@@ -43,12 +43,25 @@ namespace veins {
 class VEINS_API MyVeinsApp : public DemoBaseApplLayer {
 public:
     void initialize(int stage) override;
-    void finish() override;
 
 protected:
-    void onBSM(DemoSafetyMessage* bsm) override;
-    void onWSM(BaseFrame1609_4* wsm) override;
-    void onWSA(DemoServiceAdvertisment* wsa) override;
+    const int TRAINING_TIME = 10;
+    const int GOSSIP_ROUND_TIME = 30;
+
+    enum nodeState {
+        TRAINING,
+        WAITING
+    };
+    enum selfMessageKind {
+        LOCAL_TRAINING,
+        GOSSIP_MODEL
+    };
+
+    nodeState currentState;
+    std::string carId;
+
+protected:
+    void onWSM(BaseFrame1609_4* frame) override;
 
     void handleSelfMsg(cMessage* msg) override;
     void handlePositionUpdate(cObject* obj) override;

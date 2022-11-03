@@ -22,6 +22,14 @@
 
 #include "veins/modules/application/traci/MyVeinsApp.h"
 
+#include "veins/modules/application/traci/MyVeinsAppMessage_m.h"
+
+#include <Python.h>
+#include <pybind11/embed.h>
+#include <pybind11/pybind11.h>
+
+namespace py = pybind11;
+
 using namespace veins;
 
 Define_Module(veins::MyVeinsApp);
@@ -30,48 +38,78 @@ void MyVeinsApp::initialize(int stage)
 {
     DemoBaseApplLayer::initialize(stage);
     if (stage == 0) {
-        // Initializing members and pointers of your application goes here
-        EV << "Initializing " << par("appName").stringValue() << std::endl;
+        // Start training the model with local data
+        currentState = TRAINING;
+    } else if (stage == 1) {
+        findHost()->getDisplayString().setTagArg("i", 1, "red");
+        carId = mobility->getExternalId();
+
+        cMessage* trainingMessage = new cMessage("Training local model", LOCAL_TRAINING);
+        scheduleAt(simTime() + TRAINING_TIME + uniform(0, 5), trainingMessage);
+
+        cMessage* gossipModelMessage = new cMessage("Send (gossip) model to peers", GOSSIP_MODEL);
+        scheduleAt(simTime() + GOSSIP_ROUND_TIME, gossipModelMessage);
     }
-    else if (stage == 1) {
-        // Initializing members that require initialized other modules goes here
+}
+
+void MyVeinsApp::onWSM(BaseFrame1609_4* frame)
+{
+    MyVeinsAppMessage* wsm = check_and_cast<MyVeinsAppMessage*>(frame);
+
+    EV << myId << " from " << wsm->getSenderAddress() << " received " << sizeof(wsm->getWeights()) << std::endl;
+    if (currentState == WAITING) {
+        py::scoped_interpreter guard{};
+        py::module_ fadnet = py::module_::import("fadnet");
+        fadnet.attr("merge")(wsm->getWeights(), carId);
+
+        findHost()->getDisplayString().setTagArg("i", 1, "red");
+        currentState = TRAINING;
+        cMessage* trainingMessage = new cMessage("Training local model", LOCAL_TRAINING);
+        scheduleAt(simTime() + TRAINING_TIME + uniform(0, 5), trainingMessage);
+    } else {
+        EV_WARN << "onWSM - Received model ignored because the node is already training" << std::endl;
     }
-}
-
-void MyVeinsApp::finish()
-{
-    DemoBaseApplLayer::finish();
-    // statistics recording goes here
-}
-
-void MyVeinsApp::onBSM(DemoSafetyMessage* bsm)
-{
-    // Your application has received a beacon message from another car or RSU
-    // code for handling the message goes here
-}
-
-void MyVeinsApp::onWSM(BaseFrame1609_4* wsm)
-{
-    // Your application has received a data message from another car or RSU
-    // code for handling the message goes here, see TraciDemo11p.cc for examples
-}
-
-void MyVeinsApp::onWSA(DemoServiceAdvertisment* wsa)
-{
-    // Your application has received a service advertisement from another car or RSU
-    // code for handling the message goes here, see TraciDemo11p.cc for examples
 }
 
 void MyVeinsApp::handleSelfMsg(cMessage* msg)
 {
-    DemoBaseApplLayer::handleSelfMsg(msg);
-    // this method is for self messages (mostly timers)
-    // it is important to call the DemoBaseApplLayer function for BSM and WSM transmission
+    EV << "Node " << myId << " action " << msg->getKind() << std::endl;
+
+    switch (msg->getKind()) {
+    case LOCAL_TRAINING: {
+        py::scoped_interpreter guard{};
+        py::module_ fadnet = py::module_::import("fadnet");
+        fadnet.attr("train")(carId);
+
+        findHost()->getDisplayString().setTagArg("i", 1, "green");
+        currentState = WAITING;
+        break;
+    }
+    case GOSSIP_MODEL: {
+        py::scoped_interpreter guard{};
+        py::module_ fadnet = py::module_::import("fadnet");
+        py::str weights_py = fadnet.attr("get_weights")(carId);
+        std::string weights = weights_py;
+
+        MyVeinsAppMessage* wsm = new MyVeinsAppMessage();
+        wsm->setWeights(weights.c_str());
+        wsm->setSenderAddress(myId);
+        populateWSM(wsm);
+        sendDelayedDown(wsm, uniform(0, 1));
+
+        cMessage* gossipModelMessage = new cMessage("Send (gossip) model to peers", GOSSIP_MODEL);
+        scheduleAt(simTime() + GOSSIP_ROUND_TIME, gossipModelMessage);
+        break;
+    }
+    default: {
+        EV_WARN << "handleSelfMsg - The message type was not detected" << std::endl;
+        break;
+    }
+    }
+    cancelAndDelete(msg);
 }
 
 void MyVeinsApp::handlePositionUpdate(cObject* obj)
 {
     DemoBaseApplLayer::handlePositionUpdate(obj);
-    // the vehicle has moved. Code that reacts to new positions goes here.
-    // member variables such as currentPosition and currentSpeed are updated in the parent class
 }
