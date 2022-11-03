@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<buildspec version="4.0">
+    <dir path="." type="custom"/>
+    <dir makemake-options="--make-so --deep -o veins -O out -pVEINS -I/Users/luizfrf/Documents/mo809/omnetpp-6.0.1/tools/macos.x86_64/lib/Python.framework/Versions/3.8/include/python3.8 -I/Users/luizfrf/Documents/mo809/omnetpp-6.0.1/tools/macos.x86_64/lib/Python.framework/Versions/3.8/lib/python3.8/site-packages/pybind11/include -I. -L/Users/luizfrf/Documents/mo809/omnetpp-6.0.1/tools/macos.x86_64/lib/Python.framework/Versions/3.8/lib/python3.8/config-3.8-darwin -lpython3.8 --meta:export-include-path --meta:export-library --meta:use-exported-libs --meta:feature-cflags --meta:feature-ldflags" path="src" type="makemake"/>
+</buildspec>
