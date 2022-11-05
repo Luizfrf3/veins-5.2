@@ -19,3 +19,8 @@ pretrained_models/
 results/
 
 venv/
+
+weights/
+
+__pycache__/
+*.py[cod]

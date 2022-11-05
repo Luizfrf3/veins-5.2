@@ -42,7 +42,7 @@ void MyVeinsApp::initialize(int stage)
         currentState = TRAINING;
     } else if (stage == 1) {
         findHost()->getDisplayString().setTagArg("i", 1, "red");
-        carId = mobility->getExternalId();
+        carId = mobility->getExternalId(); // flow0.2
 
         cMessage* trainingMessage = new cMessage("Training local model", LOCAL_TRAINING);
         scheduleAt(simTime() + TRAINING_TIME + uniform(0, 5), trainingMessage);

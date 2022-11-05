@@ -46,7 +46,7 @@ public:
 
 protected:
     const int TRAINING_TIME = 10;
-    const int GOSSIP_ROUND_TIME = 30;
+    const int GOSSIP_ROUND_TIME = 20;
 
     enum nodeState {
         TRAINING,
