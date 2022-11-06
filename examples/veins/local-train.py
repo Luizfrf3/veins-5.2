@@ -25,6 +25,7 @@ model.add(layers.Dense(64, activation='relu'))
 model.add(layers.Dropout(0.2))
 model.add(layers.Dense(10))
 model.summary()
+print(type(model.get_weights()))
 
 model.compile(optimizer='adam', loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True), metrics=['accuracy'])
 

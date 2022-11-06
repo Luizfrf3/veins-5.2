@@ -43,6 +43,7 @@ namespace veins {
 class VEINS_API MyVeinsApp : public DemoBaseApplLayer {
 public:
     void initialize(int stage) override;
+    void finish() override;
 
 protected:
     const int TRAINING_TIME = 10;

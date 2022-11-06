@@ -42,7 +42,10 @@ void MyVeinsApp::initialize(int stage)
         currentState = TRAINING;
     } else if (stage == 1) {
         findHost()->getDisplayString().setTagArg("i", 1, "red");
-        carId = mobility->getExternalId(); // flow0.2
+        carId = mobility->getExternalId(); // Example flow0.2
+        if (carId.compare("flow0.0") == 0) {
+            py::initialize_interpreter();
+        }
 
         cMessage* trainingMessage = new cMessage("Training local model", LOCAL_TRAINING);
         scheduleAt(simTime() + TRAINING_TIME + uniform(0, 5), trainingMessage);
@@ -52,13 +55,20 @@ void MyVeinsApp::initialize(int stage)
     }
 }
 
+void MyVeinsApp::finish()
+{
+    DemoBaseApplLayer::finish();
+    if (carId.compare("flow0.0") == 0) {
+        py::finalize_interpreter();
+    }
+}
+
 void MyVeinsApp::onWSM(BaseFrame1609_4* frame)
 {
     MyVeinsAppMessage* wsm = check_and_cast<MyVeinsAppMessage*>(frame);
 
     EV << myId << " from " << wsm->getSenderAddress() << " received " << sizeof(wsm->getWeights()) << std::endl;
     if (currentState == WAITING) {
-        py::scoped_interpreter guard{};
         py::module_ fadnet = py::module_::import("fadnet");
         fadnet.attr("merge")(wsm->getWeights(), carId);
 
@@ -77,7 +87,6 @@ void MyVeinsApp::handleSelfMsg(cMessage* msg)
 
     switch (msg->getKind()) {
     case LOCAL_TRAINING: {
-        py::scoped_interpreter guard{};
         py::module_ fadnet = py::module_::import("fadnet");
         fadnet.attr("train")(carId);
 
@@ -86,7 +95,6 @@ void MyVeinsApp::handleSelfMsg(cMessage* msg)
         break;
     }
     case GOSSIP_MODEL: {
-        py::scoped_interpreter guard{};
         py::module_ fadnet = py::module_::import("fadnet");
         py::str weights_py = fadnet.attr("get_weights")(carId);
         std::string weights = weights_py;
