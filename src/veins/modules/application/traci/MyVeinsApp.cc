@@ -44,11 +44,13 @@ void MyVeinsApp::initialize(int stage)
         findHost()->getDisplayString().setTagArg("i", 1, "red");
         carId = mobility->getExternalId(); // Example flow0.2
         if (carId.compare("flow0.0") == 0) {
+            system("rm -rf weights");
+            system("mkdir weights");
             py::initialize_interpreter();
         }
 
         cMessage* trainingMessage = new cMessage("Training local model", LOCAL_TRAINING);
-        scheduleAt(simTime() + TRAINING_TIME + uniform(0, 5), trainingMessage);
+        scheduleAt(simTime() + TRAINING_TIME + uniform(0.0, 5.0), trainingMessage);
 
         cMessage* gossipModelMessage = new cMessage("Send (gossip) model to peers", GOSSIP_MODEL);
         scheduleAt(simTime() + GOSSIP_ROUND_TIME, gossipModelMessage);
@@ -67,7 +69,7 @@ void MyVeinsApp::onWSM(BaseFrame1609_4* frame)
 {
     MyVeinsAppMessage* wsm = check_and_cast<MyVeinsAppMessage*>(frame);
 
-    EV << myId << " from " << wsm->getSenderAddress() << " received " << sizeof(wsm->getWeights()) << std::endl;
+    EV << myId << " from " << wsm->getSenderAddress() << std::endl;
     if (currentState == WAITING) {
         py::module_ fadnet = py::module_::import("fadnet");
         fadnet.attr("merge")(wsm->getWeights(), carId);
@@ -75,7 +77,7 @@ void MyVeinsApp::onWSM(BaseFrame1609_4* frame)
         findHost()->getDisplayString().setTagArg("i", 1, "red");
         currentState = TRAINING;
         cMessage* trainingMessage = new cMessage("Training local model", LOCAL_TRAINING);
-        scheduleAt(simTime() + TRAINING_TIME + uniform(0, 5), trainingMessage);
+        scheduleAt(simTime() + TRAINING_TIME + uniform(0.0, 5.0), trainingMessage);
     } else {
         EV_WARN << "onWSM - Received model ignored because the node is already training" << std::endl;
     }
@@ -103,7 +105,7 @@ void MyVeinsApp::handleSelfMsg(cMessage* msg)
         wsm->setWeights(weights.c_str());
         wsm->setSenderAddress(myId);
         populateWSM(wsm);
-        sendDelayedDown(wsm, uniform(0, 1));
+        sendDelayedDown(wsm, uniform(0.0, 1.0));
 
         cMessage* gossipModelMessage = new cMessage("Send (gossip) model to peers", GOSSIP_MODEL);
         scheduleAt(simTime() + GOSSIP_ROUND_TIME, gossipModelMessage);

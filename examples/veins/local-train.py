@@ -3,12 +3,12 @@ from tensorflow.keras import layers, models
 import numpy as np
 tf.keras.utils.set_random_seed(42)
 
-epochs = 30
-train_path = 'data/train_data.npz'
-test_path = 'data/test_data.npz'
+EPOCHS = 30
+TRAIN_PATH = 'data/train_data.npz'
+TEST_PATH = 'data/test_data.npz'
 
-train_data = np.load(train_path)
-test_data = np.load(test_path)
+train_data = np.load(TRAIN_PATH)
+test_data = np.load(TEST_PATH)
 
 train_images, train_labels = train_data['images'], train_data['labels']
 test_images, test_labels = test_data['images'], test_data['labels']
@@ -29,7 +29,7 @@ print(type(model.get_weights()))
 
 model.compile(optimizer='adam', loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True), metrics=['accuracy'])
 
-history = model.fit(train_images, train_labels, epochs=epochs, validation_data=(test_images, test_labels))
+history = model.fit(train_images, train_labels, epochs=EPOCHS, validation_data=(test_images, test_labels))
 print(history.history)
 
 train_loss, train_acc = model.evaluate(train_images,  train_labels, verbose=2)
