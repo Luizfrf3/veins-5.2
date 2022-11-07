@@ -1,8 +1,10 @@
 import os
+import logging
 import pickle
 import tensorflow as tf
 from tensorflow.keras import layers, models
 import numpy as np
+tf.keras.utils.set_random_seed(42)
 
 WEIGHTS_FOLDER = 'weights/'
 WEIGHTS_FILE_SUFFIX = '_weights.pickle'
@@ -53,40 +55,38 @@ def _read_weights(weights_path):
         _save_weights(weights_path, weights)
     return weights
 
-def get_weights(carId):
-    weights_path = WEIGHTS_FOLDER + carId + WEIGHTS_FILE_SUFFIX
+def get_weights(car_id):
+    weights_path = WEIGHTS_FOLDER + car_id + WEIGHTS_FILE_SUFFIX
     weights = _read_weights(weights_path)
     return _encode_weights(weights)
 
-def train(carId):
-    tf.keras.utils.set_random_seed(42)
-
-    train_path = DATA_FOLDER + carId + DATA_FILE_SUFFIX
+def train(car_id, training_round):
+    train_path = DATA_FOLDER + car_id + DATA_FILE_SUFFIX
     train_data = np.load(train_path)
     test_data = np.load(TEST_PATH)
 
     train_images, train_labels = train_data['images'], train_data['labels']
     test_images, test_labels = test_data['images'], test_data['labels']
 
-    weights_path = WEIGHTS_FOLDER + carId + WEIGHTS_FILE_SUFFIX
+    weights_path = WEIGHTS_FOLDER + car_id + WEIGHTS_FILE_SUFFIX
     weights = _read_weights(weights_path)
 
     model = _get_model()
     model.set_weights(weights)
 
     model.compile(optimizer='adam', loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True), metrics=['accuracy'])
-    history = model.fit(train_images, train_labels, epochs=EPOCHS, validation_data=(test_images, test_labels))
-    print(carId, history.history)
+    history = model.fit(train_images, train_labels, epochs=EPOCHS, validation_data=(test_images, test_labels), verbose=0)
+    logging.warning('Node {}, Training Round {}, History {}'.format(car_id, training_round, history.history))
 
     _save_weights(weights_path, model.get_weights())
 
-def merge(raw_weights, carId):
-    weights_path = WEIGHTS_FOLDER + carId + WEIGHTS_FILE_SUFFIX
+def merge(raw_weights, car_id):
+    weights_path = WEIGHTS_FOLDER + car_id + WEIGHTS_FILE_SUFFIX
     weights = _read_weights(weights_path)
 
     received_weights = _decode_weights(raw_weights)
 
     for i in range(len(weights)):
         weights[i] = (weights[i] + received_weights[i]) / 2
-    
+
     _save_weights(weights_path, weights)

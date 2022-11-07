@@ -26,6 +26,8 @@
 
 #include "veins/modules/application/ieee80211p/DemoBaseApplLayer.h"
 
+#include <queue>
+
 using namespace omnetpp;
 
 namespace veins {
@@ -48,6 +50,7 @@ public:
 protected:
     const int TRAINING_TIME = 10;
     const int GOSSIP_ROUND_TIME = 20;
+    const int MAX_QUEUE_SIZE = 2;
 
     enum nodeState {
         TRAINING,
@@ -60,12 +63,17 @@ protected:
 
     nodeState currentState;
     std::string carId;
+    int trainingRound;
+    std::deque<std::string> lastReceivedCarIds;
 
 protected:
     void onWSM(BaseFrame1609_4* frame) override;
 
     void handleSelfMsg(cMessage* msg) override;
     void handlePositionUpdate(cObject* obj) override;
+
+private:
+    bool shouldAcceptMessageFromSender(std::string senderId);
 };
 
 } // namespace veins

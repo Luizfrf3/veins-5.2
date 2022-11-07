@@ -29,4 +29,5 @@ namespace veins;
 packet MyVeinsAppMessage extends BaseFrame1609_4 {
     string weights;
     LAddress::L2Type senderAddress = -1;
+    string senderId;
 }
