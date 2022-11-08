@@ -74,8 +74,10 @@ def train(car_id, training_round):
     model = _get_model()
     model.set_weights(weights)
 
-    model.compile(optimizer='adam', loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True), metrics=['accuracy'])
-    history = model.fit(train_images, train_labels, epochs=EPOCHS, validation_data=(test_images, test_labels), verbose=0)
+    model.compile(optimizer='adam',
+        loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True), metrics=['accuracy'])
+    history = model.fit(train_images, train_labels, epochs=EPOCHS,
+        validation_data=(test_images, test_labels), verbose=0)
     logging.warning('Node {}, Training Round {}, History {}'.format(car_id, training_round, history.history))
 
     _save_weights(weights_path, model.get_weights())

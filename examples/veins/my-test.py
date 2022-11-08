@@ -19,5 +19,4 @@ def test2(s):
         l.append(int(c))
     b = bytes(l)
     od = pickle.loads(b)
-    with open('test.txt', 'w') as f:
-        f.write(str(od))
+    print(od)
