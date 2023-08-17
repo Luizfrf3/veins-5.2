@@ -61,11 +61,11 @@ void TraCIDemo11p::initialize(int stage)
     int result = result_py.cast<int>();
     EV << result << std::endl;*/
 
-    py::scoped_interpreter guard{};
+    /*py::scoped_interpreter guard{};
     py::module_ myTest = py::module_::import("my-test");
     py::str result_py = myTest.attr("test1")();
     std::string result = result_py;
-    myTest.attr("test2")(result.c_str());
+    myTest.attr("test2")(result.c_str());*/
 }
 
 void TraCIDemo11p::onWSM(BaseFrame1609_4* frame)

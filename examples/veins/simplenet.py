@@ -3,6 +3,7 @@ import logging
 import pickle
 import tensorflow as tf
 from tensorflow.keras import layers, models
+from tensorflow.keras.utils import to_categorical
 import numpy as np
 tf.keras.utils.set_random_seed(42)
 
@@ -14,6 +15,7 @@ TEST_PATH = 'data/test_data.npz'
 EPOCHS = 1
 
 def _get_model():
+    '''
     model = models.Sequential()
     model.add(layers.Conv2D(32, (3, 3), activation='relu', input_shape=(32, 32, 3)))
     model.add(layers.MaxPooling2D((2, 2)))
@@ -24,7 +26,29 @@ def _get_model():
     model.add(layers.Flatten())
     model.add(layers.Dense(64, activation='relu'))
     model.add(layers.Dropout(0.2))
-    model.add(layers.Dense(10))
+    model.add(layers.Dense(10, activation='softmax'))
+    '''
+    model = models.Sequential()
+
+    model.add(layers.Conv2D(32, (3,3), padding='same', activation='relu', input_shape=(32,32,3)))
+    model.add(layers.BatchNormalization())
+    model.add(layers.Conv2D(32, (3,3), padding='same', activation='relu'))
+    model.add(layers.BatchNormalization())
+    model.add(layers.MaxPooling2D(pool_size=(2,2)))
+    model.add(layers.Dropout(0.3))
+
+    model.add(layers.Conv2D(64, (3,3), padding='same', activation='relu'))
+    model.add(layers.BatchNormalization())
+    model.add(layers.Conv2D(64, (3,3), padding='same', activation='relu'))
+    model.add(layers.BatchNormalization())
+    model.add(layers.MaxPooling2D(pool_size=(2,2)))
+    model.add(layers.Dropout(0.5))
+
+    model.add(layers.Flatten())
+    model.add(layers.Dense(64, activation='relu'))
+    model.add(layers.BatchNormalization())
+    model.add(layers.Dropout(0.5))
+    model.add(layers.Dense(10, activation='softmax'))
     return model
 
 def _encode_weights(weights):
@@ -75,7 +99,7 @@ def train(car_id, training_round):
     model.set_weights(weights)
 
     model.compile(optimizer='adam',
-        loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True), metrics=['accuracy'])
+        loss=tf.keras.losses.categorical_crossentropy, metrics=['accuracy'])
     history = model.fit(train_images, train_labels, epochs=EPOCHS,
         validation_data=(test_images, test_labels), verbose=0)
     logging.warning('Node {}, Training Round {}, History {}'.format(car_id, training_round, history.history))

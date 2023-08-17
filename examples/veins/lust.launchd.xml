@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+
+<!-- debug config -->
+<launch>
+    <copy file="lust.net.xml" />
+    <copy file="lust.rou.xml" />
+    <copy file="lust.poly.xml" />
+    <copy file="lust.sumo.cfg" type="config" />
+</launch>
+

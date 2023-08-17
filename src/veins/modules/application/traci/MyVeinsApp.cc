@@ -92,8 +92,8 @@ void MyVeinsApp::onWSM(BaseFrame1609_4* frame)
     EV << carId << ", from " << wsm->getSenderId() << std::endl;
     if (currentState == WAITING) {
         if (shouldAcceptMessageFromSender(wsm->getSenderId())) {
-            py::module_ fadnet = py::module_::import("fadnet");
-            fadnet.attr("merge")(wsm->getWeights(), carId);
+            py::module_ simplenet = py::module_::import("simplenet");
+            simplenet.attr("merge")(wsm->getWeights(), carId);
 
             findHost()->getDisplayString().setTagArg("i", 1, "red");
             currentState = TRAINING;
@@ -114,16 +114,16 @@ void MyVeinsApp::handleSelfMsg(cMessage* msg)
     switch (msg->getKind()) {
     case LOCAL_TRAINING: {
         trainingRound += 1;
-        py::module_ fadnet = py::module_::import("fadnet");
-        fadnet.attr("train")(carId, trainingRound);
+        py::module_ simplenet = py::module_::import("simplenet");
+        simplenet.attr("train")(carId, trainingRound);
 
         findHost()->getDisplayString().setTagArg("i", 1, "green");
         currentState = WAITING;
         break;
     }
     case GOSSIP_MODEL: {
-        py::module_ fadnet = py::module_::import("fadnet");
-        py::str weights_py = fadnet.attr("get_weights")(carId);
+        py::module_ simplenet = py::module_::import("simplenet");
+        py::str weights_py = simplenet.attr("get_weights")(carId);
         std::string weights = weights_py;
 
         MyVeinsAppMessage* wsm = new MyVeinsAppMessage();

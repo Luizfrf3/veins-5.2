@@ -1,5 +1,6 @@
 import tensorflow as tf
 from tensorflow.keras import datasets
+from tensorflow.keras.utils import to_categorical
 import numpy as np
 
 (train_images, train_labels), (test_images, test_labels) = datasets.cifar10.load_data()
@@ -14,5 +15,5 @@ images_dict['test'], labels_dict['test'] = test_images, test_labels
 
 for k in images_dict.keys():
     images = np.array(images_dict[k], dtype=np.float32)
-    labels = np.array(labels_dict[k], dtype=np.float32)
+    labels = to_categorical(np.array(labels_dict[k], dtype=np.float32), 10)
     np.savez('data/' + k + '_data.npz', images=images, labels=labels)
