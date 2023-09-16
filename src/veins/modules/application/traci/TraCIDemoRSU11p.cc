@@ -28,6 +28,16 @@ using namespace veins;
 
 Define_Module(veins::TraCIDemoRSU11p);
 
+void TraCIDemoRSU11p::initialize(int stage)
+{
+    DemoBaseApplLayerRSU::initialize(stage);
+    EV << getId() << std::endl;
+    if (stage == 1 && getId() == 18) {
+        cMessage* trainingMessage = new cMessage("Self message");
+        scheduleAt(simTime() + 5, trainingMessage);
+    }
+}
+
 /*void TraCIDemoRSU11p::onWSA(DemoServiceAdvertisment* wsa)
 {
     // if this RSU receives a WSA for service 42, it will tune to the chan
@@ -38,8 +48,22 @@ Define_Module(veins::TraCIDemoRSU11p);
 
 void TraCIDemoRSU11p::onWSM(BaseFrame1609_4* frame)
 {
-    TraCIDemo11pMessage* wsm = check_and_cast<TraCIDemo11pMessage*>(frame);
+    //TraCIDemo11pMessage* wsm = check_and_cast<TraCIDemo11pMessage*>(frame);
 
     // this rsu repeats the received traffic update in 2 seconds plus some random delay
-    sendDelayedDown(wsm->dup(), 2 + uniform(0.01, 0.2));
+    //sendDelayedDown(wsm->dup(), 2 + uniform(0.01, 0.2));
+}
+
+void TraCIDemoRSU11p::handleSelfMsg(cMessage* msg)
+{
+    EV << "Test " << getId() << std::endl;
+    cMessage *msg2 = new cMessage("1");
+    send(msg2, "out");
+    cancelAndDelete(msg);
+}
+
+void TraCIDemoRSU11p::handleGateMsg(cMessage* msg)
+{
+    EV << "Message " << msg->getName() << " " << getId() << std::endl;
+    delete(msg);
 }

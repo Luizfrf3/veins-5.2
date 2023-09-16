@@ -23,10 +23,31 @@
 import org.car2x.veins.nodes.RSU;
 import org.car2x.veins.nodes.Scenario;
 
+simple Server
+{
+    parameters:
+        @display("i=block/routing");
+    gates:
+        inout gate[3];
+}
+
 network RSUExampleScenario extends Scenario
 {
-    //submodules:
-    //    rsu[1]: RSU {
-    //        @display("p=150,140;i=veins/sign/yellowdiamond;is=vs");
-    //    }
+    types:
+        channel myChannel extends ned.DelayChannel {
+            delay = 100ms;
+        };
+
+    submodules:
+        rsu[3]: RSU {
+            @display("p=150,140;i=veins/sign/yellowdiamond;is=vs");
+        };
+        server: Server;
+    connections allowunconnected:
+        rsu[0].out --> myChannel --> server.gate$i[0];
+        server.gate$o[0] --> myChannel --> rsu[0].in;
+        rsu[1].out --> myChannel --> server.gate$i[1];
+        server.gate$o[1] --> myChannel --> rsu[1].in;
+        rsu[2].out --> myChannel --> server.gate$i[2];
+        server.gate$o[2] --> myChannel --> rsu[2].in;
 }

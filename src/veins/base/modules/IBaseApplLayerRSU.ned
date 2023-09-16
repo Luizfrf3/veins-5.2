@@ -1,5 +1,7 @@
 //
-// Copyright (C) 2016 David Eckhoff <david.eckhoff@fau.de>
+// Copyright (C) 2007 Technische Universitaet Berlin (TUB), Germany, Telecommunication Networks Group
+// Copyright (C) 2007 Technische Universiteit Delft (TUD), Netherlands
+// Copyright (C) 2007 Universitaet Paderborn (UPB), Germany
 //
 // Documentation for these modules is at http://veins.car2x.org/
 //
@@ -20,23 +22,19 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
-#pragma once
+package org.car2x.veins.base.modules;
 
-#include "veins/modules/application/ieee80211p/DemoBaseApplLayerRSU.h"
+// Interface for application layer modules
+moduleinterface IBaseApplLayerRSU
+{
+    parameters:
+        int headerLength @unit("bit"); // length of the application message header (in bits)
+    gates:
+        input lowerLayerIn; // from network layer
+        output lowerLayerOut; // to network layer
+        input lowerControlIn; // control from network layer
+        output lowerControlOut; // control to network layer
+        input in;
+        output out;
+}
 
-namespace veins {
-
-/**
- * Small RSU Demo using 11p
- */
-class VEINS_API TraCIDemoRSU11p : public DemoBaseApplLayerRSU {
-public:
-    void initialize(int stage) override;
-protected:
-    void onWSM(BaseFrame1609_4* wsm) override;
-    //void onWSA(DemoServiceAdvertisment* wsa) override;
-    void handleSelfMsg(cMessage* msg) override;
-    void handleGateMsg(cMessage* msg) override;
-};
-
-} // namespace veins

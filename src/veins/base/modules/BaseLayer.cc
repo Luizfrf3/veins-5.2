@@ -108,8 +108,14 @@ void BaseLayer::handleMessage(cMessage* msg)
          * with extra gates, but handleMessage() isn't overridden to
          * check for the new gate(s).
          */
-        throw cRuntimeError("Unknown gateID?? Check configuration or override handleMessage().");
+        // This considers messages through the wired links
+        handleGateMsg(msg);
     }
+}
+
+void BaseLayer::handleGateMsg(cMessage* msg)
+{
+    throw cRuntimeError("Unknown gateID?? Check configuration or override handleMessage().");
 }
 
 void BaseLayer::sendDown(cMessage* msg)

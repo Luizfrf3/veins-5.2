@@ -166,6 +166,8 @@ protected:
 
     void recordPacket(PassedMessage::direction_t dir, PassedMessage::gates_t gate, const cMessage* m);
 
+    virtual void handleGateMsg(cMessage*);
+
     // private:
     //       void recordPacket(bool in, MsgType type, const cMessage *);
     //    void printPackets(std::map<MsgType,std::map<int,std::pair<char *,int>* > *> *use, bool in);
