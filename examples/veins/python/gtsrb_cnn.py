@@ -11,13 +11,13 @@ input_shape = (48, 48, 3)
 batch_size = 64
 epochs = 5
 
-df = pd.read_csv('GTSRB/Train.csv')
+df = pd.read_csv('GTSRB/raw/Train.csv')
 df = df.sample(frac=1).reset_index(drop=True)
 
 imgs = []
 labels = []
 for index, row in df.iterrows():
-    img = cv2.imread('GTSRB/' + row['Path'])
+    img = cv2.imread('GTSRB/raw/' + row['Path'])
 
     min_side = min(img.shape[:-1])
     centre = img.shape[0]//2, img.shape[1]//2
