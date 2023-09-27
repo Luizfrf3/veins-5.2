@@ -37,10 +37,17 @@ for c in range(max_clusters):
     ytsvs = [y_test_c[i::vehicles_group_size] for i in range(vehicles_group_size)]
 
     for v in range(vehicles_group_size):
-        images_train = np.array(xtrvs[v], dtype=np.float32)
-        labels_train = np.array(ytrvs[v], dtype=np.float32)
+        train_validation_split = int(len(xtrvs[v]) * 0.8)
+        images_train = np.array(xtrvs[v][:train_validation_split], dtype=np.float32)
+        labels_train = np.array(ytrvs[v][:train_validation_split], dtype=np.float32)
+        images_validation = np.array(xtrvs[v][train_validation_split:], dtype=np.float32)
+        labels_validation = np.array(ytrvs[v][train_validation_split:], dtype=np.float32)
         images_test = np.array(xtsvs[v], dtype=np.float32)
         labels_test = np.array(ytsvs[v], dtype=np.float32)
-        name = 'CIFAR10/' + str(total) + '_' + str(c) + '_' + str(v) + '_data.npz'
-        np.savez(name, images_train=images_train, labels_train=labels_train, images_test=images_test, labels_test=labels_test)
+        name = 'CIFAR10/data/' + str(total) + '_' + str(c) + '_' + str(v) + '_data.npz'
+        np.savez(
+            name, images_train=images_train, labels_train=labels_train,
+            images_validation=images_validation, labels_validation=labels_validation,
+            images_test=images_test, labels_test=labels_test
+        )
         total += 1
