@@ -16,15 +16,17 @@ void GossipLearningApp::initialize(int stage)
 {
     DemoBaseApplLayer::initialize(stage);
     if (stage == 0) {
-        // TODO: implement here
-        carId = mobility->getExternalId(); // Example flow0.2
-        if (carId.compare("flow0.0") == 0) {
+        carId = mobility->getExternalId();
+        if (carId.compare("v0") == 0) {
             system("rm -rf weights");
             system("mkdir weights");
             py::initialize_interpreter();
         }
     } else if (stage == 1) {
         findHost()->getDisplayString().setTagArg("i", 1, "red");
+
+        py::module_ learning = py::module_::import("learning");
+        learning.attr("init")(carId);
         // TODO: implement here
     }
 }
@@ -32,8 +34,7 @@ void GossipLearningApp::initialize(int stage)
 void GossipLearningApp::finish()
 {
     DemoBaseApplLayer::finish();
-    // TODO: check car ID
-    if (carId.compare("flow0.0") == 0) {
+    if (carId.compare("v0") == 0) {
         py::finalize_interpreter();
     }
 }

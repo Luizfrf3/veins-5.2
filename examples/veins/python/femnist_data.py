@@ -1,7 +1,6 @@
 import os
 import json
 import numpy as np
-from tensorflow import keras
 
 num_classes = 62
 
@@ -24,12 +23,12 @@ for file_name in os.listdir('FEMNIST/raw'):
 total = 0
 for user in x_train.keys():
     images_train = np.array(x_train[user], dtype=np.float32)
-    labels_train = keras.utils.to_categorical(np.array(y_train[user], dtype=np.float32), num_classes)
+    labels_train = np.array(y_train[user], dtype=np.float32)
     images_test = np.array(x_test[user], dtype=np.float32)
-    labels_test = keras.utils.to_categorical(np.array(y_test[user], dtype=np.float32), num_classes)
-    name = 'FEMNIST/data/' + str(total) + '_' + user + '_data.npz'
+    labels_test = np.array(y_test[user], dtype=np.float32)
+    name = 'FEMNIST/data/v' + str(total) + '_' + user + '_data.npz'
     np.savez(
             name, images_train=images_train, labels_train=labels_train,
-            images_test=images_test, labels_test=labels_test
+            images_test=images_test, labels_test=labels_test, num_classes=num_classes
         )
     total += 1

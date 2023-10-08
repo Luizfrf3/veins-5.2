@@ -1,6 +1,5 @@
 import numpy as np
 import cv2
-from tensorflow import keras
 from tensorflow.keras import datasets
 np.random.seed(42)
 
@@ -16,9 +15,6 @@ x_train = x_train.astype("float32") / 255
 x_test = x_test.astype("float32") / 255
 x_train = np.expand_dims(x_train, -1)
 x_test = np.expand_dims(x_test, -1)
-
-y_train = keras.utils.to_categorical(y_train, num_classes)
-y_test = keras.utils.to_categorical(y_test, num_classes)
 
 total = 0
 for c in range(max_clusters):
@@ -43,9 +39,9 @@ for c in range(max_clusters):
         labels_train = np.array(ytrvs[v], dtype=np.float32)
         images_test = np.array(xtsvs[v], dtype=np.float32)
         labels_test = np.array(ytsvs[v], dtype=np.float32)
-        name = 'MNIST/data/' + str(total) + '_' + str(c) + '_' + str(v) + '_data.npz'
+        name = 'MNIST/data/v' + str(total) + '_' + str(c) + '_' + str(v) + '_data.npz'
         np.savez(
             name, images_train=images_train, labels_train=labels_train,
-            images_test=images_test, labels_test=labels_test
+            images_test=images_test, labels_test=labels_test, num_classes=num_classes
         )
         total += 1

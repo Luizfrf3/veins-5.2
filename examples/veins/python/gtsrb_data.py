@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 import cv2
-from tensorflow import keras
 from sklearn.model_selection import train_test_split
 np.random.seed(42)
 
@@ -71,11 +70,11 @@ for client in range(num_clients):
 for i in range(len(y)):
     x_train, x_test, y_train, y_test = train_test_split(X[i], y[i], train_size=0.8, shuffle=True)
     images_train = np.array(x_train, dtype=np.float32)
-    labels_train = keras.utils.to_categorical(np.array(y_train, dtype=np.float32), num_classes)
+    labels_train = np.array(y_train, dtype=np.float32)
     images_test = np.array(x_test, dtype=np.float32)
-    labels_test = keras.utils.to_categorical(np.array(y_test, dtype=np.float32), num_classes)
-    name = 'GTSRB/data/' + str(i) + '_data.npz'
+    labels_test = np.array(y_test, dtype=np.float32)
+    name = 'GTSRB/data/v' + str(i) + '_data.npz'
     np.savez(
             name, images_train=images_train, labels_train=labels_train,
-            images_test=images_test, labels_test=labels_test
+            images_test=images_test, labels_test=labels_test, num_classes=num_classes
         )
