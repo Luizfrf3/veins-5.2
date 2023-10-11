@@ -5,9 +5,6 @@
 # Environment
 env/
 
-# Dataset
-data/
-
 # Graph resuls
 graph_ultils/results/
 
@@ -21,6 +18,7 @@ results/
 venv/
 
 weights/
+logs/
 
 __pycache__/
 *.py[cod]

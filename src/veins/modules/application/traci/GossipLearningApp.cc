@@ -22,15 +22,15 @@ void GossipLearningApp::initialize(int stage)
 
         carId = mobility->getExternalId();
         if (carId.compare("v0") == 0) {
-            system("rm -rf weights");
-            system("mkdir weights");
+            system("rm -rf weights logs");
+            system("mkdir weights logs");
             py::initialize_interpreter();
         }
     } else if (stage == 1) {
         findHost()->getDisplayString().setTagArg("i", 1, "red");
 
         py::module_ learning = py::module_::import("learning");
-        learning.attr("init")(carId);
+        learning.attr("init")(carId, simTime().dbl());
 
         cMessage* trainingMessage = new cMessage("Training local model", LOCAL_TRAINING);
         scheduleAt(simTime() + TRAINING_TIME + uniform(0.0, 5.0), trainingMessage);
@@ -57,7 +57,7 @@ void GossipLearningApp::onWSM(BaseFrame1609_4* frame)
         EV << carId << " merge models" << std::endl;
 
         py::module_ learning = py::module_::import("learning");
-        learning.attr("merge")(wsm->getWeights(), carId);
+        learning.attr("merge")(wsm->getWeights(), carId, wsm->getSenderId(), simTime().dbl());
 
         findHost()->getDisplayString().setTagArg("i", 1, "red");
         currentState = TRAINING;
@@ -78,7 +78,7 @@ void GossipLearningApp::handleSelfMsg(cMessage* msg)
 
         trainingRound += 1;
         py::module_ learning = py::module_::import("learning");
-        learning.attr("train")(carId, trainingRound);
+        learning.attr("train")(carId, trainingRound, simTime().dbl());
 
         findHost()->getDisplayString().setTagArg("i", 1, "green");
         currentState = WAITING;
@@ -88,7 +88,7 @@ void GossipLearningApp::handleSelfMsg(cMessage* msg)
         EV << "Node " << carId << " gossip model" << std::endl;
 
         py::module_ learning = py::module_::import("learning");
-        py::str weights_py = learning.attr("get_weights")(carId);
+        py::str weights_py = learning.attr("get_weights")(carId, simTime().dbl());
         std::string weights = weights_py;
 
         AppMessage* wsm = new AppMessage();

@@ -30,6 +30,7 @@ DATASET = MNIST
 DATA_PATH = 'python/' + DATASET + '/data/'
 WEIGHTS_FOLDER = 'weights/'
 WEIGHTS_FILE_SUFFIX = '_weights.pickle'
+LOGS_PATH = 'logs/logs.txt'
 
 vehicle_data = {}
 models = {}
@@ -125,7 +126,11 @@ def _decode_weights(raw_weights):
     weights_bytes = bytes(byte_list)
     return pickle.loads(weights_bytes)
 
-def init(car_id):
+def _register_log(data):
+    with open(LOGS_PATH, 'a') as f:
+        f.write('{}\n'.format(data))
+
+def init(car_id, sim_time):
     for file in os.listdir(DATA_PATH):
         if file.startswith(car_id + '_'):
             logging.warning('Preparing dataset for ' + file)
@@ -145,7 +150,11 @@ def init(car_id):
 
             models[car_id] = _get_model(num_classes)
 
-def train(car_id, training_round):
+            logs = {'event': 'init', 'car_id': car_id, 'sim_time': sim_time}
+            _register_log(logs)
+
+
+def train(car_id, training_round, sim_time):
     X_train, y_train = vehicle_data[car_id]['train']
     X_valid, y_valid = vehicle_data[car_id]['valid']
 
@@ -153,14 +162,19 @@ def train(car_id, training_round):
     history = model.fit(X_train, y_train, epochs=EPOCHS, validation_data=(X_valid, y_valid), verbose=0)
     logging.warning('Node {}, Training Round {}, History {}'.format(car_id, training_round, history.history))
 
+    logs = {'event': 'train', 'car_id': car_id, 'sim_time': sim_time, 'training_round': training_round, 'history': history.history}
+    _register_log(logs)
+
     weights_path = WEIGHTS_FOLDER + car_id + WEIGHTS_FILE_SUFFIX
     _save_weights(weights_path, model.get_weights())
 
-def get_weights(car_id):
+def get_weights(car_id, sim_time):
     model = models[car_id]
+    logs = {'event': 'get_weights', 'car_id': car_id, 'sim_time': sim_time}
+    _register_log(logs)
     return _encode_weights(model.get_weights())
 
-def merge(raw_weights, car_id):
+def merge(raw_weights, car_id, sender_id, sim_time):
     logging.warning('Node {} merging models'.format(car_id))
     model = models[car_id]
     received_weights = _decode_weights(raw_weights)
@@ -168,3 +182,6 @@ def merge(raw_weights, car_id):
     for i in range(len(weights)):
         weights[i] = (weights[i] + received_weights[i]) / 2
     model.set_weights(weights)
+
+    logs = {'event': 'merge', 'car_id': car_id, 'sim_time': sim_time, 'sender_id': sender_id}
+    _register_log(logs)
