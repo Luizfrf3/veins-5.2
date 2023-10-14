@@ -3,7 +3,7 @@ from tensorflow import keras
 from tensorflow.keras import layers
 from python.src import constants
 
-def get_model(num_classes):
+def get_model():
     model = None
 
     if constants.DATASET == constants.MNIST:
@@ -18,7 +18,7 @@ def get_model(num_classes):
                 layers.Flatten(),
                 layers.Dense(128, activation="relu"),
                 layers.Dropout(0.5),
-                layers.Dense(num_classes, activation="softmax")
+                layers.Dense(10, name="final_dense", activation="softmax")
             ]
         )
     elif constants.DATASET == constants.CIFAR10:
@@ -38,7 +38,7 @@ def get_model(num_classes):
                 layers.Flatten(),
                 layers.Dense(128, activation="relu"),
                 layers.Dropout(0.5),
-                layers.Dense(num_classes, activation="softmax")
+                layers.Dense(10, name="final_dense", activation="softmax")
             ]
         )
     elif constants.DATASET == constants.FEMNIST:
@@ -52,7 +52,7 @@ def get_model(num_classes):
                 layers.Flatten(),
                 layers.Dense(2048, activation="relu"),
                 layers.Dropout(0.5),
-                layers.Dense(num_classes, activation="softmax")
+                layers.Dense(62, name="final_dense", activation="softmax")
             ]
         )
     elif constants.DATASET == constants.GTSRB:
@@ -69,7 +69,7 @@ def get_model(num_classes):
                 layers.Flatten(),
                 layers.Dense(300, activation="relu"),
                 layers.Dropout(0.5),
-                layers.Dense(num_classes, activation="softmax")
+                layers.Dense(43, name="final_dense", activation="softmax")
             ]
         )
 

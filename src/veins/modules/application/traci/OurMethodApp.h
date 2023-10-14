@@ -8,13 +8,13 @@ using namespace omnetpp;
 
 namespace veins {
 
-class VEINS_API GossipLearningApp : public DemoBaseApplLayer {
+class VEINS_API OurMethodApp : public DemoBaseApplLayer {
 public:
     void initialize(int stage) override;
     void finish() override;
 
 protected:
-    const int TRAINING_TIME = 10;
+    const int TRAINING_TIME = 15;
     const int GOSSIP_ROUND_TIME = 30;
 
     enum nodeState {
@@ -29,6 +29,7 @@ protected:
     nodeState currentState;
     std::string vehicleId;
     int trainingRound;
+    int numberOfReceivedModels;
 
     void onWSM(BaseFrame1609_4* frame) override;
     void handleSelfMsg(cMessage* msg) override;

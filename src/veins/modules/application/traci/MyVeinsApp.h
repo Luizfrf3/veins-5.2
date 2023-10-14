@@ -62,9 +62,9 @@ protected:
     };
 
     nodeState currentState;
-    std::string carId;
+    std::string vehicleId;
     int trainingRound;
-    std::deque<std::string> lastReceivedCarIds;
+    std::deque<std::string> lastReceivedVehicleIds;
 
 protected:
     void onWSM(BaseFrame1609_4* frame) override;

@@ -42,8 +42,8 @@ void MyVeinsApp::initialize(int stage)
         currentState = TRAINING;
         trainingRound = 0;
 
-        carId = mobility->getExternalId(); // Example flow0.2
-        if (carId.compare("flow0.0") == 0) {
+        vehicleId = mobility->getExternalId(); // Example flow0.2
+        if (vehicleId.compare("flow0.0") == 0) {
             system("rm -rf weights");
             system("mkdir weights");
             py::initialize_interpreter();
@@ -62,7 +62,7 @@ void MyVeinsApp::initialize(int stage)
 void MyVeinsApp::finish()
 {
     DemoBaseApplLayer::finish();
-    if (carId.compare("flow0.0") == 0) {
+    if (vehicleId.compare("flow0.0") == 0) {
         py::finalize_interpreter();
     }
 }
@@ -70,17 +70,17 @@ void MyVeinsApp::finish()
 bool MyVeinsApp::shouldAcceptMessageFromSender(std::string senderId)
 {
     bool shouldAccept = true;
-    for(auto it = lastReceivedCarIds.cbegin(); it != lastReceivedCarIds.cend(); it++) {
+    for(auto it = lastReceivedVehicleIds.cbegin(); it != lastReceivedVehicleIds.cend(); it++) {
         if (senderId.compare(*it) == 0) {
             shouldAccept = false;
             break;
         }
     }
     if (shouldAccept) {
-        if (lastReceivedCarIds.size() >= MAX_QUEUE_SIZE) {
-            lastReceivedCarIds.pop_front();
+        if (lastReceivedVehicleIds.size() >= MAX_QUEUE_SIZE) {
+            lastReceivedVehicleIds.pop_front();
         }
-        lastReceivedCarIds.push_back(senderId);
+        lastReceivedVehicleIds.push_back(senderId);
     }
     return shouldAccept;
 }
@@ -89,11 +89,11 @@ void MyVeinsApp::onWSM(BaseFrame1609_4* frame)
 {
     MyVeinsAppMessage* wsm = check_and_cast<MyVeinsAppMessage*>(frame);
 
-    EV << carId << ", from " << wsm->getSenderId() << std::endl;
+    EV << vehicleId << ", from " << wsm->getSenderId() << std::endl;
     if (currentState == WAITING) {
         if (shouldAcceptMessageFromSender(wsm->getSenderId())) {
             py::module_ simplenet = py::module_::import("simplenet");
-            simplenet.attr("merge")(wsm->getWeights(), carId);
+            simplenet.attr("merge")(wsm->getWeights(), vehicleId);
 
             findHost()->getDisplayString().setTagArg("i", 1, "red");
             currentState = TRAINING;
@@ -109,13 +109,13 @@ void MyVeinsApp::onWSM(BaseFrame1609_4* frame)
 
 void MyVeinsApp::handleSelfMsg(cMessage* msg)
 {
-    EV << "Node " << carId << ", action " << msg->getKind() << std::endl;
+    EV << "Node " << vehicleId << ", action " << msg->getKind() << std::endl;
 
     switch (msg->getKind()) {
     case LOCAL_TRAINING: {
         trainingRound += 1;
         py::module_ simplenet = py::module_::import("simplenet");
-        simplenet.attr("train")(carId, trainingRound);
+        simplenet.attr("train")(vehicleId, trainingRound);
 
         findHost()->getDisplayString().setTagArg("i", 1, "green");
         currentState = WAITING;
@@ -123,13 +123,13 @@ void MyVeinsApp::handleSelfMsg(cMessage* msg)
     }
     case GOSSIP_MODEL: {
         py::module_ simplenet = py::module_::import("simplenet");
-        py::str weights_py = simplenet.attr("get_weights")(carId);
+        py::str weights_py = simplenet.attr("get_weights")(vehicleId);
         std::string weights = weights_py;
 
         MyVeinsAppMessage* wsm = new MyVeinsAppMessage();
         wsm->setWeights(weights.c_str());
         wsm->setSenderAddress(myId);
-        wsm->setSenderId(carId.c_str());
+        wsm->setSenderId(vehicleId.c_str());
         populateWSM(wsm);
         sendDelayedDown(wsm, uniform(0.0, 1.0));
 
