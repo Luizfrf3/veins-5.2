@@ -29,9 +29,8 @@
 
 namespace omnetpp {
 
-class Server : public cSimpleModule
-{
-  protected:
+class Server : public cSimpleModule {
+protected:
     virtual void handleMessage(cMessage *msg) override;
 };
 
@@ -39,7 +38,7 @@ Define_Module(Server);
 
 void Server::handleMessage(cMessage *msg)
 {
-    EV << "Message " << msg->getName() << " arrived.\n";
+    EV << "Message " << msg->getName() << " arrived." << std::endl;
     send(msg, "gate$o", atoi(msg->getName()));
 }
 

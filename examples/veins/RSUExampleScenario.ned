@@ -35,7 +35,7 @@ network RSUExampleScenario extends Scenario
 {
     types:
         channel myChannel extends ned.DelayChannel {
-            delay = 100ms;
+            delay = 10ms;
         };
 
     submodules:

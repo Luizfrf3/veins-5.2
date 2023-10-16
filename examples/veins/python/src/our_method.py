@@ -36,8 +36,7 @@ def _local_clustering(vehicle_id, model, mw, X_valid, y_valid):
 
     rfeatures = []
     rweights = []
-    for rw in received_weights[vehicle_id]:
-        rweight = rw['weights']
+    for rweight in received_weights[vehicle_id].values():
         rmodel = models.get_model()
         rmodel.set_weights(rweight)
 
@@ -61,11 +60,8 @@ def _local_clustering(vehicle_id, model, mw, X_valid, y_valid):
 def store_weights(raw_weights, vehicle_id, sender_id):
     weights = models.decode_weights(raw_weights)
     if vehicle_id not in received_weights.keys():
-        received_weights[vehicle_id] = []
-    received_weights[vehicle_id].append({
-        'sender_id': sender_id,
-        'weights': weights
-    })
+        received_weights[vehicle_id] = {}
+    received_weights[vehicle_id][sender_id] = weights
 
 def train(vehicle_id, training_round, sim_time, vehicle_data, vehicle_models):
     X_train, y_train = vehicle_data[vehicle_id]['train']
@@ -75,7 +71,7 @@ def train(vehicle_id, training_round, sim_time, vehicle_data, vehicle_models):
     mweights = model.get_weights()
 
     if vehicle_id not in received_weights.keys():
-        received_weights[vehicle_id] = []
+        received_weights[vehicle_id] = {}
 
     if len(received_weights[vehicle_id]) > 0:
         clustered_weights = _local_clustering(vehicle_id, model, _flatten(mweights), X_valid, y_valid)
@@ -89,10 +85,10 @@ def train(vehicle_id, training_round, sim_time, vehicle_data, vehicle_models):
     history = model.fit(X_train, y_train, epochs=constants.EPOCHS, validation_data=(X_valid, y_valid), verbose=0)
 
     logging.warning('Node {}, Training Round {}, History {}'.format(vehicle_id, training_round, history.history))
-    logs_data = {'event': 'train', 'vehicle_id': vehicle_id, 'sim_time': sim_time, 'training_round': training_round, 'history': history.history}
+    logs_data = {'event': 'train', 'vehicle_id': vehicle_id, 'sim_time': sim_time, 'training_round': training_round, 'number_of_received_models': len(received_weights[vehicle_id]), 'history': history.history}
     logs.register_log(logs_data)
 
     models.save_weights(vehicle_id, model.get_weights())
     vehicle_models[vehicle_id] = model
 
-    received_weights[vehicle_id] = []
+    received_weights[vehicle_id] = {}
