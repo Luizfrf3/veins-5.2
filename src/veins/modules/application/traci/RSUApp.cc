@@ -1,5 +1,6 @@
 
 #include "veins/modules/application/traci/RSUApp.h"
+#include "veins/modules/application/traci/AppMessage_m.h"
 
 #include <random>
 
@@ -18,6 +19,7 @@ void RSUApp::initialize(int stage)
 
     if (stage == 0) {
         rsuId = std::to_string(getParentModule()->getIndex());
+        gen.seed(SEED);
     } else if (stage == 1) {
         int numberOfRSUs = getSimulation()->getModuleByPath("rsu[*]")->getVectorSize();
 
@@ -40,7 +42,8 @@ void RSUApp::initialize(int stage)
             // Until 1000 meters the weight is 1, after that it increases +1 every 500 meters
             double distance = calculateDistance(posX, posY, xs[i], ys[i]);
             if (stoi(rsuId) == i) {
-                distance = 0;
+                // So that the weight is 0 for the current RSU
+                distance = 500;
             } else if (distance < 1000) {
                 distance = 1000;
             }
@@ -48,28 +51,50 @@ void RSUApp::initialize(int stage)
             rsuWeights.push_back(weight);
         }
 
+        uniform_dist.param(std::uniform_int_distribution<>::param_type(0, numberOfRSUs - 1));
+        weighted_dist.param(std::discrete_distribution<>::param_type(std::begin(rsuWeights), std::end(rsuWeights)));
+
         EV << "ID: " << rsuId << ", X: " << posX << ", Y: " << posY << std::endl;
     }
 }
 
 void RSUApp::onWSM(BaseFrame1609_4* frame)
 {
-    // TODO: implement here
-    //std::mt19937 gen(12);
-    //std::uniform_int_distribution<> distr(0, numberOfRSUs - 1);
-    //std::vector<double> weights{90,56,10};
-    //std::discrete_distribution<int> distr(std::begin(weights), std::end(weights));
-    //EV << distr(gen) << std::endl;
-}
+    AppMessage* wsm = check_and_cast<AppMessage*>(frame);
 
-void RSUApp::handleSelfMsg(cMessage* msg)
-{
-    // TODO: implement here
-    cancelAndDelete(msg);
+    EV << "RSU " << rsuId << " received message from " << wsm->getSenderId() << std::endl;
+    if (wsm->isRSU() == false) {
+        int dest;
+        do {
+            if (messageStrategy == RANDOM) {
+                dest = uniform_dist(gen);
+            } else {
+                dest = weighted_dist(gen);
+            }
+        } while (dest == stoi(rsuId));
+
+        AppMessage* msg = new AppMessage();
+        msg->setWeights(wsm->getWeights());
+        msg->setSenderAddress(wsm->getSenderAddress());
+        msg->setSenderId(wsm->getSenderId());
+        msg->setDest(dest);
+        send(msg, "out");
+    } else {
+        EV_WARN << "onWSM - Received model ignored because it is from another RSU" << std::endl;
+    }
 }
 
 void RSUApp::handleGateMsg(cMessage* msg)
 {
-    // TODO: implement here
+    AppMessage* appMsg = check_and_cast<AppMessage*>(msg);
+
+    AppMessage* wsm = new AppMessage();
+    wsm->setWeights(appMsg->getWeights());
+    wsm->setSenderAddress(appMsg->getSenderAddress());
+    wsm->setSenderId(appMsg->getSenderId());
+    wsm->setIsRSU(true);
+    populateWSM(wsm);
+    sendDelayedDown(wsm, uniform(0.0, 0.5));
+
     delete(msg);
 }

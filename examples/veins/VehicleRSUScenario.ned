@@ -13,8 +13,9 @@ simple BridgeServer
 network VehicleRSUScenario extends Scenario
 {
     types:
-        channel myChannel extends ned.DelayChannel {
+        channel myChannel extends ned.DatarateChannel {
             delay = 10ms;
+            datarate = 200Mbps;
         };
 
     submodules:

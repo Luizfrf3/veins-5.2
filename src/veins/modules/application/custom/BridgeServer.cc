@@ -1,4 +1,6 @@
 
+#include "veins/modules/application/traci/AppMessage_m.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <omnetpp.h>
@@ -14,7 +16,9 @@ Define_Module(BridgeServer);
 
 void BridgeServer::handleMessage(cMessage *msg)
 {
-    // TODO: implement here
+    veins::AppMessage* appMsg = check_and_cast<veins::AppMessage*>(msg);
+    EV << "Message to " << appMsg->getDest() << " arrived in Bridge Server." << std::endl;
+    send(msg, "gate$o", appMsg->getDest());
 }
 
 }

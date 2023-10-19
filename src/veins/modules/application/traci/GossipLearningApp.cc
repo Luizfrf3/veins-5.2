@@ -96,7 +96,7 @@ void GossipLearningApp::handleSelfMsg(cMessage* msg)
         wsm->setSenderAddress(myId);
         wsm->setSenderId(vehicleId.c_str());
         populateWSM(wsm);
-        sendDelayedDown(wsm, uniform(0.0, 1.0));
+        sendDelayedDown(wsm, uniform(0.0, 0.5));
 
         cMessage* gossipModelMessage = new cMessage("Send model to peers", GOSSIP_MODEL);
         scheduleAt(simTime() + GOSSIP_ROUND_TIME, gossipModelMessage);

@@ -53,7 +53,7 @@ void OurMethodApp::onWSM(BaseFrame1609_4* frame)
 {
     AppMessage* wsm = check_and_cast<AppMessage*>(frame);
 
-    EV << vehicleId << " received message from " << wsm->getSenderId() << std::endl;
+    EV << vehicleId << " received message from " << wsm->getSenderId() << ", RSU " << wsm->isRSU() << std::endl;
     if (currentState == WAITING) {
         EV << vehicleId << " store model" << std::endl;
 
@@ -91,7 +91,7 @@ void OurMethodApp::handleSelfMsg(cMessage* msg)
         wsm->setSenderAddress(myId);
         wsm->setSenderId(vehicleId.c_str());
         populateWSM(wsm);
-        sendDelayedDown(wsm, uniform(0.0, 1.0));
+        sendDelayedDown(wsm, uniform(0.0, 0.5));
 
         break;
     }
@@ -117,7 +117,7 @@ void OurMethodApp::handleSelfMsg(cMessage* msg)
             wsm->setSenderAddress(myId);
             wsm->setSenderId(vehicleId.c_str());
             populateWSM(wsm);
-            sendDelayedDown(wsm, uniform(0.0, 1.0));
+            sendDelayedDown(wsm, uniform(0.0, 0.5));
         }
 
         cMessage* gossipModelMessage = new cMessage("Send model to peers", GOSSIP_MODEL);
