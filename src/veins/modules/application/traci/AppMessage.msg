@@ -7,6 +7,7 @@ namespace veins;
 
 packet AppMessage extends BaseFrame1609_4 {
 	string weights;
+	int datasetSize;
     LAddress::L2Type senderAddress = -1;
     string senderId;
     int dest;

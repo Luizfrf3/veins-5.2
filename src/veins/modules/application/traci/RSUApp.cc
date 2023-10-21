@@ -75,6 +75,7 @@ void RSUApp::onWSM(BaseFrame1609_4* frame)
 
         AppMessage* msg = new AppMessage();
         msg->setWeights(wsm->getWeights());
+        msg->setDatasetSize(wsm->getDatasetSize());
         msg->setSenderAddress(wsm->getSenderAddress());
         msg->setSenderId(wsm->getSenderId());
         msg->setDest(dest);
@@ -90,6 +91,7 @@ void RSUApp::handleGateMsg(cMessage* msg)
 
     AppMessage* wsm = new AppMessage();
     wsm->setWeights(appMsg->getWeights());
+    wsm->setDatasetSize(appMsg->getDatasetSize());
     wsm->setSenderAddress(appMsg->getSenderAddress());
     wsm->setSenderId(appMsg->getSenderId());
     wsm->setIsRSU(true);

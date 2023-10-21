@@ -5,6 +5,7 @@ from sklearn.cluster import AffinityPropagation
 from python.src import models, constants, logs
 
 received_weights = {}
+dataset_sizes = {}
 
 def _flatten(w):
     r = np.array([], dtype=np.float32)
@@ -36,7 +37,8 @@ def _local_clustering(vehicle_id, model, mw, X_valid, y_valid):
 
     rfeatures = []
     rweights = []
-    for rweight in received_weights[vehicle_id].values():
+    senders = []
+    for sender, rweight in received_weights[vehicle_id].items():
         rmodel = models.get_model()
         rmodel.set_weights(rweight)
 
@@ -49,19 +51,22 @@ def _local_clustering(vehicle_id, model, mw, X_valid, y_valid):
 
         rfeatures.append([cossim, cka, cca, loss, accuracy])
         rweights.append(rweight)
+        senders.append(sender)
 
     rfeatures = np.array(rfeatures)
     clustering = AffinityPropagation().fit(rfeatures)
 
     vehicle_cluster = clustering.predict([mfeatures])[0]
     indexes = [i for i in range(len(clustering.labels_)) if clustering.labels_[i] == vehicle_cluster]
-    return [rweights[i] for i in indexes]
+    return [{'w': rweights[i], 'id': senders[i]} for i in indexes]
 
-def store_weights(raw_weights, vehicle_id, sender_id):
+def store_weights(raw_weights, dataset_size, vehicle_id, sender_id):
     weights = models.decode_weights(raw_weights)
     if vehicle_id not in received_weights.keys():
         received_weights[vehicle_id] = {}
+        dataset_sizes[vehicle_id] = {}
     received_weights[vehicle_id][sender_id] = weights
+    dataset_sizes[vehicle_id][sender_id] = dataset_size
 
 def train(vehicle_id, training_round, sim_time, vehicle_data, vehicle_models):
     X_train, y_train = vehicle_data[vehicle_id]['train']
@@ -72,14 +77,18 @@ def train(vehicle_id, training_round, sim_time, vehicle_data, vehicle_models):
 
     if vehicle_id not in received_weights.keys():
         received_weights[vehicle_id] = {}
+        dataset_sizes[vehicle_id] = {}
 
     if len(received_weights[vehicle_id]) > 0:
         clustered_weights = _local_clustering(vehicle_id, model, _flatten(mweights), X_valid, y_valid)
 
         for i in range(len(mweights)):
-            for w in clustered_weights:
-                mweights[i] = mweights[i] + w[i]
-            mweights[i] = mweights[i] / (len(clustered_weights) + 1)
+            sizes = len(X_train)
+            mweights[i] = mweights[i] * sizes
+            for cw in clustered_weights:
+                mweights[i] = mweights[i] + (cw['w'][i] * dataset_sizes[vehicle_id][cw['id']])
+                sizes += dataset_sizes[vehicle_id][cw['id']]
+            mweights[i] = mweights[i] / sizes
         model.set_weights(mweights)
 
     history = model.fit(X_train, y_train, epochs=constants.EPOCHS, validation_data=(X_valid, y_valid), verbose=0)
@@ -92,3 +101,4 @@ def train(vehicle_id, training_round, sim_time, vehicle_data, vehicle_models):
     vehicle_models[vehicle_id] = model
 
     received_weights[vehicle_id] = {}
+    dataset_sizes[vehicle_id] = {}

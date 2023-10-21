@@ -59,7 +59,7 @@ void OurMethodApp::onWSM(BaseFrame1609_4* frame)
 
         numberOfReceivedModels += 1;
         py::module_ learning = py::module_::import("learning");
-        learning.attr("store_weights")(wsm->getWeights(), vehicleId, wsm->getSenderId(), simTime().dbl());
+        learning.attr("store_weights")(wsm->getWeights(), wsm->getDatasetSize(), vehicleId, wsm->getSenderId(), simTime().dbl());
     } else {
         EV_WARN << "onWSM - Received model ignored because the node is already training" << std::endl;
     }
@@ -85,9 +85,12 @@ void OurMethodApp::handleSelfMsg(cMessage* msg)
 
         py::str weights_py = learning.attr("get_weights")(vehicleId, simTime().dbl());
         std::string weights = weights_py;
+        py::int_ dataset_size_py = learning.attr("get_dataset_size")(vehicleId);
+        int datasetSize = dataset_size_py;
 
         AppMessage* wsm = new AppMessage();
         wsm->setWeights(weights.c_str());
+        wsm->setDatasetSize(datasetSize);
         wsm->setSenderAddress(myId);
         wsm->setSenderId(vehicleId.c_str());
         populateWSM(wsm);
@@ -111,9 +114,12 @@ void OurMethodApp::handleSelfMsg(cMessage* msg)
             py::module_ learning = py::module_::import("learning");
             py::str weights_py = learning.attr("get_weights")(vehicleId, simTime().dbl());
             std::string weights = weights_py;
+            py::int_ dataset_size_py = learning.attr("get_dataset_size")(vehicleId);
+            int datasetSize = dataset_size_py;
 
             AppMessage* wsm = new AppMessage();
             wsm->setWeights(weights.c_str());
+            wsm->setDatasetSize(datasetSize);
             wsm->setSenderAddress(myId);
             wsm->setSenderId(vehicleId.c_str());
             populateWSM(wsm);

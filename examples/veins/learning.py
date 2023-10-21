@@ -45,17 +45,20 @@ def get_weights(vehicle_id, sim_time):
     model = vehicle_models[vehicle_id]
     return models.encode_weights(model.get_weights())
 
-def merge(raw_weights, vehicle_id, sender_id, sim_time):
+def get_dataset_size(vehicle_id):
+    return len(vehicle_data[vehicle_id]['train'][0])
+
+def merge(raw_weights, dataset_size, vehicle_id, sender_id, sim_time):
     logging.warning('Node {} merging models'.format(vehicle_id))
-    logs_data = {'event': 'merge', 'vehicle_id': vehicle_id, 'sim_time': sim_time, 'sender_id': sender_id}
+    logs_data = {'event': 'merge', 'dataset_size': dataset_size, 'vehicle_id': vehicle_id, 'sim_time': sim_time, 'sender_id': sender_id}
     logs.register_log(logs_data)
 
     if constants.EXPERIMENT == constants.GOSSIP_LEARNING:
-        gossip_learning.merge(raw_weights, vehicle_id, vehicle_models)
+        gossip_learning.merge(raw_weights, dataset_size, vehicle_id, vehicle_data, vehicle_models)
 
-def store_weights(raw_weights, vehicle_id, sender_id, sim_time):
-    logs_data = {'event': 'store_weights', 'vehicle_id': vehicle_id, 'sim_time': sim_time, 'sender_id': sender_id}
+def store_weights(raw_weights, dataset_size, vehicle_id, sender_id, sim_time):
+    logs_data = {'event': 'store_weights', 'dataset_size': dataset_size, 'vehicle_id': vehicle_id, 'sim_time': sim_time, 'sender_id': sender_id}
     logs.register_log(logs_data)
 
     if constants.EXPERIMENT == constants.OUR_METHOD:
-        our_method.store_weights(raw_weights, vehicle_id, sender_id)
+        our_method.store_weights(raw_weights, dataset_size, vehicle_id, sender_id)

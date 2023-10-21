@@ -57,7 +57,7 @@ void GossipLearningApp::onWSM(BaseFrame1609_4* frame)
         EV << vehicleId << " merge models" << std::endl;
 
         py::module_ learning = py::module_::import("learning");
-        learning.attr("merge")(wsm->getWeights(), vehicleId, wsm->getSenderId(), simTime().dbl());
+        learning.attr("merge")(wsm->getWeights(), wsm->getDatasetSize(), vehicleId, wsm->getSenderId(), simTime().dbl());
 
         findHost()->getDisplayString().setTagArg("i", 1, "red");
         currentState = TRAINING;
@@ -90,9 +90,12 @@ void GossipLearningApp::handleSelfMsg(cMessage* msg)
         py::module_ learning = py::module_::import("learning");
         py::str weights_py = learning.attr("get_weights")(vehicleId, simTime().dbl());
         std::string weights = weights_py;
+        py::int_ dataset_size_py = learning.attr("get_dataset_size")(vehicleId);
+        int datasetSize = dataset_size_py;
 
         AppMessage* wsm = new AppMessage();
         wsm->setWeights(weights.c_str());
+        wsm->setDatasetSize(datasetSize);
         wsm->setSenderAddress(myId);
         wsm->setSenderId(vehicleId.c_str());
         populateWSM(wsm);

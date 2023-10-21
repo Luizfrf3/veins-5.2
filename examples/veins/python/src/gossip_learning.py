@@ -15,10 +15,11 @@ def train(vehicle_id, training_round, sim_time, vehicle_data, vehicle_models):
     models.save_weights(vehicle_id, model.get_weights())
     vehicle_models[vehicle_id] = model
 
-def merge(raw_weights, vehicle_id, vehicle_models):
+def merge(raw_weights, dataset_size, vehicle_id, vehicle_data, vehicle_models):
+    size = len(vehicle_data[vehicle_id]['train'][0])
     model = vehicle_models[vehicle_id]
     received_weights = models.decode_weights(raw_weights)
     weights = model.get_weights()
     for i in range(len(weights)):
-        weights[i] = (weights[i] + received_weights[i]) / 2
+        weights[i] = (weights[i] * size + received_weights[i] * dataset_size) / (size + dataset_size)
     model.set_weights(weights)
