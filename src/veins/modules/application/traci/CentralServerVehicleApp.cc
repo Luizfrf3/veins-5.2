@@ -43,9 +43,7 @@ void CentralServerVehicleApp::onWSM(BaseFrame1609_4* frame)
         EV << vehicleId << " started training" << std::endl;
 
         py::module_ learning = py::module_::import("learning");
-        py::int_ dataset_size_py = learning.attr("get_dataset_size")(vehicleId);
-        int datasetSize = dataset_size_py;
-        learning.attr("store_weights")(wsm->getWeights(), datasetSize, vehicleId, wsm->getSenderId(), simTime().dbl());
+        learning.attr("receive_global_model")(wsm->getWeights(), vehicleId, wsm->getSenderId(), simTime().dbl());
 
         findHost()->getDisplayString().setTagArg("i", 1, "red");
         currentState = TRAINING;

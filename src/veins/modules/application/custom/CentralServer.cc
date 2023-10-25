@@ -57,6 +57,10 @@ void CentralServer::initialize()
     aggregationRound = 0;
     numberOfReceivedModels = 0;
     currentState = AGGREGATING;
+
+    py::module_ learning = py::module_::import("learning");
+    learning.attr("init_server")(SERVER, simTime().dbl());
+
     cMessage *selfMsg = new cMessage("Initialization message", ROUND_MESSAGE);
     scheduleAt(ROUND_TIME, selfMsg);
 }
@@ -76,7 +80,7 @@ void CentralServer::handleMessage(cMessage *msg)
         EV << SERVER << " ending aggregation round " << aggregationRound << ", received models" << numberOfReceivedModels << std::endl;
 
         py::module_ learning = py::module_::import("learning");
-        learning.attr("aggregation")(aggregationRound, simTime().dbl());
+        learning.attr("aggregation")(aggregationRound, SERVER, numberOfReceivedModels, simTime().dbl());
         aggregationRound += 1;
         numberOfReceivedModels = 0;
 
