@@ -65,5 +65,5 @@ void TraCIDemoRSU11p::handleSelfMsg(cMessage* msg)
 void TraCIDemoRSU11p::handleGateMsg(cMessage* msg)
 {
     EV << "Message " << msg->getName() << " " << getId() << std::endl;
-    delete(msg);
+    cancelAndDelete(msg);
 }

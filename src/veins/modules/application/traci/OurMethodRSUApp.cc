@@ -1,19 +1,19 @@
 
-#include "veins/modules/application/traci/RSUApp.h"
+#include <veins/modules/application/traci/OurMethodRSUApp.h>
 #include "veins/modules/application/traci/AppMessage_m.h"
 
 #include <random>
 
 using namespace veins;
 
-Define_Module(veins::RSUApp);
+Define_Module(veins::OurMethodRSUApp);
 
-double RSUApp::calculateDistance(double x1, double y1, double x2, double y2)
+double OurMethodRSUApp::calculateDistance(double x1, double y1, double x2, double y2)
 {
     return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2));
 }
 
-void RSUApp::initialize(int stage)
+void OurMethodRSUApp::initialize(int stage)
 {
     DemoBaseApplLayerRSU::initialize(stage);
 
@@ -58,7 +58,7 @@ void RSUApp::initialize(int stage)
     }
 }
 
-void RSUApp::onWSM(BaseFrame1609_4* frame)
+void OurMethodRSUApp::onWSM(BaseFrame1609_4* frame)
 {
     AppMessage* wsm = check_and_cast<AppMessage*>(frame);
 
@@ -85,7 +85,7 @@ void RSUApp::onWSM(BaseFrame1609_4* frame)
     }
 }
 
-void RSUApp::handleGateMsg(cMessage* msg)
+void OurMethodRSUApp::handleGateMsg(cMessage* msg)
 {
     AppMessage* appMsg = check_and_cast<AppMessage*>(msg);
 
@@ -98,5 +98,5 @@ void RSUApp::handleGateMsg(cMessage* msg)
     populateWSM(wsm);
     sendDelayedDown(wsm, uniform(0.0, 0.5));
 
-    delete(msg);
+    cancelAndDelete(msg);
 }

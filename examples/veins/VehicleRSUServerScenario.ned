@@ -2,7 +2,7 @@
 import org.car2x.veins.nodes.RSU;
 import org.car2x.veins.nodes.Scenario;
 
-simple BridgeServer
+simple CentralServer
 {
     parameters:
         @display("i=block/routing");
@@ -10,11 +10,11 @@ simple BridgeServer
         inout gate[3];
 }
 
-network VehicleRSUScenario extends Scenario
+network VehicleRSUServerScenario extends Scenario
 {
     types:
         channel myChannel extends ned.DatarateChannel {
-            delay = 100ms;
+            delay = 10ms;
             datarate = 200Mbps;
         };
 
@@ -22,7 +22,7 @@ network VehicleRSUScenario extends Scenario
         rsu[3]: RSU {
             @display("p=150,140;i=veins/sign/yellowdiamond;is=vs");
         };
-        server: BridgeServer;
+        server: CentralServer;
     connections allowunconnected:
         rsu[0].out --> myChannel --> server.gate$i[0];
         server.gate$o[0] --> myChannel --> rsu[0].in;

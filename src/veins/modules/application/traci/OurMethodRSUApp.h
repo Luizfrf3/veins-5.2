@@ -7,7 +7,7 @@
 
 namespace veins {
 
-class VEINS_API RSUApp : public DemoBaseApplLayerRSU {
+class VEINS_API OurMethodRSUApp : public DemoBaseApplLayerRSU {
 public:
     void initialize(int stage) override;
 protected:

@@ -8,9 +8,9 @@ from python.src import constants, models, logs, gossip_learning, our_method
 vehicle_data = {}
 vehicle_models = {}
 
-def init(vehicle_id, sim_time):
+def init(node_id, sim_time):
     for file in os.listdir(constants.DATA_PATH):
-        if file.startswith(vehicle_id + '_'):
+        if file.startswith(node_id + '_'):
             logging.warning('Preparing dataset for ' + file)
             data = np.load(constants.DATA_PATH + file)
             X, y = data['images_train'], data['labels_train']
@@ -21,44 +21,44 @@ def init(vehicle_id, sim_time):
                 if constants.SPLIT == i:
                     X_train, y_train = X[train_index], y[train_index]
                     X_valid, y_valid = X[valid_index], y[valid_index]
-                    vehicle_data[vehicle_id] = {}
-                    vehicle_data[vehicle_id]['train'] = (X_train, keras.utils.to_categorical(y_train, num_classes))
-                    vehicle_data[vehicle_id]['valid'] = (X_valid, keras.utils.to_categorical(y_valid, num_classes))
+                    vehicle_data[node_id] = {}
+                    vehicle_data[node_id]['train'] = (X_train, keras.utils.to_categorical(y_train, num_classes))
+                    vehicle_data[node_id]['valid'] = (X_valid, keras.utils.to_categorical(y_valid, num_classes))
             logging.warning('Dataset preparation finished')
 
-            vehicle_models[vehicle_id] = models.get_model()
+            vehicle_models[node_id] = models.get_model()
 
-            logs_data = {'event': 'init', 'vehicle_id': vehicle_id, 'sim_time': sim_time}
+            logs_data = {'event': 'init', 'node_id': node_id, 'sim_time': sim_time}
             logs.register_log(logs_data)
 
 
-def train(vehicle_id, training_round, sim_time):
+def train(node_id, training_round, sim_time):
     if constants.EXPERIMENT == constants.GOSSIP_LEARNING:
-        gossip_learning.train(vehicle_id, training_round, sim_time, vehicle_data, vehicle_models)
+        gossip_learning.train(node_id, training_round, sim_time, vehicle_data, vehicle_models)
     elif constants.EXPERIMENT == constants.OUR_METHOD:
-        our_method.train(vehicle_id, training_round, sim_time, vehicle_data, vehicle_models)
+        our_method.train(node_id, training_round, sim_time, vehicle_data, vehicle_models)
 
-def get_weights(vehicle_id, sim_time):
-    logs_data = {'event': 'get_weights', 'vehicle_id': vehicle_id, 'sim_time': sim_time}
+def get_weights(node_id, sim_time):
+    logs_data = {'event': 'get_weights', 'node_id': node_id, 'sim_time': sim_time}
     logs.register_log(logs_data)
 
-    model = vehicle_models[vehicle_id]
+    model = vehicle_models[node_id]
     return models.encode_weights(model.get_weights())
 
-def get_dataset_size(vehicle_id):
-    return len(vehicle_data[vehicle_id]['train'][0])
+def get_dataset_size(node_id):
+    return len(vehicle_data[node_id]['train'][0])
 
-def merge(raw_weights, dataset_size, vehicle_id, sender_id, sim_time):
-    logging.warning('Node {} merging models'.format(vehicle_id))
-    logs_data = {'event': 'merge', 'dataset_size': dataset_size, 'vehicle_id': vehicle_id, 'sim_time': sim_time, 'sender_id': sender_id}
+def merge(raw_weights, dataset_size, node_id, sender_id, sim_time):
+    logging.warning('Node {} merging models'.format(node_id))
+    logs_data = {'event': 'merge', 'dataset_size': dataset_size, 'node_id': node_id, 'sim_time': sim_time, 'sender_id': sender_id}
     logs.register_log(logs_data)
 
     if constants.EXPERIMENT == constants.GOSSIP_LEARNING:
-        gossip_learning.merge(raw_weights, dataset_size, vehicle_id, vehicle_data, vehicle_models)
+        gossip_learning.merge(raw_weights, dataset_size, node_id, vehicle_data, vehicle_models)
 
-def store_weights(raw_weights, dataset_size, vehicle_id, sender_id, sim_time):
-    logs_data = {'event': 'store_weights', 'dataset_size': dataset_size, 'vehicle_id': vehicle_id, 'sim_time': sim_time, 'sender_id': sender_id}
+def store_weights(raw_weights, dataset_size, node_id, sender_id, sim_time):
+    logs_data = {'event': 'store_weights', 'dataset_size': dataset_size, 'node_id': node_id, 'sim_time': sim_time, 'sender_id': sender_id}
     logs.register_log(logs_data)
 
     if constants.EXPERIMENT == constants.OUR_METHOD:
-        our_method.store_weights(raw_weights, dataset_size, vehicle_id, sender_id)
+        our_method.store_weights(raw_weights, dataset_size, node_id, sender_id)
