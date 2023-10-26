@@ -76,7 +76,7 @@ def receive_global_model(raw_weights, node_id, sender_id, sim_time):
     logs_data = {'event': 'receive_global_model', 'node_id': node_id, 'sim_time': sim_time, 'sender_id': sender_id}
     logs.register_log(logs_data)
 
-    model = vehicle_models[node_id]
+    model = node_models[node_id]
     weights = models.decode_weights(raw_weights)
     model.set_weights(weights)
 

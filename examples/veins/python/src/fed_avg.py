@@ -17,7 +17,11 @@ def aggregation(aggregation_round, node_id, number_of_received_models, sim_time,
     model = node_models[node_id]
 
     if node_id in received_weights.keys() and len(received_weights[node_id]) > 0:
-        weights = np.zeros(model.get_weights().shape)
+        weights = []
+        model_weights = model.get_weights()
+        for i in range(len(model_weights)):
+            weights.append(np.zeros(model_weights[i].shape))
+
         for i in range(len(weights)):
             size = 0
             for sender, rweights in received_weights[node_id].items():

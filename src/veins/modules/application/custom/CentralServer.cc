@@ -61,23 +61,20 @@ void CentralServer::initialize()
     py::module_ learning = py::module_::import("learning");
     learning.attr("init_server")(SERVER, simTime().dbl());
 
-    cMessage *selfMsg = new cMessage("Initialization message", ROUND_MESSAGE);
-    scheduleAt(ROUND_TIME, selfMsg);
+    cMessage *selfMsg = new cMessage("Waiting models", ROUND_MESSAGE);
+    scheduleAt(simTime() + ROUND_TIME, selfMsg);
 }
 
 void CentralServer::handleMessage(cMessage *msg)
 {
-    switch (msg->getKind()) {
-    case ROUND_MESSAGE: {
+    if (strcmp("Waiting models", msg->getName()) == 0) {
         EV << SERVER << " starting model aggregation" << std::endl;
 
         currentState = AGGREGATING;
         cMessage *selfMsg = new cMessage("Aggregating models", AGGREGATION_MESSAGE);
-        scheduleAt(AGGREGATION_TIME, selfMsg);
-        break;
-    }
-    case AGGREGATION_MESSAGE: {
-        EV << SERVER << " ending aggregation round " << aggregationRound << ", received models" << numberOfReceivedModels << std::endl;
+        scheduleAt(simTime() + AGGREGATION_TIME, selfMsg);
+    } else if (strcmp("Aggregating models", msg->getName()) == 0) {
+        EV << SERVER << " ending aggregation round " << aggregationRound << ", received models " << numberOfReceivedModels << std::endl;
 
         py::module_ learning = py::module_::import("learning");
         learning.attr("aggregation")(aggregationRound, SERVER, numberOfReceivedModels, simTime().dbl());
@@ -86,20 +83,17 @@ void CentralServer::handleMessage(cMessage *msg)
 
         currentState = WAITING;
         cMessage *selfMsg = new cMessage("Waiting models", ROUND_MESSAGE);
-        scheduleAt(ROUND_TIME, selfMsg);
+        scheduleAt(simTime() + ROUND_TIME, selfMsg);
 
         py::str weights_py = learning.attr("get_weights")(SERVER, simTime().dbl());
         std::string weights = weights_py;
-        veins::AppMessage* appMsg = new veins::AppMessage();
-        appMsg->setWeights(weights.c_str());
-        appMsg->setSenderId(SERVER.c_str());
         for (int i = 0; i < numberOfRSUs; i++) {
+            veins::AppMessage* appMsg = new veins::AppMessage();
+            appMsg->setWeights(weights.c_str());
+            appMsg->setSenderId(SERVER.c_str());
             send(appMsg, "gate$o", i);
         }
-
-        break;
-    }
-    default: {
+    } else {
         veins::AppMessage* appMsg = check_and_cast<veins::AppMessage*>(msg);
         EV << "Central Server received message from " << appMsg->getSenderId() << std::endl;
 
@@ -112,8 +106,6 @@ void CentralServer::handleMessage(cMessage *msg)
         } else {
             EV_WARN << "handleMessage - Received model ignored because the server is already aggregating" << std::endl;
         }
-        break;
-    }
     }
 
     cancelAndDelete(msg);

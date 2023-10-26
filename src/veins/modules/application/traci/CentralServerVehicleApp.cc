@@ -39,7 +39,7 @@ void CentralServerVehicleApp::onWSM(BaseFrame1609_4* frame)
     AppMessage* wsm = check_and_cast<AppMessage*>(frame);
 
     EV << vehicleId << " received message from " << wsm->getSenderId() << std::endl;
-    if (currentState == WAITING) {
+    if (currentState == WAITING && wsm->isRSU()) {
         EV << vehicleId << " started training" << std::endl;
 
         py::module_ learning = py::module_::import("learning");
@@ -50,7 +50,11 @@ void CentralServerVehicleApp::onWSM(BaseFrame1609_4* frame)
         cMessage* trainingMessage = new cMessage("Training local model");
         scheduleAt(simTime() + TRAINING_TIME + uniform(0.0, 5.0), trainingMessage);
     } else {
-        EV_WARN << "onWSM - Received model ignored because the node is already training" << std::endl;
+        if (currentState == WAITING) {
+            EV_WARN << "onWSM - Received model ignored because the node is already training" << std::endl;
+        } else {
+            EV_WARN << "onWSM - Received model ignored because the message is from another vehicle" << std::endl;
+        }
     }
 }
 
@@ -61,6 +65,9 @@ void CentralServerVehicleApp::handleSelfMsg(cMessage* msg)
     py::module_ learning = py::module_::import("learning");
     learning.attr("train")(vehicleId, trainingRound, simTime().dbl());
     trainingRound += 1;
+
+    findHost()->getDisplayString().setTagArg("i", 1, "green");
+    currentState = WAITING;
 
     EV << "Node " << vehicleId << " sending model to server" << std::endl;
 
