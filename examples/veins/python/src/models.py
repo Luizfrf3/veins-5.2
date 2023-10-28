@@ -1,6 +1,9 @@
 import pickle
-from tensorflow import keras
-from tensorflow.keras import layers
+import tensorflow as tf
+from tensorflow.python import keras
+from tensorflow.python.keras import layers
+from tensorflow.python.ops import standard_ops
+from tensorflow.python.keras import optimizer_v2
 from python.src import constants
 
 def get_model():
@@ -73,7 +76,11 @@ def get_model():
             ]
         )
 
-    model.compile(loss="categorical_crossentropy", optimizer="adam", metrics=["accuracy"])
+    if constants.EXPERIMENT == constants.FED_PROX:
+        model.compile(loss="categorical_crossentropy", optimizer=FedProxOptimizer(), metrics=["accuracy"])
+    else:
+        model.compile(loss="categorical_crossentropy", optimizer="adam", metrics=["accuracy"])
+
     return model
 
 def save_weights(car_id, weights):
@@ -94,3 +101,57 @@ def decode_weights(raw_weights):
         byte_list.append(int(byte_str))
     weights_bytes = bytes(byte_list)
     return pickle.loads(weights_bytes)
+
+@tf.keras.utils.register_keras_serializable()
+class FedProxOptimizer(optimizer_v2.optimizer_v2.OptimizerV2):
+
+    def __init__(self, learning_rate=0.01, mu=0.01, name='FedProxOptimizer', **kwargs):
+        super().__init__(name=name, **kwargs)
+
+        self._set_hyper('learning_rate', learning_rate)
+        self._set_hyper('mu', mu)
+
+        self._lr_t = None
+        self._mu_t = None
+
+    def _prepare(self, var_list):
+        self._lr_t = tf.convert_to_tensor(self._get_hyper('learning_rate'), name='lr')
+        self._mu_t = tf.convert_to_tensor(self._get_hyper('mu'), name='mu')
+
+    def _create_slots(self, var_list):
+        for v in var_list:
+            self.add_slot(v, 'vstar')
+
+    def _resource_apply_dense(self, grad, var):
+        lr_t = tf.cast(self._lr_t, var.dtype.base_dtype)
+        mu_t = tf.cast(self._mu_t, var.dtype.base_dtype)
+        vstar = self.get_slot(var, 'vstar')
+
+        var_update = var.assign_sub(lr_t * (grad + mu_t * (var - vstar)))
+
+        return tf.group(*[var_update, ])
+
+    def _apply_sparse_shared(self, grad, var, indices, scatter_add):
+        lr_t = tf.cast(self._lr_t, var.dtype.base_dtype)
+        mu_t = tf.cast(self._mu_t, var.dtype.base_dtype)
+        vstar = self.get_slot(var, 'vstar')
+        v_diff = vstar.assign(mu_t * (var - vstar), use_locking=self._use_locking)
+
+        with tf.control_dependencies([v_diff]):
+            scaled_grad = scatter_add(vstar, indices, grad)
+        var_update = var.assign_sub(lr_t * scaled_grad)
+
+        return tf.group(*[var_update, ])
+
+    def _resource_apply_sparse(self, grad, var):
+        return self._apply_sparse_shared(
+            grad.values, var, grad.indices,
+            lambda x, i, v: standard_ops.scatter_add(x, i, v))
+
+    def get_config(self):
+        base_config = super(FedProxOptimizer, self).get_config()
+        return {
+            **base_config,
+            'lr': self._serialize_hyperparameter('learning_rate'),
+            'mu': self._serialize_hyperparameter('mu')
+        }
