@@ -12,4 +12,6 @@ packet AppMessage extends BaseFrame1609_4 {
     string senderId;
     int dest;
     bool isRSU = false;
+    string participatingNodes;
+    string clusterNodes;
 }

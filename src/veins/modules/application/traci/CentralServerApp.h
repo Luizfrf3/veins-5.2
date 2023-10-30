@@ -8,7 +8,7 @@ using namespace omnetpp;
 
 namespace veins {
 
-class VEINS_API CentralServerVehicleApp : public DemoBaseApplLayer {
+class VEINS_API CentralServerApp : public DemoBaseApplLayer {
 public:
     void initialize(int stage) override;
     void finish() override;

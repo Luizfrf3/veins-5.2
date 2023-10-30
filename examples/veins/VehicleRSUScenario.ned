@@ -15,7 +15,7 @@ network VehicleRSUScenario extends Scenario
     types:
         channel myChannel extends ned.DatarateChannel {
             delay = 100ms;
-            datarate = 200Mbps;
+            datarate = 500Mbps;
         };
 
     submodules:

@@ -1,18 +1,18 @@
 
-#include "veins/modules/application/traci/CentralServerVehicleApp.h"
 #include "veins/modules/application/traci/AppMessage_m.h"
 
 #include <Python.h>
 #include <pybind11/embed.h>
 #include <pybind11/pybind11.h>
+#include <veins/modules/application/traci/CentralServerApp.h>
 
 namespace py = pybind11;
 
 using namespace veins;
 
-Define_Module(veins::CentralServerVehicleApp);
+Define_Module(veins::CentralServerApp);
 
-void CentralServerVehicleApp::initialize(int stage)
+void CentralServerApp::initialize(int stage)
 {
     DemoBaseApplLayer::initialize(stage);
     if (stage == 0) {
@@ -29,12 +29,12 @@ void CentralServerVehicleApp::initialize(int stage)
     }
 }
 
-void CentralServerVehicleApp::finish()
+void CentralServerApp::finish()
 {
     DemoBaseApplLayer::finish();
 }
 
-void CentralServerVehicleApp::onWSM(BaseFrame1609_4* frame)
+void CentralServerApp::onWSM(BaseFrame1609_4* frame)
 {
     AppMessage* wsm = check_and_cast<AppMessage*>(frame);
 
@@ -58,7 +58,7 @@ void CentralServerVehicleApp::onWSM(BaseFrame1609_4* frame)
     }
 }
 
-void CentralServerVehicleApp::handleSelfMsg(cMessage* msg)
+void CentralServerApp::handleSelfMsg(cMessage* msg)
 {
     EV << "Node " << vehicleId << " ending training, round " << trainingRound << std::endl;
 

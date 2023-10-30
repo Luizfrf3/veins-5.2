@@ -72,7 +72,7 @@ def store_weights(raw_weights, dataset_size, node_id, sender_id, sim_time):
     if constants.EXPERIMENT == constants.OUR_METHOD:
         our_method.store_weights(raw_weights, dataset_size, node_id, sender_id)
     elif constants.EXPERIMENT == constants.FED_AVG:
-        fed_avg.store_weights(raw_weights, dataset_size, node_id, sender_id)
+        fed_avg_fed_prox.store_weights(raw_weights, dataset_size, node_id, sender_id)
     elif constants.EXPERIMENT == constants.FED_PROX:
         fed_avg_fed_prox.store_weights(raw_weights, dataset_size, node_id, sender_id)
 
@@ -86,6 +86,6 @@ def receive_global_model(raw_weights, node_id, sender_id, sim_time):
 
 def aggregation(aggregation_round, node_id, number_of_received_models, sim_time):
     if constants.EXPERIMENT == constants.FED_AVG:
-        fed_avg.aggregation(aggregation_round, node_id, number_of_received_models, sim_time, node_models)
+        fed_avg_fed_prox.aggregation(aggregation_round, node_id, number_of_received_models, sim_time, node_models)
     elif constants.EXPERIMENT == constants.FED_PROX:
         fed_avg_fed_prox.aggregation(aggregation_round, node_id, number_of_received_models, sim_time, node_models)
