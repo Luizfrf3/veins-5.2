@@ -2,32 +2,10 @@ import logging
 import numpy as np
 from tensorflow import keras
 from sklearn.cluster import AffinityPropagation
-from python.src import models, constants, logs
+from python.src import models, constants, logs, metrics
 
 received_weights = {}
 dataset_sizes = {}
-
-def _flatten(w):
-    r = np.array([], dtype=np.float32)
-    for i in range(len(w)):
-        r = np.concatenate((r, w[i].flatten()), axis=0)
-    return r
-
-def _cossim(a, b):
-    return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
-
-def _cka(features_x, features_y):
-    features_x = features_x - np.mean(features_x, 0, keepdims=True)
-    features_y = features_y - np.mean(features_y, 0, keepdims=True)
-    dot_product_similarity = np.linalg.norm(features_x.T.dot(features_y)) ** 2
-    normalization_x = np.linalg.norm(features_x.T.dot(features_x))
-    normalization_y = np.linalg.norm(features_y.T.dot(features_y))
-    return dot_product_similarity / (normalization_x * normalization_y)
-
-def _cca(features_x, features_y):
-    qx, _ = np.linalg.qr(features_x)
-    qy, _ = np.linalg.qr(features_y)
-    return np.linalg.norm(qx.T.dot(qy)) ** 2 / min(features_x.shape[1], features_y.shape[1])
 
 def _local_clustering(node_id, model, mw, X_valid, y_valid):
     loss, accuracy = model.evaluate(X_valid, y_valid, verbose=0)
@@ -43,11 +21,11 @@ def _local_clustering(node_id, model, mw, X_valid, y_valid):
         rmodel.set_weights(rweight)
 
         loss, accuracy = rmodel.evaluate(X_valid, y_valid, verbose=0)
-        cossim = _cossim(mw, _flatten(rweight))
+        cossim = metrics.cossim(mw, metrics.flatten(rweight))
         rinter_model = keras.Model(inputs=rmodel.input, outputs=rmodel.get_layer("final_dense").output)
         ractivation = np.array(rinter_model(X_valid))
-        cka = _cka(activation, ractivation)
-        cca = _cca(activation, ractivation)
+        cka = metrics.cka(activation, ractivation)
+        cca = metrics.cca(activation, ractivation)
 
         rfeatures.append([cossim, cka, cca, loss, accuracy])
         rweights.append(rweight)
@@ -68,11 +46,11 @@ def store_weights(raw_weights, dataset_size, node_id, sender_id):
     received_weights[node_id][sender_id] = weights
     dataset_sizes[node_id][sender_id] = dataset_size
 
-def train(node_id, training_round, sim_time, vehicle_data, vehicle_models):
+def train(node_id, training_round, sim_time, vehicle_data, node_models):
     X_train, y_train = vehicle_data[node_id]['train']
     X_valid, y_valid = vehicle_data[node_id]['valid']
 
-    model = vehicle_models[node_id]
+    model = node_models[node_id]
     mweights = model.get_weights()
 
     if node_id not in received_weights.keys():
@@ -80,7 +58,7 @@ def train(node_id, training_round, sim_time, vehicle_data, vehicle_models):
         dataset_sizes[node_id] = {}
 
     if len(received_weights[node_id]) > 0:
-        clustered_weights = _local_clustering(node_id, model, _flatten(mweights), X_valid, y_valid)
+        clustered_weights = _local_clustering(node_id, model, metrics.flatten(mweights), X_valid, y_valid)
 
         for i in range(len(mweights)):
             sizes = len(X_train)
@@ -98,7 +76,7 @@ def train(node_id, training_round, sim_time, vehicle_data, vehicle_models):
     logs.register_log(logs_data)
 
     models.save_weights(node_id, model.get_weights())
-    vehicle_models[node_id] = model
+    node_models[node_id] = model
 
     received_weights[node_id] = {}
     dataset_sizes[node_id] = {}

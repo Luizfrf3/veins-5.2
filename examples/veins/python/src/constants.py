@@ -19,7 +19,7 @@ WSCC = 'WSCC'
 FEDPC = 'FedPC'
 BARBIERI = 'Barbieri'
 DFL_DSS = 'DFL-DSS'
-EXPERIMENT = FED_AVG
+EXPERIMENT = WSCC
 
 DATA_PATH = 'python/' + DATASET + '/data/'
 WEIGHTS_FOLDER = 'weights/'

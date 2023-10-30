@@ -89,18 +89,35 @@ void WSCCServer::handleMessage(cMessage *msg)
         py::str participating_nodes_py = learning.attr("get_participating_nodes")(SERVER, simTime().dbl());
         std::string participatingNodes = participating_nodes_py;
 
-        for (int i = 0; i < numberOfClusters; i++) {
-            py::str weights_py = learning.attr("get_cluster_weights")(SERVER, i, simTime().dbl());
+        if (numberOfClusters == 0) {
+            EV << "Number of clusters is 0, sending global model" << std::endl;
+
+            py::str weights_py = learning.attr("get_weights")(SERVER, simTime().dbl());
             std::string weights = weights_py;
-            py::str cluster_nodes_py = learning.attr("get_cluster_nodes")(SERVER, i, simTime().dbl());
-            std::string clusterNodes = cluster_nodes_py;
             for (int i = 0; i < numberOfRSUs; i++) {
                 veins::AppMessage* appMsg = new veins::AppMessage();
                 appMsg->setWeights(weights.c_str());
                 appMsg->setSenderId(SERVER.c_str());
-                appMsg->setParticipatingNodes(participatingNodes.c_str());
-                appMsg->setClusterNodes(clusterNodes.c_str());
+                appMsg->setParticipatingNodes("");
+                appMsg->setClusterNodes("");
                 send(appMsg, "gate$o", i);
+            }
+        } else {
+            EV << "Sending models to " << numberOfClusters << " clusters, participating nodes " << participatingNodes << std::endl;
+            for (int i = 0; i < numberOfClusters; i++) {
+                py::str weights_py = learning.attr("get_cluster_weights")(SERVER, i, simTime().dbl());
+                std::string weights = weights_py;
+                py::str cluster_nodes_py = learning.attr("get_cluster_nodes")(SERVER, i, simTime().dbl());
+                std::string clusterNodes = cluster_nodes_py;
+                EV << "Sending model to cluster " << i << ", cluster nodes " << clusterNodes << std::endl;
+                for (int i = 0; i < numberOfRSUs; i++) {
+                    veins::AppMessage* appMsg = new veins::AppMessage();
+                    appMsg->setWeights(weights.c_str());
+                    appMsg->setSenderId(SERVER.c_str());
+                    appMsg->setParticipatingNodes(participatingNodes.c_str());
+                    appMsg->setClusterNodes(clusterNodes.c_str());
+                    send(appMsg, "gate$o", i);
+                }
             }
         }
     } else {

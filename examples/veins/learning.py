@@ -3,7 +3,7 @@ import logging
 import numpy as np
 from sklearn.model_selection import StratifiedKFold
 from tensorflow import keras
-from python.src import constants, models, logs, gossip_learning, our_method, fed_avg_fed_prox
+from python.src import constants, models, logs, gossip_learning, our_method, fed_avg_fed_prox, wscc
 
 vehicle_data = {}
 node_models = {}
@@ -46,6 +46,8 @@ def train(node_id, training_round, sim_time):
         fed_avg_fed_prox.train(node_id, training_round, sim_time, vehicle_data, node_models)
     elif constants.EXPERIMENT == constants.FED_PROX:
         fed_avg_fed_prox.train(node_id, training_round, sim_time, vehicle_data, node_models)
+    elif constants.EXPERIMENT == constants.WSCC:
+        wscc.train(node_id, training_round, sim_time, vehicle_data, node_models)
 
 def get_weights(node_id, sim_time):
     logs_data = {'event': 'get_weights', 'node_id': node_id, 'sim_time': sim_time}
@@ -75,6 +77,8 @@ def store_weights(raw_weights, dataset_size, node_id, sender_id, sim_time):
         fed_avg_fed_prox.store_weights(raw_weights, dataset_size, node_id, sender_id)
     elif constants.EXPERIMENT == constants.FED_PROX:
         fed_avg_fed_prox.store_weights(raw_weights, dataset_size, node_id, sender_id)
+    elif constants.EXPERIMENT == constants.WSCC:
+        wscc.store_weights(raw_weights, dataset_size, node_id, sender_id)
 
 def receive_global_model(raw_weights, node_id, sender_id, sim_time):
     logs_data = {'event': 'receive_global_model', 'node_id': node_id, 'sim_time': sim_time, 'sender_id': sender_id}
@@ -89,3 +93,26 @@ def aggregation(aggregation_round, node_id, number_of_received_models, sim_time)
         fed_avg_fed_prox.aggregation(aggregation_round, node_id, number_of_received_models, sim_time, node_models)
     elif constants.EXPERIMENT == constants.FED_PROX:
         fed_avg_fed_prox.aggregation(aggregation_round, node_id, number_of_received_models, sim_time, node_models)
+    elif constants.EXPERIMENT == constants.WSCC:
+        return wscc.aggregation(aggregation_round, node_id, number_of_received_models, sim_time, node_models)
+
+def get_participating_nodes(node_id, sim_time):
+    logs_data = {'event': 'get_participating_nodes', 'node_id': node_id, 'sim_time': sim_time}
+    logs.register_log(logs_data)
+
+    if constants.EXPERIMENT == constants.WSCC:
+        return wscc.get_participating_nodes(node_id, sim_time)
+
+def get_cluster_weights(node_id, cluster, sim_time):
+    logs_data = {'event': 'get_cluster_weights', 'node_id': node_id, 'cluster': cluster, 'sim_time': sim_time}
+    logs.register_log(logs_data)
+
+    if constants.EXPERIMENT == constants.WSCC:
+        return wscc.get_cluster_weights(node_id, cluster, sim_time)
+
+def get_cluster_nodes(node_id, cluster, sim_time):
+    logs_data = {'event': 'get_cluster_nodes', 'node_id': node_id, 'cluster': cluster, 'sim_time': sim_time}
+    logs.register_log(logs_data)
+
+    if constants.EXPERIMENT == constants.WSCC:
+        return wscc.get_cluster_nodes(node_id, cluster, sim_time)
