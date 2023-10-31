@@ -14,7 +14,7 @@ public:
     void finish() override;
 
 protected:
-    const int TRAINING_TIME = 15;
+    const int TRAINING_TIME = 12;
 
     enum nodeState {
         TRAINING,

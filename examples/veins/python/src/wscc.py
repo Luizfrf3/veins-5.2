@@ -112,12 +112,21 @@ def train(node_id, training_round, sim_time, vehicle_data, node_models):
     X_train, y_train = vehicle_data[node_id]['train']
     X_valid, y_valid = vehicle_data[node_id]['valid']
 
+    accepted_model = False
     model = node_models[node_id]
-    #history = model.fit(X_train, y_train, epochs=constants.EPOCHS, validation_data=(X_valid, y_valid), verbose=0)
+    rmodel = models.get_model()
+    rmodel.set_weights(rweight)
+    _, maccuracy = model.evaluate(X_valid, y_valid, verbose=0)
+    _, raccuracy = rmodel.evaluate(X_valid, y_valid, verbose=0)
+    if raccuracy >= maccuracy or abs(maccuracy - raccuracy) <= constants.THRESHOLD:
+        model = rmodel
+        accepted_model = True
 
-    #logging.warning('Node {}, Training Round {}, History {}'.format(node_id, training_round, history.history))
-    #logs_data = {'event': 'train', 'node_id': node_id, 'sim_time': sim_time, 'training_round': training_round, 'history': history.history}
-    #logs.register_log(logs_data)
+    history = model.fit(X_train, y_train, epochs=constants.EPOCHS, validation_data=(X_valid, y_valid), verbose=0)
+
+    logging.warning('Node {}, Training Round {}, Accepted Model {}, History {}'.format(node_id, training_round, accepted_model, history.history))
+    logs_data = {'event': 'train', 'node_id': node_id, 'sim_time': sim_time, 'training_round': training_round, 'accepted_model': accepted_model, 'history': history.history}
+    logs.register_log(logs_data)
 
     models.save_weights(node_id, model.get_weights())
     node_models[node_id] = model

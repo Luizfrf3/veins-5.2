@@ -25,3 +25,5 @@ DATA_PATH = 'python/' + DATASET + '/data/'
 WEIGHTS_FOLDER = 'weights/'
 WEIGHTS_FILE_SUFFIX = '_weights.pickle'
 LOGS_PATH = 'logs/logs.txt'
+
+THRESHOLD = 0.02
