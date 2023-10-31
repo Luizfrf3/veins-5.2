@@ -108,24 +108,32 @@ def get_cluster_weights(node_id, cluster, sim_time):
 def get_cluster_nodes(node_id, cluster, sim_time):
     return ','.join(clusters_nodes[node_id][cluster])
 
-def train(node_id, training_round, sim_time, vehicle_data, node_models):
-    X_train, y_train = vehicle_data[node_id]['train']
+def receive_global_model(raw_weights, node_id, sender_id, sim_time, node_models, vehicle_data):
     X_valid, y_valid = vehicle_data[node_id]['valid']
 
     accepted_model = False
     model = node_models[node_id]
+    rweights = models.decode_weights(raw_weights)
     rmodel = models.get_model()
-    rmodel.set_weights(rweight)
+    rmodel.set_weights(rweights)
     _, maccuracy = model.evaluate(X_valid, y_valid, verbose=0)
     _, raccuracy = rmodel.evaluate(X_valid, y_valid, verbose=0)
     if raccuracy >= maccuracy or abs(maccuracy - raccuracy) <= constants.THRESHOLD:
-        model = rmodel
+        model.set_weights(rweights)
         accepted_model = True
 
+    logs_data = {'event': 'receive_global_model', 'node_id': node_id, 'sim_time': sim_time, 'sender_id': sender_id, 'accepted_model': accepted_model, 'maccuracy': maccuracy, 'raccuracy': raccuracy}
+    logs.register_log(logs_data)
+
+def train(node_id, training_round, sim_time, vehicle_data, node_models):
+    X_train, y_train = vehicle_data[node_id]['train']
+    X_valid, y_valid = vehicle_data[node_id]['valid']
+
+    model = node_models[node_id]
     history = model.fit(X_train, y_train, epochs=constants.EPOCHS, validation_data=(X_valid, y_valid), verbose=0)
 
-    logging.warning('Node {}, Training Round {}, Accepted Model {}, History {}'.format(node_id, training_round, accepted_model, history.history))
-    logs_data = {'event': 'train', 'node_id': node_id, 'sim_time': sim_time, 'training_round': training_round, 'accepted_model': accepted_model, 'history': history.history}
+    logging.warning('Node {}, Training Round {}, History {}'.format(node_id, training_round, history.history))
+    logs_data = {'event': 'train', 'node_id': node_id, 'sim_time': sim_time, 'training_round': training_round, 'history': history.history}
     logs.register_log(logs_data)
 
     models.save_weights(node_id, model.get_weights())

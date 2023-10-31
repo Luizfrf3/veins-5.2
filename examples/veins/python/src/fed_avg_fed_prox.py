@@ -39,6 +39,14 @@ def aggregation(aggregation_round, node_id, number_of_received_models, sim_time,
     received_weights[node_id] = {}
     dataset_sizes[node_id] = {}
 
+def receive_global_model(raw_weights, node_id, sender_id, sim_time, node_models):
+    logs_data = {'event': 'receive_global_model', 'node_id': node_id, 'sim_time': sim_time, 'sender_id': sender_id}
+    logs.register_log(logs_data)
+
+    model = node_models[node_id]
+    weights = models.decode_weights(raw_weights)
+    model.set_weights(weights)
+
 def train(node_id, training_round, sim_time, vehicle_data, node_models):
     X_train, y_train = vehicle_data[node_id]['train']
     X_valid, y_valid = vehicle_data[node_id]['valid']

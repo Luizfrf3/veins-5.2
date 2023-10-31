@@ -81,12 +81,12 @@ def store_weights(raw_weights, dataset_size, node_id, sender_id, sim_time):
         wscc.store_weights(raw_weights, dataset_size, node_id, sender_id)
 
 def receive_global_model(raw_weights, node_id, sender_id, sim_time):
-    logs_data = {'event': 'receive_global_model', 'node_id': node_id, 'sim_time': sim_time, 'sender_id': sender_id}
-    logs.register_log(logs_data)
-
-    model = node_models[node_id]
-    weights = models.decode_weights(raw_weights)
-    model.set_weights(weights)
+    if constants.EXPERIMENT == constants.FED_AVG:
+        fed_avg_fed_prox.receive_global_model(raw_weights, node_id, sender_id, sim_time, node_models)
+    elif constants.EXPERIMENT == constants.FED_PROX:
+        fed_avg_fed_prox.receive_global_model(raw_weights, node_id, sender_id, sim_time, node_models)
+    elif constants.EXPERIMENT == constants.WSCC:
+        wscc.receive_global_model(raw_weights, node_id, sender_id, sim_time, node_models, vehicle_data)
 
 def aggregation(aggregation_round, node_id, number_of_received_models, sim_time):
     if constants.EXPERIMENT == constants.FED_AVG:
