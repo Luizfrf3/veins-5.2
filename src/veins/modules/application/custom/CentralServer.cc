@@ -77,7 +77,7 @@ void CentralServer::handleMessage(cMessage *msg)
         EV << SERVER << " ending aggregation round " << aggregationRound << ", received models " << numberOfReceivedModels << std::endl;
 
         py::module_ learning = py::module_::import("learning");
-        learning.attr("aggregation")(aggregationRound, SERVER, numberOfReceivedModels, simTime().dbl());
+        learning.attr("aggregation")(aggregationRound, SERVER, simTime().dbl());
         aggregationRound += 1;
         numberOfReceivedModels = 0;
 

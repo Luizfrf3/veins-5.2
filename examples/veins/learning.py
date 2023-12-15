@@ -88,13 +88,13 @@ def receive_global_model(raw_weights, node_id, sender_id, sim_time):
     elif constants.EXPERIMENT == constants.WSCC:
         wscc.receive_global_model(raw_weights, node_id, sender_id, sim_time, node_models, vehicle_data)
 
-def aggregation(aggregation_round, node_id, number_of_received_models, sim_time):
+def aggregation(aggregation_round, node_id, sim_time):
     if constants.EXPERIMENT == constants.FED_AVG:
-        fed_avg_fed_prox.aggregation(aggregation_round, node_id, number_of_received_models, sim_time, node_models)
+        fed_avg_fed_prox.aggregation(aggregation_round, node_id, sim_time, node_models)
     elif constants.EXPERIMENT == constants.FED_PROX:
-        fed_avg_fed_prox.aggregation(aggregation_round, node_id, number_of_received_models, sim_time, node_models)
+        fed_avg_fed_prox.aggregation(aggregation_round, node_id, sim_time, node_models)
     elif constants.EXPERIMENT == constants.WSCC:
-        return wscc.aggregation(aggregation_round, node_id, number_of_received_models, sim_time, node_models)
+        return wscc.aggregation(aggregation_round, node_id, sim_time, node_models)
 
 def get_participating_nodes(node_id, sim_time):
     logs_data = {'event': 'get_participating_nodes', 'node_id': node_id, 'sim_time': sim_time}

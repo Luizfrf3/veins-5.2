@@ -77,7 +77,7 @@ void WSCCServer::handleMessage(cMessage *msg)
         EV << SERVER << " ending aggregation round " << aggregationRound << ", received models " << numberOfReceivedModels << std::endl;
 
         py::module_ learning = py::module_::import("learning");
-        py::int_ number_of_clusters_py = learning.attr("aggregation")(aggregationRound, SERVER, numberOfReceivedModels, simTime().dbl());
+        py::int_ number_of_clusters_py = learning.attr("aggregation")(aggregationRound, SERVER, simTime().dbl());
         int numberOfClusters = number_of_clusters_py;
         aggregationRound += 1;
         numberOfReceivedModels = 0;

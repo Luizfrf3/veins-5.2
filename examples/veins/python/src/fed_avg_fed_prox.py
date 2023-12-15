@@ -13,7 +13,7 @@ def store_weights(raw_weights, dataset_size, node_id, sender_id):
     received_weights[node_id][sender_id] = weights
     dataset_sizes[node_id][sender_id] = dataset_size
 
-def aggregation(aggregation_round, node_id, number_of_received_models, sim_time, node_models):
+def aggregation(aggregation_round, node_id, sim_time, node_models):
     model = node_models[node_id]
 
     if node_id in received_weights.keys() and len(received_weights[node_id]) > 0:
@@ -30,7 +30,7 @@ def aggregation(aggregation_round, node_id, number_of_received_models, sim_time,
             weights[i] = weights[i] / size
         model.set_weights(weights)
 
-    logs_data = {'event': 'aggregation', 'node_id': node_id, 'sim_time': sim_time, 'aggregation_round': aggregation_round, 'number_of_received_models': number_of_received_models}
+    logs_data = {'event': 'aggregation', 'node_id': node_id, 'sim_time': sim_time, 'aggregation_round': aggregation_round, 'number_of_received_models': len(received_weights[node_id])}
     logs.register_log(logs_data)
 
     models.save_weights(node_id, model.get_weights())

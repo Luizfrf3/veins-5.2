@@ -54,7 +54,9 @@ void OurMethodApp::onWSM(BaseFrame1609_4* frame)
     AppMessage* wsm = check_and_cast<AppMessage*>(frame);
 
     EV << vehicleId << " received message from " << wsm->getSenderId() << ", RSU " << wsm->isRSU() << std::endl;
-    if (currentState == WAITING) {
+    if (wsm->getSenderAddress() == myId) {
+        EV_WARN << "onWSM - Received model ignored because it is from the same node" << std::endl;
+    } else if (currentState == WAITING) {
         EV << vehicleId << " store model" << std::endl;
 
         numberOfReceivedModels += 1;
