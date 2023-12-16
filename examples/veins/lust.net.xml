@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- generated on 2023-12-13 20:35:55 by Eclipse SUMO netedit Version 1.18.0
+<!-- generated on 2023-12-15 20:49:34 by Eclipse SUMO netedit Version 1.18.0
 <configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/neteditConfiguration.xsd">
 
     <input>
-        <additional-files value="/Users/luizfrf/Documents/Master/omnetpp-6.0.1/samples/veins-5.2/examples/veins/lust.poly.xml"/>
         <sumo-net-file value="samples/veins-5.2/examples/veins/lust.net.xml"/>
     </input>
 
@@ -6722,9 +6721,6 @@
     <edge id="--30566#1" from="-10168" to="-13432" priority="4" type="highway.residential" shape="5719.89,7368.53 5718.82,7364.09 5717.25,7357.55 5713.72,7346.41 5708.73,7335.63 5699.09,7333.68 5681.71,7337.69 5652.93,7344.40 5646.05,7344.75 5639.77,7341.66">
         <lane id="--30566#1_0" index="0" speed="13.89" length="99.85" shape="5718.75,7370.61 5717.26,7364.46 5715.71,7357.98 5712.23,7346.99 5707.62,7337.04 5699.11,7335.32 5682.07,7339.25 5653.15,7345.99 5645.72,7346.37 5644.77,7345.90"/>
     </edge>
-    <edge id="--30586#0" from="-13132" to="-25242" priority="4" type="highway.residential" shape="4889.99,7750.40 4855.76,7710.22 4815.28,7750.85 4851.65,7786.09 4880.32,7776.84">
-        <lane id="--30586#0_0" index="0" speed="13.89" length="182.27" shape="4888.77,7751.44 4855.67,7712.58 4817.56,7750.83 4852.07,7784.27 4879.83,7775.32"/>
-    </edge>
     <edge id="--30600" from="-27744" to="-9996" priority="4" type="highway.residential" shape="4993.58,6522.48 4992.38,6513.79 4987.99,6512.90 4970.84,6511.50 4961.99,6506.66">
         <lane id="--30600_0" index="0" speed="13.89" length="32.58" shape="4991.15,6516.57 4990.95,6515.13 4987.77,6514.49 4970.37,6513.07 4961.22,6508.06"/>
     </edge>
@@ -8173,9 +8169,6 @@
     <edge id="-30582#2" from="-14114" to="-858" priority="4" type="highway.residential" spreadType="center" shape="6050.18,7199.02 6056.18,7199.49 6061.07,7202.09 6064.21,7205.68 6065.84,7209.49 6066.20,7214.77">
         <lane id="-30582#2_0" index="0" speed="13.89" length="13.06" shape="6056.75,7197.98 6062.08,7200.82 6065.58,7204.82 6067.16,7208.51"/>
         <lane id="-30582#2_1" index="1" speed="13.89" length="13.06" shape="6056.43,7201.44 6060.06,7203.36 6062.84,7206.54 6063.79,7208.77"/>
-    </edge>
-    <edge id="-30586#0" from="-25242" to="-13132" priority="4" type="highway.residential" shape="4880.32,7776.84 4851.65,7786.09 4815.28,7750.85 4855.76,7710.22 4889.99,7750.40">
-        <lane id="-30586#0_0" index="0" speed="13.89" length="199.54" shape="4880.81,7778.36 4851.23,7787.91 4813.00,7750.87 4855.85,7707.86 4891.21,7749.36"/>
     </edge>
     <edge id="-30598#0" from="-2146" to="-22098" priority="4" type="highway.residential" spreadType="center" shape="6269.61,6179.73 6259.48,6141.99 6253.52,6131.15">
         <lane id="-30598#0_0" index="0" speed="13.89" length="41.94" shape="6267.78,6172.90 6259.48,6141.99 6254.69,6133.28"/>
@@ -10381,7 +10374,6 @@
         <request index="6" response="00000000" foes="00011100" cont="0"/>
         <request index="7" response="00000000" foes="00011100" cont="0"/>
     </junction>
-    <junction id="-13132" type="dead_end" x="4889.99" y="7750.40" incLanes="-30586#0_0" intLanes="" shape="4889.99,7750.40 4892.43,7748.32 4889.99,7750.40"/>
     <junction id="-1332" type="traffic_light" x="6889.99" y="5922.77" incLanes="--31634_0 --31634_1 -31336#6_0 -31336#6_1" intLanes=":-1332_0_0" shape="6886.10,5914.41 6881.50,5926.36 6883.87,5931.32 6889.96,5933.29">
         <request index="0" response="0" foes="0" cont="0"/>
     </junction>
@@ -11546,7 +11538,6 @@
         <request index="6" response="00000000" foes="00000010" cont="0"/>
         <request index="7" response="00011100" foes="00011110" cont="1"/>
     </junction>
-    <junction id="-25242" type="dead_end" x="4880.32" y="7776.84" incLanes="--30586#0_0" intLanes="" shape="4880.32,7776.84 4879.34,7773.79 4880.32,7776.84"/>
     <junction id="-25380" type="priority" x="5623.72" y="6540.76" incLanes="--32750#1_0 --32750#1_1 --32750#1_2 --31744#4_0 -32750#0_0 -32750#0_1 -32750#0_2 -31744#3_0" intLanes=":-25380_0_0 :-25380_1_0 :-25380_1_1 :-25380_1_2 :-25380_16_0 :-25380_5_0 :-25380_6_0 :-25380_7_0 :-25380_8_0 :-25380_9_0 :-25380_9_1 :-25380_9_2 :-25380_17_0 :-25380_13_0 :-25380_14_0 :-25380_15_0" shape="5627.35,6552.53 5634.43,6534.68 5632.38,6529.57 5626.57,6526.90 5620.48,6529.14 5613.39,6546.99 5615.59,6552.17 5621.52,6554.59">
         <request index="0"  response="0000000000000000" foes="0001000001000000" cont="0"/>
         <request index="1"  response="0000000000000000" foes="1111000011000000" cont="0"/>
