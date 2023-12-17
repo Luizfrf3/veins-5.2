@@ -5,7 +5,7 @@ from sklearn.model_selection import train_test_split
 np.random.seed(42)
 
 num_classes = 43
-num_clients = 10
+num_clients = 100
 alpha = 0.5
 
 def read_data(path):

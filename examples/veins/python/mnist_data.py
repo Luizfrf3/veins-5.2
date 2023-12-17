@@ -4,7 +4,7 @@ from tensorflow.keras import datasets
 np.random.seed(42)
 
 num_classes = 10
-vehicles = 12
+vehicles = 100
 clusters = [None, cv2.ROTATE_180, cv2.ROTATE_90_CLOCKWISE, cv2.ROTATE_90_COUNTERCLOCKWISE]
 max_clusters = 4
 vehicles_group_size = int(vehicles / max_clusters)
