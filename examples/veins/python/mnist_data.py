@@ -13,8 +13,6 @@ vehicles_group_size = int(vehicles / max_clusters)
 
 x_train = x_train.astype("float32") / 255
 x_test = x_test.astype("float32") / 255
-x_train = np.expand_dims(x_train, -1)
-x_test = np.expand_dims(x_test, -1)
 
 total = 0
 for c in range(max_clusters):
@@ -35,9 +33,9 @@ for c in range(max_clusters):
     ytsvs = [y_test_c[i::vehicles_group_size] for i in range(vehicles_group_size)]
 
     for v in range(vehicles_group_size):
-        images_train = np.array(xtrvs[v], dtype=np.float32)
+        images_train = np.expand_dims(np.array(xtrvs[v], dtype=np.float32), -1)
         labels_train = np.array(ytrvs[v], dtype=np.float32)
-        images_test = np.array(xtsvs[v], dtype=np.float32)
+        images_test = np.expand_dims(np.array(xtsvs[v], dtype=np.float32), -1)
         labels_test = np.array(ytsvs[v], dtype=np.float32)
         name = 'MNIST/data/v' + str(total) + '_' + str(c) + '_' + str(v) + '_data.npz'
         np.savez(
