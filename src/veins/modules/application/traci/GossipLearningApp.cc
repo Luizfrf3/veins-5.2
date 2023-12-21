@@ -76,9 +76,9 @@ void GossipLearningApp::handleSelfMsg(cMessage* msg)
     case LOCAL_TRAINING: {
         EV << "Node " << vehicleId << " local training" << std::endl;
 
-        trainingRound += 1;
         py::module_ learning = py::module_::import("learning");
         learning.attr("train")(vehicleId, trainingRound, simTime().dbl());
+        trainingRound += 1;
 
         findHost()->getDisplayString().setTagArg("i", 1, "green");
         currentState = WAITING;
