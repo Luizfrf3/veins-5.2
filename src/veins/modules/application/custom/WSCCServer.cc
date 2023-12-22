@@ -68,13 +68,13 @@ void WSCCServer::initialize()
 void WSCCServer::handleMessage(cMessage *msg)
 {
     if (strcmp("Waiting models", msg->getName()) == 0) {
-        EV << SERVER << " starting model aggregation" << std::endl;
+        std::cout << SERVER << " starting model aggregation" << std::endl;
 
         currentState = AGGREGATING;
         cMessage *selfMsg = new cMessage("Aggregating models", AGGREGATION_MESSAGE);
         scheduleAt(simTime() + AGGREGATION_TIME, selfMsg);
     } else if (strcmp("Aggregating models", msg->getName()) == 0) {
-        EV << SERVER << " ending aggregation round " << aggregationRound << ", received models " << numberOfReceivedModels << std::endl;
+        std::cout << SERVER << " ending aggregation round " << aggregationRound << ", received models " << numberOfReceivedModels << std::endl;
 
         py::module_ learning = py::module_::import("learning");
         py::int_ number_of_clusters_py = learning.attr("aggregation")(aggregationRound, SERVER, simTime().dbl());
@@ -90,7 +90,7 @@ void WSCCServer::handleMessage(cMessage *msg)
         std::string participatingNodes = participating_nodes_py;
 
         if (numberOfClusters == 0) {
-            EV << "Number of clusters is 0, sending global model" << std::endl;
+            std::cout << "Number of clusters is 0, sending global model" << std::endl;
 
             py::str weights_py = learning.attr("get_weights")(SERVER, simTime().dbl());
             std::string weights = weights_py;
@@ -103,13 +103,13 @@ void WSCCServer::handleMessage(cMessage *msg)
                 send(appMsg, "gate$o", i);
             }
         } else {
-            EV << "Sending models to " << numberOfClusters << " clusters, participating nodes " << participatingNodes << std::endl;
+            std::cout << "Sending models to " << numberOfClusters << " clusters, participating nodes " << participatingNodes << std::endl;
             for (int i = 0; i < numberOfClusters; i++) {
                 py::str weights_py = learning.attr("get_cluster_weights")(SERVER, i, simTime().dbl());
                 std::string weights = weights_py;
                 py::str cluster_nodes_py = learning.attr("get_cluster_nodes")(SERVER, i, simTime().dbl());
                 std::string clusterNodes = cluster_nodes_py;
-                EV << "Sending model to cluster " << i << ", cluster nodes " << clusterNodes << std::endl;
+                std::cout << "Sending model to cluster " << i << ", cluster nodes " << clusterNodes << std::endl;
                 for (int i = 0; i < numberOfRSUs; i++) {
                     veins::AppMessage* appMsg = new veins::AppMessage();
                     appMsg->setWeights(weights.c_str());
@@ -122,19 +122,19 @@ void WSCCServer::handleMessage(cMessage *msg)
         }
     } else {
         veins::AppMessage* appMsg = check_and_cast<veins::AppMessage*>(msg);
-        EV << "Central Server received message from " << appMsg->getSenderId() << std::endl;
+        std::cout << "Central Server received message from " << appMsg->getSenderId() << std::endl;
 
         if (currentState == WAITING) {
-            EV << SERVER << " store model" << std::endl;
+            std::cout << SERVER << " store model" << std::endl;
 
             numberOfReceivedModels += 1;
             py::module_ learning = py::module_::import("learning");
             learning.attr("store_weights")(appMsg->getWeights(), appMsg->getDatasetSize(), SERVER, appMsg->getSenderId(), simTime().dbl());
         } else {
-            EV_WARN << "handleMessage - Received model ignored because the server is already aggregating" << std::endl;
+            std::cerr << "handleMessage - Received model ignored because the server is already aggregating" << std::endl;
         }
     }
-	
+
     cancelAndDelete(msg);
 }
 

@@ -52,9 +52,9 @@ void GossipLearningApp::onWSM(BaseFrame1609_4* frame)
 {
     AppMessage* wsm = check_and_cast<AppMessage*>(frame);
 
-    EV << vehicleId << " received message from " << wsm->getSenderId() << std::endl;
+    std::cout << vehicleId << " received message from " << wsm->getSenderId() << std::endl;
     if (currentState == WAITING) {
-        EV << vehicleId << " merge models" << std::endl;
+        std::cout << vehicleId << " merge models" << std::endl;
 
         py::module_ learning = py::module_::import("learning");
         learning.attr("merge")(wsm->getWeights(), wsm->getDatasetSize(), vehicleId, wsm->getSenderId(), simTime().dbl());
@@ -64,17 +64,17 @@ void GossipLearningApp::onWSM(BaseFrame1609_4* frame)
         cMessage* trainingMessage = new cMessage("Training local model", LOCAL_TRAINING);
         scheduleAt(simTime() + TRAINING_TIME + uniform(0.0, 5.0), trainingMessage);
     } else {
-        EV_WARN << "onWSM - Received model ignored because the node is already training" << std::endl;
+        std::cerr << "onWSM - Received model ignored because the node is already training" << std::endl;
     }
 }
 
 void GossipLearningApp::handleSelfMsg(cMessage* msg)
 {
-    EV << "Node " << vehicleId << ", action " << msg->getKind() << std::endl;
+    std::cout << "Node " << vehicleId << ", action " << msg->getKind() << std::endl;
 
     switch (msg->getKind()) {
     case LOCAL_TRAINING: {
-        EV << "Node " << vehicleId << " local training" << std::endl;
+        std::cout << "Node " << vehicleId << " local training" << std::endl;
 
         py::module_ learning = py::module_::import("learning");
         learning.attr("train")(vehicleId, trainingRound, simTime().dbl());
@@ -85,7 +85,7 @@ void GossipLearningApp::handleSelfMsg(cMessage* msg)
         break;
     }
     case GOSSIP_MODEL: {
-        EV << "Node " << vehicleId << " gossip model" << std::endl;
+        std::cout << "Node " << vehicleId << " gossip model" << std::endl;
 
         py::module_ learning = py::module_::import("learning");
         py::str weights_py = learning.attr("get_weights")(vehicleId, simTime().dbl());
@@ -106,7 +106,7 @@ void GossipLearningApp::handleSelfMsg(cMessage* msg)
         break;
     }
     default: {
-        EV_WARN << "handleSelfMsg - The message type was not detected" << std::endl;
+        std::cerr << "handleSelfMsg - The message type was not detected" << std::endl;
         break;
     }
     }

@@ -68,13 +68,13 @@ void CentralServer::initialize()
 void CentralServer::handleMessage(cMessage *msg)
 {
     if (strcmp("Waiting models", msg->getName()) == 0) {
-        EV << SERVER << " starting model aggregation" << std::endl;
+        std::cout << SERVER << " starting model aggregation" << std::endl;
 
         currentState = AGGREGATING;
         cMessage *selfMsg = new cMessage("Aggregating models", AGGREGATION_MESSAGE);
         scheduleAt(simTime() + AGGREGATION_TIME, selfMsg);
     } else if (strcmp("Aggregating models", msg->getName()) == 0) {
-        EV << SERVER << " ending aggregation round " << aggregationRound << ", received models " << numberOfReceivedModels << std::endl;
+        std::cout << SERVER << " ending aggregation round " << aggregationRound << ", received models " << numberOfReceivedModels << std::endl;
 
         py::module_ learning = py::module_::import("learning");
         learning.attr("aggregation")(aggregationRound, SERVER, simTime().dbl());
@@ -95,16 +95,16 @@ void CentralServer::handleMessage(cMessage *msg)
         }
     } else {
         veins::AppMessage* appMsg = check_and_cast<veins::AppMessage*>(msg);
-        EV << "Central Server received message from " << appMsg->getSenderId() << std::endl;
+        std::cout << "Central Server received message from " << appMsg->getSenderId() << std::endl;
 
         if (currentState == WAITING) {
-            EV << SERVER << " store model" << std::endl;
+            std::cout << SERVER << " store model" << std::endl;
 
             numberOfReceivedModels += 1;
             py::module_ learning = py::module_::import("learning");
             learning.attr("store_weights")(appMsg->getWeights(), appMsg->getDatasetSize(), SERVER, appMsg->getSenderId(), simTime().dbl());
         } else {
-            EV_WARN << "handleMessage - Received model ignored because the server is already aggregating" << std::endl;
+            std::cerr << "handleMessage - Received model ignored because the server is already aggregating" << std::endl;
         }
     }
 

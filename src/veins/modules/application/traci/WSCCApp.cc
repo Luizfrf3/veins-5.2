@@ -49,15 +49,15 @@ void WSCCApp::onWSM(BaseFrame1609_4* frame)
 {
     AppMessage* wsm = check_and_cast<AppMessage*>(frame);
 
-    EV << vehicleId << " received message from " << wsm->getSenderId() << std::endl;
+    std::cout << vehicleId << " received message from " << wsm->getSenderId() << std::endl;
     if (currentState == WAITING && wsm->isRSU()) {
         std::set<std::string> participatingNodes = splitString(wsm->getParticipatingNodes(), ',');
         std::set<std::string> clusterNodes = splitString(wsm->getClusterNodes(), ',');
         if (clusterNodes.count(vehicleId) > 0 || participatingNodes.count(vehicleId) == 0) {
             if (participatingNodes.count(vehicleId) == 0) {
-                EV << vehicleId << " did not participate in the server aggregation" << std::endl;
+                std::cout << vehicleId << " did not participate in the server aggregation" << std::endl;
             }
-            EV << vehicleId << " started training" << std::endl;
+            std::cout << vehicleId << " started training" << std::endl;
 
             py::module_ learning = py::module_::import("learning");
             learning.attr("receive_global_model")(wsm->getWeights(), vehicleId, wsm->getSenderId(), simTime().dbl());
@@ -67,20 +67,20 @@ void WSCCApp::onWSM(BaseFrame1609_4* frame)
             cMessage* trainingMessage = new cMessage("Training local model");
             scheduleAt(simTime() + TRAINING_TIME + uniform(0.0, 5.0), trainingMessage);
         } else {
-            EV_WARN << "onWSM - Received model ignored because the vehicle belongs to another cluster" << std::endl;
+            std::cerr << "onWSM - Received model ignored because the vehicle belongs to another cluster" << std::endl;
         }
     } else {
         if (currentState == WAITING) {
-            EV_WARN << "onWSM - Received model ignored because the node is already training" << std::endl;
+            std::cerr << "onWSM - Received model ignored because the node is already training" << std::endl;
         } else {
-            EV_WARN << "onWSM - Received model ignored because the message is from another vehicle" << std::endl;
+            std::cerr << "onWSM - Received model ignored because the message is from another vehicle" << std::endl;
         }
     }
 }
 
 void WSCCApp::handleSelfMsg(cMessage* msg)
 {
-    EV << "Node " << vehicleId << " ending training, round " << trainingRound << std::endl;
+    std::cout << "Node " << vehicleId << " ending training, round " << trainingRound << std::endl;
 
     py::module_ learning = py::module_::import("learning");
     learning.attr("train")(vehicleId, trainingRound, simTime().dbl());
@@ -89,7 +89,7 @@ void WSCCApp::handleSelfMsg(cMessage* msg)
     findHost()->getDisplayString().setTagArg("i", 1, "green");
     currentState = WAITING;
 
-    EV << "Node " << vehicleId << " sending model to server" << std::endl;
+    std::cout << "Node " << vehicleId << " sending model to server" << std::endl;
 
     py::str weights_py = learning.attr("get_weights")(vehicleId, simTime().dbl());
     std::string weights = weights_py;

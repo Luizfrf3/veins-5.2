@@ -54,7 +54,7 @@ void OurMethodRSUApp::initialize(int stage)
         uniform_dist.param(std::uniform_int_distribution<>::param_type(0, numberOfRSUs - 1));
         weighted_dist.param(std::discrete_distribution<>::param_type(std::begin(rsuWeights), std::end(rsuWeights)));
 
-        EV << "ID: " << rsuId << ", X: " << posX << ", Y: " << posY << std::endl;
+        std::cout << "ID: " << rsuId << ", X: " << posX << ", Y: " << posY << std::endl;
     }
 }
 
@@ -62,7 +62,7 @@ void OurMethodRSUApp::onWSM(BaseFrame1609_4* frame)
 {
     AppMessage* wsm = check_and_cast<AppMessage*>(frame);
 
-    EV << "RSU " << rsuId << " received message from " << wsm->getSenderId() << std::endl;
+    std::cout << "RSU " << rsuId << " received message from " << wsm->getSenderId() << std::endl;
     if (wsm->isRSU() == false) {
         int dest;
         do {
@@ -73,6 +73,7 @@ void OurMethodRSUApp::onWSM(BaseFrame1609_4* frame)
             }
         } while (dest == stoi(rsuId));
 
+        std::cout << "RSU " << rsuId << " sending message to RSU " << dest << std::endl;
         AppMessage* msg = new AppMessage();
         msg->setWeights(wsm->getWeights());
         msg->setDatasetSize(wsm->getDatasetSize());
@@ -81,7 +82,7 @@ void OurMethodRSUApp::onWSM(BaseFrame1609_4* frame)
         msg->setDest(dest);
         send(msg, "out");
     } else {
-        EV_WARN << "onWSM - Received model ignored because it is from another RSU" << std::endl;
+        std::cerr << "onWSM - Received model ignored because it is from another RSU" << std::endl;
     }
 }
 

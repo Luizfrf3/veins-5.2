@@ -21,7 +21,7 @@ void CentralServerRSUApp::onWSM(BaseFrame1609_4* frame)
 {
     AppMessage* wsm = check_and_cast<AppMessage*>(frame);
 
-    EV << "RSU " << rsuId << " received message from " << wsm->getSenderId() << std::endl;
+    std::cout << "RSU " << rsuId << " received message from " << wsm->getSenderId() << std::endl;
     if (wsm->isRSU() == false) {
         AppMessage* msg = new AppMessage();
         msg->setWeights(wsm->getWeights());
@@ -30,7 +30,7 @@ void CentralServerRSUApp::onWSM(BaseFrame1609_4* frame)
         msg->setSenderId(wsm->getSenderId());
         send(msg, "out");
     } else {
-        EV_WARN << "onWSM - Received model ignored because it is from another RSU" << std::endl;
+        std::cerr << "onWSM - Received model ignored because it is from another RSU" << std::endl;
     }
 }
 

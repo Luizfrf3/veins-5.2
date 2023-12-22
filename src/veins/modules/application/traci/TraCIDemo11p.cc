@@ -42,7 +42,7 @@ void TraCIDemo11p::initialize(int stage)
         lastDroveAt = simTime();
         currentSubscribedServiceId = -1;
     }
-    //EV << mobility->getExternalId() << std::endl;
+    //std::cout << mobility->getExternalId() << std::endl;
 
     /*Py_Initialize();
     wchar_t** _argv = (wchar_t**) PyMem_Malloc(0);
@@ -52,14 +52,14 @@ void TraCIDemo11p::initialize(int stage)
     PyObject* args = PyTuple_Pack(1, PyLong_FromLong(2));
     PyObject* myResult = PyObject_CallObject(myFunction, args);
     long result = PyLong_AsLong(myResult);
-    EV << "My Result: " << result << std::endl;
+    std::cout << "My Result: " << result << std::endl;
     Py_Finalize();*/
 
     /*py::scoped_interpreter guard{};
     py::module_ myTest = py::module_::import("my-test");
     py::object result_py = myTest.attr("func")(2);
     int result = result_py.cast<int>();
-    EV << result << std::endl;*/
+    std::cout << result << std::endl;*/
 
     /*py::scoped_interpreter guard{};
     py::module_ myTest = py::module_::import("my-test");

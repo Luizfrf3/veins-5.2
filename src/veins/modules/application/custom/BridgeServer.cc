@@ -17,7 +17,7 @@ Define_Module(BridgeServer);
 void BridgeServer::handleMessage(cMessage *msg)
 {
     veins::AppMessage* appMsg = check_and_cast<veins::AppMessage*>(msg);
-    EV << "Message to " << appMsg->getDest() << " arrived in Bridge Server." << std::endl;
+    std::cout << "Message to " << appMsg->getDest() << " arrived in Bridge Server." << std::endl;
     send(msg, "gate$o", appMsg->getDest());
 }
 

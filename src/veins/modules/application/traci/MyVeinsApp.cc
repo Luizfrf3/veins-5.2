@@ -89,7 +89,7 @@ void MyVeinsApp::onWSM(BaseFrame1609_4* frame)
 {
     MyVeinsAppMessage* wsm = check_and_cast<MyVeinsAppMessage*>(frame);
 
-    EV << vehicleId << ", from " << wsm->getSenderId() << std::endl;
+    std::cout << vehicleId << ", from " << wsm->getSenderId() << std::endl;
     if (currentState == WAITING) {
         if (shouldAcceptMessageFromSender(wsm->getSenderId())) {
             py::module_ simplenet = py::module_::import("simplenet");
@@ -100,16 +100,16 @@ void MyVeinsApp::onWSM(BaseFrame1609_4* frame)
             cMessage* trainingMessage = new cMessage("Training local model", LOCAL_TRAINING);
             scheduleAt(simTime() + TRAINING_TIME + uniform(0.0, 5.0), trainingMessage);
         } else {
-            EV_WARN << "onWSM - Received model ignored because the node have received a message from " << wsm->getSenderId() << " recently" << std::endl;
+            std::cerr << "onWSM - Received model ignored because the node have received a message from " << wsm->getSenderId() << " recently" << std::endl;
         }
     } else {
-        EV_WARN << "onWSM - Received model ignored because the node is already training" << std::endl;
+        std::cerr << "onWSM - Received model ignored because the node is already training" << std::endl;
     }
 }
 
 void MyVeinsApp::handleSelfMsg(cMessage* msg)
 {
-    EV << "Node " << vehicleId << ", action " << msg->getKind() << std::endl;
+    std::cout << "Node " << vehicleId << ", action " << msg->getKind() << std::endl;
 
     switch (msg->getKind()) {
     case LOCAL_TRAINING: {
@@ -138,7 +138,7 @@ void MyVeinsApp::handleSelfMsg(cMessage* msg)
         break;
     }
     default: {
-        EV_WARN << "handleSelfMsg - The message type was not detected" << std::endl;
+        std::cerr << "handleSelfMsg - The message type was not detected" << std::endl;
         break;
     }
     }

@@ -1,6 +1,6 @@
 import logging
 import numpy as np
-from tensorflow import keras
+from tensorflow.python import keras
 from sklearn.cluster import AffinityPropagation
 from python.src import models, constants, logs, metrics
 
@@ -52,6 +52,7 @@ def train(node_id, training_round, sim_time, vehicle_data, node_models):
     X_train, y_train = vehicle_data[node_id]['train']
     X_valid, y_valid = vehicle_data[node_id]['valid']
 
+    accepted_model = False
     model = node_models[node_id]
     mweights = model.get_weights()
 
@@ -59,8 +60,13 @@ def train(node_id, training_round, sim_time, vehicle_data, node_models):
         received_weights[node_id] = {}
         dataset_sizes[node_id] = {}
 
+    participating_nodes = []
+    cluster_nodes = []
+
     if len(received_weights[node_id]) > 0:
+        participating_nodes = [node for node in received_weights[node_id].keys()]
         clustered_weights = _local_clustering(node_id, model, metrics.flatten(mweights), X_valid, y_valid)
+        cluster_nodes = [cw['id'] for cw in clustered_weights]
 
         for i in range(len(mweights)):
             sizes = len(X_train)
@@ -69,12 +75,19 @@ def train(node_id, training_round, sim_time, vehicle_data, node_models):
                 mweights[i] = mweights[i] + (cw['w'][i] * dataset_sizes[node_id][cw['id']])
                 sizes += dataset_sizes[node_id][cw['id']]
             mweights[i] = mweights[i] / sizes
-        model.set_weights(mweights)
+
+        rmodel = models.get_model()
+        rmodel.set_weights(mweights)
+        _, maccuracy = model.evaluate(X_valid, y_valid, verbose=0)
+        _, raccuracy = rmodel.evaluate(X_valid, y_valid, verbose=0)
+        if raccuracy >= maccuracy or abs(maccuracy - raccuracy) <= constants.THRESHOLD:
+            model.set_weights(mweights)
+            accepted_model = True
 
     history = model.fit(X_train, y_train, epochs=constants.EPOCHS, validation_data=(X_valid, y_valid), verbose=0)
 
     logging.warning('Node {}, Training Round {}, History {}'.format(node_id, training_round, history.history))
-    logs_data = {'event': 'train', 'node_id': node_id, 'sim_time': sim_time, 'training_round': training_round, 'number_of_received_models': len(received_weights[node_id]), 'history': history.history}
+    logs_data = {'event': 'train', 'node_id': node_id, 'sim_time': sim_time, 'accepted_model': accepted_model, 'training_round': training_round, 'number_of_received_models': len(received_weights[node_id]), 'history': history.history, 'participating_nodes': participating_nodes, 'cluster_nodes': cluster_nodes}
     logs.register_log(logs_data)
 
     models.save_weights(node_id, model.get_weights())

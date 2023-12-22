@@ -31,7 +31,7 @@ Define_Module(veins::TraCIDemoRSU11p);
 void TraCIDemoRSU11p::initialize(int stage)
 {
     DemoBaseApplLayerRSU::initialize(stage);
-    EV << getId() << std::endl;
+    std::cout << getId() << std::endl;
     if (stage == 1 && getId() == 18) {
         cMessage* trainingMessage = new cMessage("Self message");
         scheduleAt(simTime() + 5, trainingMessage);
@@ -56,7 +56,7 @@ void TraCIDemoRSU11p::onWSM(BaseFrame1609_4* frame)
 
 void TraCIDemoRSU11p::handleSelfMsg(cMessage* msg)
 {
-    EV << "Test " << getId() << std::endl;
+    std::cout << "Test " << getId() << std::endl;
     cMessage *msg2 = new cMessage("1");
     send(msg2, "out");
     cancelAndDelete(msg);
@@ -64,6 +64,6 @@ void TraCIDemoRSU11p::handleSelfMsg(cMessage* msg)
 
 void TraCIDemoRSU11p::handleGateMsg(cMessage* msg)
 {
-    EV << "Message " << msg->getName() << " " << getId() << std::endl;
+    std::cout << "Message " << msg->getName() << " " << getId() << std::endl;
     cancelAndDelete(msg);
 }

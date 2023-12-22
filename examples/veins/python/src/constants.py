@@ -16,7 +16,7 @@ OUR_METHOD = 'Our Method'
 FED_AVG = 'FedAvg'
 FED_PROX = 'FedProx'
 WSCC = 'WSCC'
-EXPERIMENT = OUR_METHOD
+EXPERIMENT = GOSSIP_LEARNING
 
 DATA_PATH = 'python/' + DATASET + '/data/'
 WEIGHTS_FOLDER = 'weights/'
