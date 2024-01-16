@@ -12,6 +12,8 @@ participating_nodes = {}
 clusters_nodes = {}
 clusters_weights = {}
 
+rmodel = models.get_model()
+
 def _cluster_aggregation(node_id, model):
     nodes_data = list(received_weights[node_id].items())
     benchmark = random.randrange(len(nodes_data))
@@ -114,7 +116,6 @@ def receive_global_model(raw_weights, node_id, sender_id, sim_time, node_models,
     accepted_model = False
     model = node_models[node_id]
     rweights = models.decode_weights(raw_weights)
-    rmodel = models.get_model()
     rmodel.set_weights(rweights)
     _, maccuracy = model.evaluate(X_valid, y_valid, verbose=0)
     _, raccuracy = rmodel.evaluate(X_valid, y_valid, verbose=0)

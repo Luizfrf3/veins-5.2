@@ -7,6 +7,8 @@ from python.src import models, constants, logs, metrics
 received_weights = {}
 dataset_sizes = {}
 
+rmodel = models.get_model()
+
 def _local_clustering(node_id, model, mw, X_valid, y_valid):
     loss, accuracy = model.evaluate(X_valid, y_valid, verbose=0)
     #mfeatures = [1.0, 1.0, 1.0, loss, accuracy]
@@ -18,7 +20,6 @@ def _local_clustering(node_id, model, mw, X_valid, y_valid):
     rweights = []
     senders = []
     for sender, rweight in received_weights[node_id].items():
-        rmodel = models.get_model()
         rmodel.set_weights(rweight)
 
         loss, accuracy = rmodel.evaluate(X_valid, y_valid, verbose=0)
@@ -76,7 +77,6 @@ def train(node_id, training_round, sim_time, vehicle_data, node_models):
                 sizes += dataset_sizes[node_id][cw['id']]
             mweights[i] = mweights[i] / sizes
 
-        rmodel = models.get_model()
         rmodel.set_weights(mweights)
         _, maccuracy = model.evaluate(X_valid, y_valid, verbose=0)
         _, raccuracy = rmodel.evaluate(X_valid, y_valid, verbose=0)
