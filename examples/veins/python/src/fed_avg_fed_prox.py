@@ -5,7 +5,7 @@ from python.src import constants, models, logs
 received_weights = {}
 dataset_sizes = {}
 
-clean_time = [100]
+clean_time = [50]
 
 def store_weights(raw_weights, dataset_size, node_id, sender_id):
     weights = models.decode_weights(raw_weights)
@@ -66,4 +66,4 @@ def train(node_id, training_round, sim_time, vehicle_data, node_models):
     if sim_time >= clean_time[0]:
         logging.warning('Clearing Keras session')
         models.clear_session()
-        clean_time[0] = clean_time[0] + 100
+        clean_time[0] = clean_time[0] + 50
