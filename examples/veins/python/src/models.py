@@ -1,3 +1,4 @@
+import gc
 import pickle
 import tensorflow as tf
 from tensorflow.python import keras
@@ -101,6 +102,10 @@ def decode_weights(raw_weights):
         byte_list.append(int(byte_str))
     weights_bytes = bytes(byte_list)
     return pickle.loads(weights_bytes)
+
+def clear_session():
+    keras.backend.clear_session()
+    gc.collect()
 
 @tf.keras.utils.register_keras_serializable()
 class FedProxOptimizer(optimizer_v2.optimizer_v2.OptimizerV2):

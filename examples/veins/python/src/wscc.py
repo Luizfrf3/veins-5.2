@@ -14,6 +14,8 @@ clusters_weights = {}
 
 rmodel = models.get_model()
 
+clean_time = [100]
+
 def _cluster_aggregation(node_id, model):
     nodes_data = list(received_weights[node_id].items())
     benchmark = random.randrange(len(nodes_data))
@@ -139,3 +141,8 @@ def train(node_id, training_round, sim_time, vehicle_data, node_models):
 
     models.save_weights(node_id, model.get_weights())
     node_models[node_id] = model
+
+    if sim_time >= clean_time[0]:
+        logging.warning('Clearing Keras session')
+        models.clear_session()
+        clean_time[0] = clean_time[0] + 100

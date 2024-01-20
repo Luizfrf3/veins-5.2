@@ -1,6 +1,8 @@
 import logging
 from python.src import constants, models, logs
 
+clean_time = [20]
+
 def train(node_id, training_round, sim_time, vehicle_data, node_models):
     X_train, y_train = vehicle_data[node_id]['train']
     X_valid, y_valid = vehicle_data[node_id]['valid']
@@ -14,6 +16,11 @@ def train(node_id, training_round, sim_time, vehicle_data, node_models):
 
     models.save_weights(node_id, model.get_weights())
     node_models[node_id] = model
+
+    if sim_time >= clean_time[0]:
+        logging.warning('Clearing Keras session')
+        models.clear_session()
+        clean_time[0] = clean_time[0] + 20
 
 def merge(raw_weights, dataset_size, node_id, vehicle_data, node_models):
     size = len(vehicle_data[node_id]['train'][0])

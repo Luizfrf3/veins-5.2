@@ -7,6 +7,8 @@ from python.src import models, constants, logs, metrics
 received_weights = {}
 dataset_sizes = {}
 
+clean_time = [100]
+
 rmodel = models.get_model()
 
 def _local_clustering(node_id, model, mw, X_valid, y_valid):
@@ -95,3 +97,8 @@ def train(node_id, training_round, sim_time, vehicle_data, node_models):
 
     received_weights[node_id] = {}
     dataset_sizes[node_id] = {}
+
+    if sim_time >= clean_time[0]:
+        logging.warning('Clearing Keras session')
+        models.clear_session()
+        clean_time[0] = clean_time[0] + 100
