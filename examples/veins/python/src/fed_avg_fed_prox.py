@@ -18,7 +18,11 @@ def store_weights(raw_weights, dataset_size, node_id, sender_id):
 def aggregation(aggregation_round, node_id, sim_time, node_models):
     model = node_models[node_id]
 
-    if node_id in received_weights.keys() and len(received_weights[node_id]) > 0:
+    if node_id not in received_weights.keys():
+        received_weights[node_id] = {}
+        dataset_sizes[node_id] = {}
+
+    if len(received_weights[node_id]) > 0:
         weights = []
         model_weights = model.get_weights()
         for i in range(len(model_weights)):

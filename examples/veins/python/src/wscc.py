@@ -86,7 +86,11 @@ def aggregation(aggregation_round, node_id, sim_time, node_models):
     clusters_nodes[node_id] = {}
     clusters_weights[node_id] = {}
 
-    if node_id in received_weights.keys() and len(received_weights[node_id]) > 0:
+    if node_id not in received_weights.keys():
+        received_weights[node_id] = {}
+        dataset_sizes[node_id] = {}
+
+    if len(received_weights[node_id]) > 0:
         participating_nodes[node_id] = list(received_weights[node_id].keys())
         number_of_clusters = _cluster_aggregation(node_id, model)
         weights = _global_aggregation(node_id, model)
