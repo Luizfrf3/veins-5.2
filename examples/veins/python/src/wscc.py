@@ -52,7 +52,7 @@ def _cluster_aggregation(node_id, model):
             cweights[i] = cweights[i] / size
         clusters_weights[node_id][cluster] = cweights
 
-    return len(clustering.labels_)
+    return max(clustering.labels_) + 1
 
 def _global_aggregation(node_id, model):
     weights = []
