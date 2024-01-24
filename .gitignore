@@ -76,3 +76,4 @@ examples/veins/python/MNIST
 examples/veins/python/CIFAR10
 examples/veins/python/GTSRB
 examples/veins/python/FEMNIST
+examples/veins/python/experiments
