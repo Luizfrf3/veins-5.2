@@ -79,12 +79,13 @@ def train(node_id, training_round, sim_time, vehicle_data, node_models):
                 sizes += dataset_sizes[node_id][cw['id']]
             mweights[i] = mweights[i] / sizes
 
-        rmodel.set_weights(mweights)
-        _, maccuracy = model.evaluate(X_valid, y_valid, verbose=0)
-        _, raccuracy = rmodel.evaluate(X_valid, y_valid, verbose=0)
-        if raccuracy >= maccuracy or abs(maccuracy - raccuracy) <= constants.THRESHOLD:
-            model.set_weights(mweights)
-            accepted_model = True
+        #rmodel.set_weights(mweights)
+        #_, maccuracy = model.evaluate(X_valid, y_valid, verbose=0)
+        #_, raccuracy = rmodel.evaluate(X_valid, y_valid, verbose=0)
+        #if raccuracy >= maccuracy or abs(maccuracy - raccuracy) <= constants.THRESHOLD:
+        #    model.set_weights(mweights)
+        #    accepted_model = True
+        model.set_weights(mweights)
 
     history = model.fit(X_train, y_train, epochs=constants.EPOCHS, validation_data=(X_valid, y_valid), verbose=0)
 
