@@ -53,7 +53,7 @@ while min_size < num_classes:
         idx_k = np.where(dataset_labels == k)[0]
         np.random.shuffle(idx_k)
         proportions = np.random.dirichlet(np.repeat(alpha, num_clients))
-        proportions = np.array([p * (len(idx_j)< N / num_clients) for p, idx_j in zip(proportions, idx_batch)])
+        proportions = np.array([p * (len(idx_j) < N / num_clients) for p, idx_j in zip(proportions, idx_batch)])
         proportions = proportions / proportions.sum()
         proportions = (np.cumsum(proportions) * len(idx_k)).astype(int)[:-1]
         idx_batch = [idx_j + idx.tolist() for idx_j, idx in zip(idx_batch, np.split(idx_k, proportions))]

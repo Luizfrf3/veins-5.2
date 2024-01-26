@@ -2,8 +2,9 @@ import ast
 import matplotlib.pyplot as plt
 
 TIME_STEP = 5
-EXPERIMENT = 'GossipLearning'
-LOGS_PATH = 'python/experiments/' + EXPERIMENT + '/logs/logs.txt'
+EXPERIMENT = 'MNIST_rot4'
+METHOD = 'GossipLearning'
+LOGS_PATH = 'python/experiments/' + EXPERIMENT + '/' + METHOD + '/logs/logs.txt'
 
 train_logs = []
 with open(LOGS_PATH, 'r') as logs_file:
@@ -63,7 +64,7 @@ plt.plot(chart_times, chart_valid_accs, label='validation')
 plt.xlabel('Time')
 plt.ylabel('Accuracy')
 plt.legend()
-plt.savefig('results/' + EXPERIMENT + '_acc.png')
+plt.savefig('results/' + EXPERIMENT + '_' + METHOD + '_acc.png')
 plt.close()
 
 plt.figure()
@@ -72,5 +73,5 @@ plt.plot(chart_times, chart_valid_losses, label='validation')
 plt.xlabel('Time')
 plt.ylabel('Loss')
 plt.legend()
-plt.savefig('results/' + EXPERIMENT + '_loss.png')
+plt.savefig('results/' + EXPERIMENT + '_' + METHOD + '_loss.png')
 plt.close()
