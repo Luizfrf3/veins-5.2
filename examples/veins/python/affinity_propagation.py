@@ -146,7 +146,7 @@ print(cca3)
 print(cca4)
 
 X = np.array([[mse1, cossim1, cka1, cca1], [mse2, cossim2, cka2, cca2], [mse3, cossim3, cka3, cca3], [mse4, cossim4, cka4, cca4]])
-clustering = AffinityPropagation().fit(X)
+clustering = AffinityPropagation(damping=0.9, max_iter=1000).fit(X)
 print(clustering.labels_)
 print(clustering.predict([[mse0, cossim0, cka0, cca0]]))
 

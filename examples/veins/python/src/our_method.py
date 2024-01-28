@@ -37,7 +37,7 @@ def _local_clustering(node_id, model, mw, X_valid, y_valid):
         senders.append(sender)
 
     rfeatures = np.array(rfeatures)
-    clustering = AffinityPropagation().fit(rfeatures)
+    clustering = AffinityPropagation(damping=0.9, max_iter=1000).fit(rfeatures)
 
     vehicle_cluster = clustering.predict([mfeatures])[0]
     indexes = [i for i in range(len(clustering.labels_)) if clustering.labels_[i] == vehicle_cluster]

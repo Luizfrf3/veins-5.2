@@ -26,7 +26,7 @@ def _cluster_aggregation(node_id, model):
         cossim = metrics.cossim(bw, metrics.flatten(rweight))
         cossims.append([cossim])
 
-    clustering = AffinityPropagation().fit(cossims)
+    clustering = AffinityPropagation(damping=0.9, max_iter=1000).fit(cossims)
 
     clusters_data = {}
     for i in range(len(clustering.labels_)):
