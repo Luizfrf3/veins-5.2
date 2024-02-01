@@ -5,10 +5,10 @@ np.random.seed(42)
 
 num_classes = 10
 vehicles = 100
-#clusters = [None, cv2.ROTATE_180, cv2.ROTATE_90_CLOCKWISE, cv2.ROTATE_90_COUNTERCLOCKWISE]
-clusters = [None, cv2.ROTATE_180]
-#max_clusters = 4
-max_clusters = 2
+clusters = [None, cv2.ROTATE_180, cv2.ROTATE_90_CLOCKWISE, cv2.ROTATE_90_COUNTERCLOCKWISE]
+#clusters = [None, cv2.ROTATE_180]
+max_clusters = 4
+#max_clusters = 2
 vehicles_group_size = int(vehicles / max_clusters)
 
 (x_train, y_train), (x_test, y_test) = datasets.cifar10.load_data()
