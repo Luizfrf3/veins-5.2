@@ -3,13 +3,14 @@ from tensorflow import keras
 SEED = 12
 SPLIT = 0
 EPOCHS = 1
+BATCH_SIZE = 50
 keras.utils.set_random_seed(SEED)
 
 MNIST = 'MNIST'
 CIFAR10 = 'CIFAR10'
 FEMNIST = 'FEMNIST'
 GTSRB = 'GTSRB'
-DATASET = MNIST
+DATASET = CIFAR10
 
 GOSSIP_LEARNING = 'Gossip Learning'
 OUR_METHOD = 'Our Method'

@@ -8,7 +8,7 @@ def train(node_id, training_round, sim_time, vehicle_data, node_models):
     X_valid, y_valid = vehicle_data[node_id]['valid']
 
     model = node_models[node_id]
-    history = model.fit(X_train, y_train, epochs=constants.EPOCHS, validation_data=(X_valid, y_valid), verbose=0)
+    history = model.fit(X_train, y_train, epochs=constants.EPOCHS, batch_size=constants.BATCH_SIZE, validation_data=(X_valid, y_valid), verbose=0)
 
     logging.warning('Node {}, Training Round {}, History {}'.format(node_id, training_round, history.history))
     logs_data = {'event': 'train', 'node_id': node_id, 'sim_time': sim_time, 'training_round': training_round, 'history': history.history}
