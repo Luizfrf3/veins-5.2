@@ -110,13 +110,13 @@ void WSCCServer::handleMessage(cMessage *msg)
                 py::str cluster_nodes_py = learning.attr("get_cluster_nodes")(SERVER, i, simTime().dbl());
                 std::string clusterNodes = cluster_nodes_py;
                 std::cout << "Sending model to cluster " << i << ", cluster nodes " << clusterNodes << std::endl;
-                for (int i = 0; i < numberOfRSUs; i++) {
+                for (int j = 0; j < numberOfRSUs; j++) {
                     veins::AppMessage* appMsg = new veins::AppMessage();
                     appMsg->setWeights(weights.c_str());
                     appMsg->setSenderId(SERVER.c_str());
                     appMsg->setParticipatingNodes(participatingNodes.c_str());
                     appMsg->setClusterNodes(clusterNodes.c_str());
-                    send(appMsg, "gate$o", i);
+                    send(appMsg, "gate$o", j);
                 }
             }
         }

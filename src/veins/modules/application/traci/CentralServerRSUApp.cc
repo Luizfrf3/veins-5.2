@@ -38,6 +38,7 @@ void CentralServerRSUApp::handleGateMsg(cMessage* msg)
 {
     AppMessage* appMsg = check_and_cast<AppMessage*>(msg);
 
+    std::cout << "RSU " << rsuId << " received gate message from " << appMsg->getSenderId() << std::endl;
     AppMessage* wsm = new AppMessage();
     wsm->setWeights(appMsg->getWeights());
     wsm->setDatasetSize(appMsg->getDatasetSize());

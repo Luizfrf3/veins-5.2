@@ -50,7 +50,7 @@ void CentralServerApp::onWSM(BaseFrame1609_4* frame)
         cMessage* trainingMessage = new cMessage("Training local model");
         scheduleAt(simTime() + TRAINING_TIME + uniform(0.0, 5.0), trainingMessage);
     } else {
-        if (currentState == WAITING) {
+        if (currentState == TRAINING) {
             std::cerr << "onWSM - Received model ignored because the node is already training" << std::endl;
         } else {
             std::cerr << "onWSM - Received model ignored because the message is from another vehicle" << std::endl;

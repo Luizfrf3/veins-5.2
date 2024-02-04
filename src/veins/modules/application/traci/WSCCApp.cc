@@ -70,7 +70,7 @@ void WSCCApp::onWSM(BaseFrame1609_4* frame)
             std::cerr << "onWSM - Received model ignored because the vehicle belongs to another cluster" << std::endl;
         }
     } else {
-        if (currentState == WAITING) {
+        if (currentState == TRAINING) {
             std::cerr << "onWSM - Received model ignored because the node is already training" << std::endl;
         } else {
             std::cerr << "onWSM - Received model ignored because the message is from another vehicle" << std::endl;
