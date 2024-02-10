@@ -26,7 +26,7 @@ def _cluster_aggregation(node_id, model):
         cossim = metrics.cossim(bw, metrics.flatten(rweight))
         cossims.append([cossim])
 
-    clustering = AffinityPropagation(damping=0.9, max_iter=1000).fit(cossims)
+    clustering = AffinityPropagation(damping=0.7, max_iter=2000).fit(cossims)
 
     clusters_data = {}
     for i in range(len(clustering.labels_)):
@@ -121,13 +121,16 @@ def receive_global_model(raw_weights, node_id, sender_id, sim_time, node_models,
 
     accepted_model = False
     model = node_models[node_id]
-    rweights = models.decode_weights(raw_weights)
-    rmodel.set_weights(rweights)
-    _, maccuracy = model.evaluate(X_valid, y_valid, verbose=0)
-    _, raccuracy = rmodel.evaluate(X_valid, y_valid, verbose=0)
-    if raccuracy >= maccuracy or abs(maccuracy - raccuracy) <= constants.THRESHOLD:
-        model.set_weights(rweights)
-        accepted_model = True
+    #rweights = models.decode_weights(raw_weights)
+    #rmodel.set_weights(rweights)
+    #_, maccuracy = model.evaluate(X_valid, y_valid, verbose=0)
+    #_, raccuracy = rmodel.evaluate(X_valid, y_valid, verbose=0)
+    #if raccuracy >= maccuracy or abs(maccuracy - raccuracy) <= constants.THRESHOLD:
+    #    model.set_weights(rweights)
+    #    accepted_model = True
+    model.set_weights(rweights)
+    maccuracy = 0
+    raccuracy = 0
 
     logs_data = {'event': 'receive_global_model', 'node_id': node_id, 'sim_time': sim_time, 'sender_id': sender_id, 'accepted_model': accepted_model, 'maccuracy': maccuracy, 'raccuracy': raccuracy}
     logs.register_log(logs_data)
