@@ -121,7 +121,7 @@ def receive_global_model(raw_weights, node_id, sender_id, sim_time, node_models,
 
     accepted_model = False
     model = node_models[node_id]
-    #rweights = models.decode_weights(raw_weights)
+    rweights = models.decode_weights(raw_weights)
     #rmodel.set_weights(rweights)
     #_, maccuracy = model.evaluate(X_valid, y_valid, verbose=0)
     #_, raccuracy = rmodel.evaluate(X_valid, y_valid, verbose=0)
