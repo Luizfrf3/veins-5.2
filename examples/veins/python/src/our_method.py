@@ -13,8 +13,9 @@ rmodel = models.get_model()
 
 def _local_clustering(node_id, model, mw, X_valid, y_valid):
     loss, accuracy = model.evaluate(X_valid, y_valid, verbose=0)
+    mfeatures = [1.0]
+    #mfeatures = [1.0, 1.0]
     #mfeatures = [1.0, 1.0, 1.0, loss, accuracy]
-    mfeatures = [1.0, loss, accuracy]
     inter_model = keras.Model(inputs=model.input, outputs=model.get_layer("final_dense").output)
     activation = np.array(inter_model(X_valid))
 
@@ -24,15 +25,16 @@ def _local_clustering(node_id, model, mw, X_valid, y_valid):
     for sender, rweight in received_weights[node_id].items():
         rmodel.set_weights(rweight)
 
-        loss, accuracy = rmodel.evaluate(X_valid, y_valid, verbose=0)
+        #loss, accuracy = rmodel.evaluate(X_valid, y_valid, verbose=0)
         #cossim = metrics.cossim(mw, metrics.flatten(rweight))
         rinter_model = keras.Model(inputs=rmodel.input, outputs=rmodel.get_layer("final_dense").output)
         ractivation = np.array(rinter_model(X_valid))
         cka = metrics.cka(activation, ractivation)
         #cca = metrics.cca(activation, ractivation)
 
-        #rfeatures.append([cossim, cka, cca, loss, accuracy])
-        rfeatures.append([cka, loss, accuracy])
+        rfeatures.append([cka])
+        #rfeatures.append([cossim])
+        #rfeatures.append([cka, cossim])
         rweights.append(rweight)
         senders.append(sender)
 
