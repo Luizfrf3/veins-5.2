@@ -8,7 +8,7 @@ from tensorflow import keras
 from keras.preprocessing.image import ImageDataGenerator
 from python.src import constants, models, metrics
 
-'''
+
 data = np.load(constants.DATA_PATH + 'v0_0_0_data.npz')
 X, y = data['images_train'], data['labels_train']
 num_classes = data['num_classes']
@@ -26,8 +26,8 @@ model = models.get_model()
 model.summary()
 model.fit(datagen.flow(X_train, y_train, batch_size=50), steps_per_epoch = 3 * X_train.shape[0] / 50, epochs=50, validation_data=(X_valid, y_valid))
 #model.fit(X_train, y_train, epochs=50, validation_data=(X_valid, y_valid))
-'''
 
+'''
 weights = []
 for v in range(100):
     weights_path = 'python/experiments/CIFAR10_rot4/OurMethodRSURandomCossim3Epochs/weights/'
@@ -45,3 +45,4 @@ clustering = AffinityPropagation(damping=0.7, max_iter=2000).fit(cossims)
 print(benchmark)
 print(cossims)
 print(clustering.labels_)
+'''

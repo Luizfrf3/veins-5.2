@@ -1,6 +1,7 @@
 import logging
 import numpy as np
 from tensorflow.python import keras
+from keras.preprocessing.image import ImageDataGenerator
 from sklearn.cluster import AffinityPropagation
 from python.src import models, constants, logs, metrics
 
@@ -14,10 +15,9 @@ rmodel = models.get_model()
 def _local_clustering(node_id, model, mw, X_valid, y_valid):
     loss, accuracy = model.evaluate(X_valid, y_valid, verbose=0)
     mfeatures = [1.0]
-    #mfeatures = [1.0, 1.0]
     #mfeatures = [1.0, 1.0, 1.0, loss, accuracy]
-    inter_model = keras.Model(inputs=model.input, outputs=model.get_layer("final_dense").output)
-    activation = np.array(inter_model(X_valid))
+    #inter_model = keras.Model(inputs=model.input, outputs=model.get_layer("final_dense").output)
+    #activation = np.array(inter_model(X_valid))
 
     rfeatures = []
     rweights = []
@@ -26,15 +26,14 @@ def _local_clustering(node_id, model, mw, X_valid, y_valid):
         rmodel.set_weights(rweight)
 
         #loss, accuracy = rmodel.evaluate(X_valid, y_valid, verbose=0)
-        #cossim = metrics.cossim(mw, metrics.flatten(rweight))
-        rinter_model = keras.Model(inputs=rmodel.input, outputs=rmodel.get_layer("final_dense").output)
-        ractivation = np.array(rinter_model(X_valid))
-        cka = metrics.cka(activation, ractivation)
-        #cca = metrics.cca(activation, ractivation)
+        cossim = metrics.cossim(mw, metrics.flatten(rweight))
+        #rinter_model = keras.Model(inputs=rmodel.input, outputs=rmodel.get_layer("final_dense").output)
+        #ractivation = np.array(rinter_model(X_valid))
+        #cka = metrics.cka(activation, ractivation)
+        #cca = metrics.cca(activation, ractivation, activation.shape[1])
 
-        rfeatures.append([cka])
-        #rfeatures.append([cossim])
-        #rfeatures.append([cka, cossim])
+        #rfeatures.append([cka])
+        rfeatures.append([cossim])
         rweights.append(rweight)
         senders.append(sender)
 
@@ -89,7 +88,12 @@ def train(node_id, training_round, sim_time, vehicle_data, node_models):
         #    accepted_model = True
         model.set_weights(mweights)
 
-    history = model.fit(X_train, y_train, epochs=constants.EPOCHS, batch_size=constants.BATCH_SIZE, validation_data=(X_valid, y_valid), verbose=0)
+    if constants.DATA_AUGMENTATION:
+        datagen = ImageDataGenerator(zoom_range=0.2, horizontal_flip=True)
+        datagen.fit(X_train)
+        history = model.fit(datagen.flow(X_train, y_train, batch_size=constants.BATCH_SIZE), steps_per_epoch = constants.EPOCHS * X_train.shape[0] / 50, validation_data=(X_valid, y_valid), verbose=0)
+    else:
+        history = model.fit(X_train, y_train, epochs=constants.EPOCHS, batch_size=constants.BATCH_SIZE, validation_data=(X_valid, y_valid), verbose=0)
 
     logging.warning('Node {}, Training Round {}, History {}'.format(node_id, training_round, history.history))
     logs_data = {'event': 'train', 'node_id': node_id, 'sim_time': sim_time, 'accepted_model': accepted_model, 'training_round': training_round, 'number_of_received_models': len(received_weights[node_id]), 'history': history.history, 'participating_nodes': participating_nodes, 'cluster_nodes': cluster_nodes}

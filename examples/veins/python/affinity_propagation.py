@@ -3,6 +3,7 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers, datasets
 from sklearn.cluster import AffinityPropagation
+from sklearn.cross_decomposition import CCA
 tf.keras.utils.set_random_seed(42)
 
 num_classes = 10
@@ -145,8 +146,20 @@ print(cca2)
 print(cca3)
 print(cca4)
 
+ccas = CCA(n_components=10)
+ccas.fit(x0, x0)
+print(ccas.score(x0, x0))
+ccas.fit(x0, x1)
+print(ccas.score(x0, x1))
+ccas.fit(x0, x2)
+print(ccas.score(x0, x2))
+ccas.fit(x0, x3)
+print(ccas.score(x0, x3))
+ccas.fit(x0, x4)
+print(ccas.score(x0, x4))
+
 X = np.array([[mse1, cossim1, cka1, cca1], [mse2, cossim2, cka2, cca2], [mse3, cossim3, cka3, cca3], [mse4, cossim4, cka4, cca4]])
-clustering = AffinityPropagation(damping=0.9, max_iter=1000).fit(X)
+clustering = AffinityPropagation(damping=0.7, max_iter=1000).fit(X)
 print(clustering.labels_)
 print(clustering.predict([[mse0, cossim0, cka0, cca0]]))
 
@@ -156,4 +169,4 @@ for i in range(len(weights)):
     for w in weights_list:
         weights[i] = weights[i] + w[i]
     weights[i] = weights[i] / (len(weights_list) + 1)
-print(weights)
+print(len(weights))

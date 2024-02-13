@@ -2,7 +2,7 @@ import ast
 import matplotlib.pyplot as plt
 
 TIME_STEP = 5
-EXPERIMENT = 'CIFAR10_rot4'
+EXPERIMENT = 'CIFAR10_rot2'
 METHOD = 'GossipLearning'
 LOGS_PATH = 'python/experiments/' + EXPERIMENT + '/' + METHOD + '/logs/logs.txt'
 

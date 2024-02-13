@@ -2,8 +2,9 @@ from tensorflow import keras
 
 SEED = 12
 SPLIT = 0
-EPOCHS = 1
+EPOCHS = 3
 BATCH_SIZE = 50
+DATA_AUGMENTATION = True
 keras.utils.set_random_seed(SEED)
 
 MNIST = 'MNIST'
