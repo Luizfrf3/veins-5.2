@@ -19,9 +19,9 @@ def cnn():
             layers.MaxPooling2D(pool_size=(2, 2)),
             layers.Dropout(0.25),
             layers.Flatten(),
-            layers.Dense(128, activation="relu"),
+            layers.Dense(128, name="first_dense", activation="relu"),
             layers.Dropout(0.5),
-            layers.Dense(num_classes, name="my_dense", activation="softmax")
+            layers.Dense(num_classes, name="last_dense", activation="softmax")
         ]
     )
 
@@ -75,11 +75,11 @@ print(cossim4)
 (x_train, y_train), (x_test, y_test) = datasets.mnist.load_data()
 x_train = x_train.astype("float32")[:20] / 255
 
-inter_model0 = keras.Model(inputs=model0.input, outputs=model0.get_layer("my_dense").output)
-inter_model1 = keras.Model(inputs=model1.input, outputs=model1.get_layer("my_dense").output)
-inter_model2 = keras.Model(inputs=model2.input, outputs=model2.get_layer("my_dense").output)
-inter_model3 = keras.Model(inputs=model3.input, outputs=model3.get_layer("my_dense").output)
-inter_model4 = keras.Model(inputs=model4.input, outputs=model4.get_layer("my_dense").output)
+inter_model0 = keras.Model(inputs=model0.input, outputs=[model0.get_layer("first_dense").output, model0.get_layer("last_dense").output])
+inter_model1 = keras.Model(inputs=model1.input, outputs=[model1.get_layer("first_dense").output, model1.get_layer("last_dense").output])
+inter_model2 = keras.Model(inputs=model2.input, outputs=[model2.get_layer("first_dense").output, model2.get_layer("last_dense").output])
+inter_model3 = keras.Model(inputs=model3.input, outputs=[model3.get_layer("first_dense").output, model3.get_layer("last_dense").output])
+inter_model4 = keras.Model(inputs=model4.input, outputs=[model4.get_layer("first_dense").output, model4.get_layer("last_dense").output])
 
 def cka(features_x, features_y):
     features_x = features_x - np.mean(features_x, 0, keepdims=True)
@@ -112,11 +112,11 @@ def cca(features_x, features_y):
     qy, _ = np.linalg.qr(features_y)
     return np.linalg.norm(qx.T.dot(qy)) ** 2 / min(features_x.shape[1], features_y.shape[1])
 
-x0 = np.array(inter_model0(x_train))
-x1 = np.array(inter_model1(x_train))
-x2 = np.array(inter_model2(x_train))
-x3 = np.array(inter_model3(x_train))
-x4 = np.array(inter_model4(x_train))
+x0 = np.array(inter_model0(x_train)[1])
+x1 = np.array(inter_model1(x_train)[1])
+x2 = np.array(inter_model2(x_train)[1])
+x3 = np.array(inter_model3(x_train)[1])
+x4 = np.array(inter_model4(x_train)[1])
 
 cka0 = cka(x0, x0)
 cka1 = cka(x0, x1)
@@ -146,17 +146,25 @@ print(cca2)
 print(cca3)
 print(cca4)
 
-ccas = CCA(n_components=10)
-ccas.fit(x0, x0)
-print(ccas.score(x0, x0))
-ccas.fit(x0, x1)
-print(ccas.score(x0, x1))
-ccas.fit(x0, x2)
-print(ccas.score(x0, x2))
-ccas.fit(x0, x3)
-print(ccas.score(x0, x3))
-ccas.fit(x0, x4)
-print(ccas.score(x0, x4))
+ccas = CCA(n_components=10, max_iter=2000)
+print(ccas.fit(x0, x0).score(x0, x0))
+print(ccas.fit(x0, x1).score(x0, x1))
+print(ccas.fit(x0, x2).score(x0, x2))
+print(ccas.fit(x0, x3).score(x0, x3))
+print(ccas.fit(x0, x4).score(x0, x4))
+
+from cca_zoo.linear import CCA
+x0 -= x0.mean(axis=0)
+x1 -= x1.mean(axis=0)
+x2 -= x2.mean(axis=0)
+x3 -= x3.mean(axis=0)
+x4 -= x4.mean(axis=0)
+ccas = CCA(latent_dimensions=10)
+print(ccas.fit((x0, x0)).score((x0, x0)) / 10)
+print(ccas.fit((x0, x1)).score((x0, x1)) / 10)
+print(ccas.fit((x0, x2)).score((x0, x2)) / 10)
+print(ccas.fit((x0, x3)).score((x0, x3)) / 10)
+print(ccas.fit((x0, x4)).score((x0, x4)) / 10)
 
 X = np.array([[mse1, cossim1, cka1, cca1], [mse2, cossim2, cka2, cca2], [mse3, cossim3, cka3, cca3], [mse4, cossim4, cka4, cca4]])
 clustering = AffinityPropagation(damping=0.7, max_iter=1000).fit(X)

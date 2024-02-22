@@ -7,6 +7,26 @@ from tensorflow.python.ops import standard_ops
 from tensorflow.python.keras import optimizer_v2
 from python.src import constants
 
+class BalancedAccuracyCallback(keras.callbacks.Callback):
+
+    def __init__(self, X_train, y_train, X_valid, y_valid):
+        super(BalancedAccuracyCallback, self).__init__()
+        self.X_train = X_train
+        self.y_train = y_train
+        self.X_valid = X_valid
+        self.y_valid = y_valid
+
+    def on_epoch_end(self, epoch, logs={}):
+        y_pred = tf.argmax(self.model.predict(self.X_train), axis=1)
+        y_true = tf.argmax(self.y_train, axis=1)
+        train_balanced_accuracy = balanced_accuracy_score(y_true, y_pred)
+        logs["train_balanced_accuracy"] = train_balanced_accuracy
+
+        y_pred = tf.argmax(self.model.predict(self.X_valid), axis=1)
+        y_true = tf.argmax(self.y_valid, axis=1)
+        valid_balanced_accuracy = balanced_accuracy_score(y_true, y_pred)
+        logs["valid_balanced_accuracy"] = valid_balanced_accuracy
+
 def get_model():
     model = None
 
@@ -35,11 +55,11 @@ def get_model():
                 layers.MaxPooling2D(pool_size=(2, 2)),
                 layers.Dropout(0.25),
                 layers.Flatten(),
-                layers.Dense(120, activation="relu"),
+                layers.Dense(120, name="dense0", activation="relu"),
                 layers.Dropout(0.5),
-                layers.Dense(84, activation="relu"),
+                layers.Dense(84, name="dense1", activation="relu"),
                 layers.Dropout(0.5),
-                layers.Dense(10, name="final_dense", activation="softmax")
+                layers.Dense(10, name="dense2", activation="softmax")
             ]
         )
     elif constants.DATASET == constants.FEMNIST:
@@ -80,6 +100,18 @@ def get_model():
         model.compile(loss="categorical_crossentropy", optimizer="adam", metrics=["accuracy"])
 
     return model
+
+def get_outputs(model):
+    outputs = None
+
+    if constants.DATASET == constants.CIFAR10:
+        outputs = [
+            model.get_layer("dense0").output,
+            model.get_layer("dense1").output,
+            model.get_layer("dense2").output
+        ]
+
+    return outputs
 
 def save_weights(car_id, weights):
     weights_path = constants.WEIGHTS_FOLDER + car_id + constants.WEIGHTS_FILE_SUFFIX

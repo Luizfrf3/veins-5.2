@@ -13,11 +13,12 @@ clean_time = [50]
 rmodel = models.get_model()
 
 def _local_clustering(node_id, model, mw, X_valid, y_valid):
-    loss, accuracy = model.evaluate(X_valid, y_valid, verbose=0)
-    mfeatures = [1.0]
+    #loss, accuracy = model.evaluate(X_valid, y_valid, verbose=0)
+    inter_model = keras.Model(inputs=model.input, outputs=models.get_outputs(model))
+    activations = [np.array(act) for act in inter_model(X_valid)]
+    mfeatures = [1.0 for _ in range(activations)]
+    #mfeatures = [1.0]
     #mfeatures = [1.0, 1.0, 1.0, loss, accuracy]
-    #inter_model = keras.Model(inputs=model.input, outputs=model.get_layer("final_dense").output)
-    #activation = np.array(inter_model(X_valid))
 
     rfeatures = []
     rweights = []
@@ -26,14 +27,14 @@ def _local_clustering(node_id, model, mw, X_valid, y_valid):
         rmodel.set_weights(rweight)
 
         #loss, accuracy = rmodel.evaluate(X_valid, y_valid, verbose=0)
-        cossim = metrics.cossim(mw, metrics.flatten(rweight))
-        #rinter_model = keras.Model(inputs=rmodel.input, outputs=rmodel.get_layer("final_dense").output)
-        #ractivation = np.array(rinter_model(X_valid))
-        #cka = metrics.cka(activation, ractivation)
+        #cossim = metrics.cossim(mw, metrics.flatten(rweight))
+        rinter_model = keras.Model(inputs=rmodel.input, outputs=models.get_outputs(rmodel))
+        ractivations = [np.array(ract) for ract in rinter_model(X_valid)]
+        ckas = [metrics.cka(activations[i], ractivations[i]) for i in range(len(ractivations))]
         #cca = metrics.cca(activation, ractivation, activation.shape[1])
 
-        #rfeatures.append([cka])
-        rfeatures.append([cossim])
+        rfeatures.append(ckas)
+        #rfeatures.append([cossim])
         rweights.append(rweight)
         senders.append(sender)
 

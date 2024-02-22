@@ -11,8 +11,6 @@ def cossim(a, b):
     return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
 
 def cka(features_x, features_y):
-    features_x = features_x.copy()
-    features_y = features_y.copy()
     features_x = features_x - np.mean(features_x, 0, keepdims=True)
     features_y = features_y - np.mean(features_y, 0, keepdims=True)
     dot_product_similarity = np.linalg.norm(features_x.T.dot(features_y)) ** 2
@@ -26,8 +24,6 @@ def cka(features_x, features_y):
 #    return np.linalg.norm(qx.T.dot(qy)) ** 2 / min(features_x.shape[1], features_y.shape[1])
 
 def cca(features_x, features_y, n_components):
-    features_x = features_x.copy()
-    features_y = features_y.copy()
-    cca_obj = CCA(n_components=n_components)
+    cca_obj = CCA(n_components=n_components, max_iter=2000)
     cca_obj.fit(features_x, features_y)
     return cca_obj.score(features_x, features_y)

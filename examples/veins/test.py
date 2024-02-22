@@ -2,12 +2,33 @@ import os
 import pickle
 import random
 import numpy as np
+import tensorflow as tf
 from sklearn.model_selection import StratifiedKFold
 from sklearn.cluster import AffinityPropagation
+from sklearn.metrics import balanced_accuracy_score
 from tensorflow import keras
 from keras.preprocessing.image import ImageDataGenerator
 from python.src import constants, models, metrics
 
+class BalancedAccuracyCallback(keras.callbacks.Callback):
+
+    def __init__(self, X_train, y_train, X_valid, y_valid):
+        super(BalancedAccuracyCallback, self).__init__()
+        self.X_train = X_train
+        self.y_train = y_train
+        self.X_valid = X_valid
+        self.y_valid = y_valid
+
+    def on_epoch_end(self, epoch, logs={}):
+        y_pred = tf.argmax(self.model.predict(self.X_train), axis=1)
+        y_true = tf.argmax(self.y_train, axis=1)
+        train_balanced_accuracy = balanced_accuracy_score(y_true, y_pred)
+        logs["train_balanced_accuracy"] = train_balanced_accuracy
+
+        y_pred = tf.argmax(self.model.predict(self.X_valid), axis=1)
+        y_true = tf.argmax(self.y_valid, axis=1)
+        valid_balanced_accuracy = balanced_accuracy_score(y_true, y_pred)
+        logs["valid_balanced_accuracy"] = valid_balanced_accuracy
 
 data = np.load(constants.DATA_PATH + 'v0_0_0_data.npz')
 X, y = data['images_train'], data['labels_train']
@@ -24,7 +45,8 @@ datagen.fit(X_train)
 
 model = models.get_model()
 model.summary()
-model.fit(datagen.flow(X_train, y_train, batch_size=50), steps_per_epoch = 3 * X_train.shape[0] / 50, epochs=50, validation_data=(X_valid, y_valid))
+history = model.fit(datagen.flow(X_train, y_train, batch_size=50), steps_per_epoch = 3 * X_train.shape[0] / 50, epochs=50, validation_data=(X_valid, y_valid), callbacks=[BalancedAccuracyCallback(X_train, y_train, X_valid, y_valid)])
+print(history.history)
 #model.fit(X_train, y_train, epochs=50, validation_data=(X_valid, y_valid))
 
 '''
