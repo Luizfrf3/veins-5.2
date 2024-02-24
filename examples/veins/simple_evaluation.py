@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 TIME_STEP = 5
 EXPERIMENT = 'CIFAR10_rot2'
-METHOD = 'OurMethodRSURandomCCA5Epochs'
+METHOD = 'GossipLearning'
 LOGS_PATH = 'python/experiments/' + EXPERIMENT + '/' + METHOD + '/logs/logs.txt'
 
 train_logs = []

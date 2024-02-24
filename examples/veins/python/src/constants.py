@@ -2,7 +2,7 @@ from tensorflow import keras
 
 SEED = 12
 SPLIT = 0
-EPOCHS = 3
+EPOCHS = 5
 BATCH_SIZE = 50
 DATA_AUGMENTATION = True
 keras.utils.set_random_seed(SEED)
@@ -18,7 +18,7 @@ OUR_METHOD = 'Our Method'
 FED_AVG = 'FedAvg'
 FED_PROX = 'FedProx'
 WSCC = 'WSCC'
-EXPERIMENT = GOSSIP_LEARNING
+EXPERIMENT = OUR_METHOD
 
 DATA_PATH = 'python/' + DATASET + '/data/'
 WEIGHTS_FOLDER = 'weights/'

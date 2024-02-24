@@ -49,9 +49,9 @@ def get_model():
         model = keras.Sequential(
             [
                 keras.Input(shape=(32, 32, 3)),
-                layers.Conv2D(6, kernel_size=(5, 5), padding="same", activation="relu"),
+                layers.Conv2D(6, kernel_size=(5, 5), padding="same", name="conv0", activation="relu"),
                 layers.MaxPooling2D(pool_size=(2, 2)),
-                layers.Conv2D(16, kernel_size=(5, 5), padding="same", activation="relu"),
+                layers.Conv2D(16, kernel_size=(5, 5), padding="same", name="conv1", activation="relu"),
                 layers.MaxPooling2D(pool_size=(2, 2)),
                 layers.Dropout(0.25),
                 layers.Flatten(),
@@ -106,6 +106,8 @@ def get_outputs(model):
 
     if constants.DATASET == constants.CIFAR10:
         outputs = [
+            model.get_layer("conv0").output,
+            model.get_layer("conv1").output,
             model.get_layer("dense0").output,
             model.get_layer("dense1").output,
             model.get_layer("dense2").output
