@@ -12,10 +12,16 @@ clean_time = [50]
 
 rmodel = models.get_model()
 
+def _flatten_activations(act):
+    result = np.array(act)
+    if len(act.shape) > 2
+        result = result.reshape((act.shape[0], act.shape[1] * act.shape[2] * act.shape[3]))
+    return result
+
 def _local_clustering(node_id, model, mw, X_valid, y_valid):
     #loss, accuracy = model.evaluate(X_valid, y_valid, verbose=0)
     inter_model = keras.Model(inputs=model.input, outputs=models.get_outputs(model))
-    activations = [np.array(act if len(act.shape == 2) else act.reshape((act.shape[0], act.shape[1] * act.shape[2] * act.shape[3]))) for act in inter_model(X_valid)]
+    activations = [_flatten_activations(act) for act in inter_model(X_valid)]
     mfeatures = [1.0 for _ in range(len(activations))]
     #mfeatures = [1.0]
     #mfeatures = [1.0, 1.0, 1.0, loss, accuracy]
@@ -29,7 +35,7 @@ def _local_clustering(node_id, model, mw, X_valid, y_valid):
         #loss, accuracy = rmodel.evaluate(X_valid, y_valid, verbose=0)
         #cossim = metrics.cossim(mw, metrics.flatten(rweight))
         rinter_model = keras.Model(inputs=rmodel.input, outputs=models.get_outputs(rmodel))
-        ractivations = [np.array(ract if len(ract.shape == 2) else ract.reshape((ract.shape[0], ract.shape[1] * ract.shape[2] * ract.shape[3]))) for ract in rinter_model(X_valid)]
+        ractivations = [_flatten_activations(ract) for ract in rinter_model(X_valid)]
         ckas = [metrics.cka(activations[i], ractivations[i]) for i in range(len(ractivations))]
         #cca = metrics.cca(activation, ractivation, activation.shape[1])
 
