@@ -14,7 +14,7 @@ rmodel = models.get_model()
 
 def _flatten_activations(act):
     result = np.array(act)
-    if len(act.shape) > 2
+    if len(act.shape) > 2:
         result = result.reshape((act.shape[0], act.shape[1] * act.shape[2] * act.shape[3]))
     return result
 

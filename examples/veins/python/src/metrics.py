@@ -26,4 +26,5 @@ def cka(features_x, features_y):
 def cca(features_x, features_y, n_components):
     cca_obj = CCA(n_components=n_components, max_iter=2000)
     cca_obj.fit(features_x, features_y)
-    return cca_obj.score(features_x, features_y)
+    x_c, y_c = cca_obj.transform(features_x, features_y)
+    return np.mean([np.corrcoef(x_c[:, i], y_c[:, i])[0, 1] for i in range(n_components)])
