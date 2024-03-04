@@ -3,6 +3,8 @@ import numpy as np
 from tensorflow.python import keras
 from keras.preprocessing.image import ImageDataGenerator
 from sklearn.cluster import AffinityPropagation
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
 from python.src import models, constants, logs, metrics
 
 received_weights = {}
@@ -12,19 +14,29 @@ clean_time = [50]
 
 rmodel = models.get_model()
 
-def _flatten_activations(act):
+def _preprocess_activations(act):
     result = np.array(act)
     if len(act.shape) > 2:
         result = result.reshape((act.shape[0], act.shape[1] * act.shape[2] * act.shape[3]))
+
+    #scaler = StandardScaler()
+    #scaler.fit(result)
+    #result = scaler.transform(result)
+
+    #pca = PCA(n_components=0.99)
+    #pca.fit(result)
+    #result = pca.transform(result)
+
     return result
 
 def _local_clustering(node_id, model, mw, X_valid, y_valid):
     #loss, accuracy = model.evaluate(X_valid, y_valid, verbose=0)
     inter_model = keras.Model(inputs=model.input, outputs=models.get_outputs(model))
-    activations = [_flatten_activations(act) for act in inter_model(X_valid)]
+    activations = [_preprocess_activations(act) for act in inter_model(X_valid)]
     mfeatures = [1.0 for _ in range(len(activations))]
     #mfeatures = [1.0]
     #mfeatures = [1.0, 1.0, 1.0, loss, accuracy]
+    #mfeatures = [metrics.cca(act, act, act.shape[1]) for act in activations]
 
     rfeatures = []
     rweights = []
@@ -35,9 +47,9 @@ def _local_clustering(node_id, model, mw, X_valid, y_valid):
         #loss, accuracy = rmodel.evaluate(X_valid, y_valid, verbose=0)
         #cossim = metrics.cossim(mw, metrics.flatten(rweight))
         rinter_model = keras.Model(inputs=rmodel.input, outputs=models.get_outputs(rmodel))
-        ractivations = [_flatten_activations(ract) for ract in rinter_model(X_valid)]
+        ractivations = [_preprocess_activations(ract) for ract in rinter_model(X_valid)]
         ckas = [metrics.cka(activations[i], ractivations[i]) for i in range(len(ractivations))]
-        #cca = metrics.cca(activation, ractivation, activation.shape[1])
+        #ccas = [metrics.cca(activations[i], ractivations[i], min(activations[i].shape[1], ractivations[i].shape[1])) for i in range(len(ractivations))]
 
         rfeatures.append(ckas)
         #rfeatures.append([cossim])
