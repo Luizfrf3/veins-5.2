@@ -20,6 +20,7 @@ void OurMethodApp::initialize(int stage)
         currentState = TRAINING;
         trainingRound = 0;
         numberOfReceivedModels = 0;
+        numberOfReceivedModelsWhileTraining = 0;
 
         vehicleId = mobility->getExternalId();
         if (vehicleId.compare("v0") == 0) {
@@ -63,7 +64,11 @@ void OurMethodApp::onWSM(BaseFrame1609_4* frame)
         py::module_ learning = py::module_::import("learning");
         learning.attr("store_weights")(wsm->getWeights(), wsm->getDatasetSize(), vehicleId, wsm->getSenderId(), simTime().dbl());
     } else {
-        std::cerr << "onWSM - Received model ignored because the node is already training" << std::endl;
+        std::cout << vehicleId << " store model while training" << std::endl;
+
+        numberOfReceivedModelsWhileTraining += 1;
+        py::module_ learning = py::module_::import("learning");
+        learning.attr("store_weights_while_training")(wsm->getWeights(), wsm->getDatasetSize(), vehicleId, wsm->getSenderId(), simTime().dbl());
     }
 }
 
@@ -81,7 +86,8 @@ void OurMethodApp::handleSelfMsg(cMessage* msg)
 
         findHost()->getDisplayString().setTagArg("i", 1, "green");
         currentState = WAITING;
-        numberOfReceivedModels = 0;
+        numberOfReceivedModels = numberOfReceivedModelsWhileTraining;
+        numberOfReceivedModelsWhileTraining = 0;
 
         std::cout << "Node " << vehicleId << " gossiping model" << std::endl;
 

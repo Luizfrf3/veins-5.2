@@ -30,6 +30,7 @@ protected:
     std::string vehicleId;
     int trainingRound;
     int numberOfReceivedModels;
+    int numberOfReceivedModelsWhileTraining;
 
     void onWSM(BaseFrame1609_4* frame) override;
     void handleSelfMsg(cMessage* msg) override;

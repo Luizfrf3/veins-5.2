@@ -16,7 +16,7 @@ def init(node_id, sim_time):
             X, y = data['images_train'], data['labels_train']
             num_classes = data['num_classes']
 
-            skf = StratifiedKFold(n_splits=5)
+            skf = StratifiedKFold(n_splits=5, random_state=constants.SEED)
             for i, (train_index, valid_index) in enumerate(skf.split(X, y)):
                 if constants.SPLIT == i:
                     X_train, y_train = X[train_index], y[train_index]
@@ -79,6 +79,13 @@ def store_weights(raw_weights, dataset_size, node_id, sender_id, sim_time):
         fed_avg_fed_prox.store_weights(raw_weights, dataset_size, node_id, sender_id)
     elif constants.EXPERIMENT == constants.WSCC:
         wscc.store_weights(raw_weights, dataset_size, node_id, sender_id)
+
+def store_weights_while_training(raw_weights, dataset_size, node_id, sender_id, sim_time):
+    logs_data = {'event': 'store_weights_while_training', 'dataset_size': dataset_size, 'node_id': node_id, 'sim_time': sim_time, 'sender_id': sender_id}
+    logs.register_log(logs_data)
+
+    if constants.EXPERIMENT == constants.OUR_METHOD:
+        our_method.store_weights_while_training(raw_weights, dataset_size, node_id, sender_id)
 
 def receive_global_model(raw_weights, node_id, sender_id, sim_time):
     if constants.EXPERIMENT == constants.FED_AVG:

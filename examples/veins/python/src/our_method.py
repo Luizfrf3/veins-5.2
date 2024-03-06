@@ -1,4 +1,5 @@
 import logging
+import copy
 import numpy as np
 from tensorflow.python import keras
 from keras.preprocessing.image import ImageDataGenerator
@@ -8,7 +9,9 @@ from sklearn.decomposition import PCA
 from python.src import models, constants, logs, metrics
 
 received_weights = {}
+received_weights_while_training = {}
 dataset_sizes = {}
+dataset_sizes_while_training = {}
 
 clean_time = [50]
 
@@ -52,6 +55,7 @@ def _local_clustering(node_id, model, mw, X_valid, y_valid):
         #ccas = [metrics.cca(activations[i], ractivations[i], min(activations[i].shape[1], ractivations[i].shape[1])) for i in range(len(ractivations))]
 
         rfeatures.append(ckas)
+        #rfeatures.append(sum(ckas) / len(ckas))
         #rfeatures.append([cossim])
         rweights.append(rweight)
         senders.append(sender)
@@ -70,6 +74,14 @@ def store_weights(raw_weights, dataset_size, node_id, sender_id):
         dataset_sizes[node_id] = {}
     received_weights[node_id][sender_id] = weights
     dataset_sizes[node_id][sender_id] = dataset_size
+
+def store_weights_while_training(raw_weights, dataset_size, node_id, sender_id):
+    weights = models.decode_weights(raw_weights)
+    if node_id not in received_weights_while_training.keys():
+        received_weights_while_training[node_id] = {}
+        dataset_sizes_while_training[node_id] = {}
+    received_weights_while_training[node_id][sender_id] = weights
+    dataset_sizes_while_training[node_id][sender_id] = dataset_size
 
 def train(node_id, training_round, sim_time, vehicle_data, node_models):
     X_train, y_train = vehicle_data[node_id]['train']
@@ -121,8 +133,10 @@ def train(node_id, training_round, sim_time, vehicle_data, node_models):
     models.save_weights(node_id, model.get_weights())
     node_models[node_id] = model
 
-    received_weights[node_id] = {}
-    dataset_sizes[node_id] = {}
+    received_weights[node_id] = copy.deepcopy(received_weights_while_training[node_id])
+    dataset_sizes[node_id] = copy.deepcopy(dataset_sizes_while_training[node_id])
+    received_weights_while_training[node_id] = {}
+    dataset_sizes_while_training[node_id] = {}
 
     if sim_time >= clean_time[0]:
         logging.warning('Clearing Keras session')
