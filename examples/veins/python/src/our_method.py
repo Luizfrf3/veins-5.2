@@ -114,18 +114,17 @@ def train(node_id, training_round, sim_time, vehicle_data, node_models):
             mweights[i] = mweights[i] / sizes
         model.set_weights(mweights)
 
-        #weights = []
-        #for i in range(len(mweights)):
-        #    weights.append(np.zeros(mweights[i].shape))
         #for i in range(len(weights)):
-        #    size = 0
+        #    size = len(vehicle_data[node_id]['train'][0])
+        #    mweights[i] = mweights[i] * size
         #    for sender, rweights in received_weights[node_id].items():
-        #        weights[i] += rweights[i] * dataset_sizes[node_id][sender]
+        #        mweights[i] += rweights[i] * dataset_sizes[node_id][sender]
         #        size += dataset_sizes[node_id][sender]
-        #    weights[i] = weights[i] / size
-        #model.set_weights(weights)
+        #    mweights[i] = mweights[i] / size
+        #model.set_weights(mweights)
 
     if constants.DATA_AUGMENTATION:
+        # This is for 2 rotations only
         datagen = ImageDataGenerator(zoom_range=0.2, horizontal_flip=True)
         datagen.fit(X_train)
         history = model.fit(datagen.flow(X_train, y_train, batch_size=constants.BATCH_SIZE), steps_per_epoch = constants.EPOCHS * X_train.shape[0] / 50, validation_data=(X_valid, y_valid), verbose=0)
