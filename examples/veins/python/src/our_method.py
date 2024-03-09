@@ -55,7 +55,7 @@ def _local_clustering(node_id, model, mw, X_valid, y_valid):
         #ccas = [metrics.cca(activations[i], ractivations[i], min(activations[i].shape[1], ractivations[i].shape[1])) for i in range(len(ractivations))]
 
         rfeatures.append(ckas)
-        #rfeatures.append(sum(ckas) / len(ckas))
+        #rfeatures.append([sum(ckas) / len(ckas)])
         #rfeatures.append([cossim])
         rweights.append(rweight)
         senders.append(sender)
@@ -94,6 +94,9 @@ def train(node_id, training_round, sim_time, vehicle_data, node_models):
     if node_id not in received_weights.keys():
         received_weights[node_id] = {}
         dataset_sizes[node_id] = {}
+    if node_id not in received_weights_while_training.keys():
+        received_weights_while_training[node_id] = {}
+        dataset_sizes_while_training[node_id] = {}
 
     participating_nodes = []
     cluster_nodes = []
@@ -102,7 +105,6 @@ def train(node_id, training_round, sim_time, vehicle_data, node_models):
         participating_nodes = [node for node in received_weights[node_id].keys()]
         clustered_weights = _local_clustering(node_id, model, metrics.flatten(mweights), X_valid, y_valid)
         cluster_nodes = [cw['id'] for cw in clustered_weights]
-
         for i in range(len(mweights)):
             sizes = len(X_train)
             mweights[i] = mweights[i] * sizes
@@ -110,14 +112,18 @@ def train(node_id, training_round, sim_time, vehicle_data, node_models):
                 mweights[i] = mweights[i] + (cw['w'][i] * dataset_sizes[node_id][cw['id']])
                 sizes += dataset_sizes[node_id][cw['id']]
             mweights[i] = mweights[i] / sizes
-
-        #rmodel.set_weights(mweights)
-        #_, maccuracy = model.evaluate(X_valid, y_valid, verbose=0)
-        #_, raccuracy = rmodel.evaluate(X_valid, y_valid, verbose=0)
-        #if raccuracy >= maccuracy or abs(maccuracy - raccuracy) <= constants.THRESHOLD:
-        #    model.set_weights(mweights)
-        #    accepted_model = True
         model.set_weights(mweights)
+
+        #weights = []
+        #for i in range(len(mweights)):
+        #    weights.append(np.zeros(mweights[i].shape))
+        #for i in range(len(weights)):
+        #    size = 0
+        #    for sender, rweights in received_weights[node_id].items():
+        #        weights[i] += rweights[i] * dataset_sizes[node_id][sender]
+        #        size += dataset_sizes[node_id][sender]
+        #    weights[i] = weights[i] / size
+        #model.set_weights(weights)
 
     if constants.DATA_AUGMENTATION:
         datagen = ImageDataGenerator(zoom_range=0.2, horizontal_flip=True)

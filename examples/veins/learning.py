@@ -16,7 +16,7 @@ def init(node_id, sim_time):
             X, y = data['images_train'], data['labels_train']
             num_classes = data['num_classes']
 
-            skf = StratifiedKFold(n_splits=5, random_state=constants.SEED)
+            skf = StratifiedKFold(n_splits=5)
             for i, (train_index, valid_index) in enumerate(skf.split(X, y)):
                 if constants.SPLIT == i:
                     X_train, y_train = X[train_index], y[train_index]
