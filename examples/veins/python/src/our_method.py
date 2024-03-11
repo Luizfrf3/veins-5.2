@@ -32,6 +32,33 @@ def _preprocess_activations(act):
 
     return result
 
+def _weighted_aggregation(node_id, model, mw, X_valid, y_valid):
+    #loss, accuracy = model.evaluate(X_valid, y_valid, verbose=0)
+    #inter_model = keras.Model(inputs=model.input, outputs=models.get_outputs(model))
+    #activations = [_preprocess_activations(act) for act in inter_model(X_valid)]
+    #mfeatures = [1.0 for _ in range(len(activations))]
+    mfeatures = [1.0]
+    #mfeatures = [1.0, 1.0, 1.0, loss, accuracy]
+    #mfeatures = [metrics.cca(act, act, act.shape[1]) for act in activations]
+
+    result = []
+    for sender, rweight in received_weights[node_id].items():
+        #loss, accuracy = rmodel.evaluate(X_valid, y_valid, verbose=0)
+        cossim = metrics.cossim(mw, metrics.flatten(rweight))
+        #rmodel.set_weights(rweight)
+        #rinter_model = keras.Model(inputs=rmodel.input, outputs=models.get_outputs(rmodel))
+        #ractivations = [_preprocess_activations(ract) for ract in rinter_model(X_valid)]
+        #ckas = [metrics.cka(activations[i], ractivations[i]) for i in range(len(ractivations))]
+        #ccas = [metrics.cca(activations[i], ractivations[i], min(activations[i].shape[1], ractivations[i].shape[1])) for i in range(len(ractivations))]
+
+        result.append({
+            'w': rweight,
+            'f': cossim,
+            'id': sender
+        })
+
+    return result, mfeatures[0]
+
 def _local_clustering(node_id, model, mw, X_valid, y_valid):
     #loss, accuracy = model.evaluate(X_valid, y_valid, verbose=0)
     inter_model = keras.Model(inputs=model.input, outputs=models.get_outputs(model))
@@ -103,6 +130,7 @@ def train(node_id, training_round, sim_time, vehicle_data, node_models):
 
     if len(received_weights[node_id]) > 0:
         participating_nodes = [node for node in received_weights[node_id].keys()]
+
         clustered_weights = _local_clustering(node_id, model, metrics.flatten(mweights), X_valid, y_valid)
         cluster_nodes = [cw['id'] for cw in clustered_weights]
         for i in range(len(mweights)):
@@ -114,8 +142,19 @@ def train(node_id, training_round, sim_time, vehicle_data, node_models):
             mweights[i] = mweights[i] / sizes
         model.set_weights(mweights)
 
-        #for i in range(len(weights)):
-        #    size = len(vehicle_data[node_id]['train'][0])
+        #clustered_weights, mf = _weighted_aggregation(node_id, model, metrics.flatten(mweights), X_valid, y_valid)
+        #cluster_nodes = [cw['id'] for cw in clustered_weights]
+        #for i in range(len(mweights)):
+        #    wagg = len(X_train) * mf
+        #    mweights[i] = mweights[i] * wagg
+        #    for cw in clustered_weights:
+        #        mweights[i] = mweights[i] + (cw['w'][i] * dataset_sizes[node_id][cw['id']] * cw['f'])
+        #        wagg += dataset_sizes[node_id][cw['id']] * cw['f']
+        #    mweights[i] = mweights[i] / wagg
+        #model.set_weights(mweights)
+
+        #for i in range(len(mweights)):
+        #    size = len(X_train)
         #    mweights[i] = mweights[i] * size
         #    for sender, rweights in received_weights[node_id].items():
         #        mweights[i] += rweights[i] * dataset_sizes[node_id][sender]
