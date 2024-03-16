@@ -53,11 +53,14 @@ def _weighted_aggregation(node_id, model, mw, X_valid, y_valid):
 
         result.append({
             'w': rweight,
-            'f': cossim,
+            'f': 1.0,
+            'o': cossim,
             'id': sender
         })
 
-    return result, mfeatures[0]
+    result.sort(key=lambda r: r['o'], reverse=True)
+
+    return result[:round(len(a) / 2)], mfeatures[0]
 
 def _local_clustering(node_id, model, mw, X_valid, y_valid):
     #loss, accuracy = model.evaluate(X_valid, y_valid, verbose=0)
