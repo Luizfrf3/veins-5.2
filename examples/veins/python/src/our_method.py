@@ -1,5 +1,6 @@
 import logging
 import copy
+import math
 import numpy as np
 from tensorflow.python import keras
 from keras.preprocessing.image import ImageDataGenerator
@@ -60,7 +61,7 @@ def _weighted_aggregation(node_id, model, mw, X_valid, y_valid):
 
     result.sort(key=lambda r: r['o'], reverse=True)
 
-    return result[:round(len(a) / 2)], mfeatures[0]
+    return result[:math.ceil(len(result) / 2)], mfeatures[0]
 
 def _local_clustering(node_id, model, mw, X_valid, y_valid):
     #loss, accuracy = model.evaluate(X_valid, y_valid, verbose=0)
