@@ -7,6 +7,7 @@ from keras.preprocessing.image import ImageDataGenerator
 from sklearn.cluster import AffinityPropagation
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
+from scipy.signal import argrelextrema
 from python.src import models, constants, logs, metrics
 
 received_weights = {}
@@ -54,14 +55,18 @@ def _weighted_aggregation(node_id, model, mw, X_valid, y_valid):
 
         result.append({
             'w': rweight,
-            'f': 1.0,
-            'o': cossim,
+            'f': (cossim + 1.0) / 2,
             'id': sender
         })
 
-    result.sort(key=lambda r: r['o'], reverse=True)
+    #result.sort(key=lambda r: r['f'], reverse=True)
+    #return result[:math.ceil(len(result) / 4)], mfeatures[0]
 
-    return result[:math.ceil(len(result) / 2)], mfeatures[0]
+    result.sort(key=lambda r: r['f'], reverse=False)
+    diff = [result[i]['f'] - result[i - 1]['f'] for i in range(1, len(result))]
+    rel_diff = [diff[i] / result[i]['f'] for i in range(len(diff))]
+    arg = argrelextrema(np.array(rel_diff), np.greater)[0]
+    return result[arg[-1] + 1:], mfeatures[0]
 
 def _local_clustering(node_id, model, mw, X_valid, y_valid):
     #loss, accuracy = model.evaluate(X_valid, y_valid, verbose=0)

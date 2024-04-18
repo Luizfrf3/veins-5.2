@@ -10,6 +10,7 @@ from tensorflow import keras
 from keras.preprocessing.image import ImageDataGenerator
 from python.src import constants, models, metrics
 
+'''
 class BalancedAccuracyCallback(keras.callbacks.Callback):
 
     def __init__(self, X_train, y_train, X_valid, y_valid):
@@ -48,6 +49,7 @@ model.summary()
 history = model.fit(datagen.flow(X_train, y_train, batch_size=50), steps_per_epoch = 3 * X_train.shape[0] / 50, epochs=50, validation_data=(X_valid, y_valid), callbacks=[BalancedAccuracyCallback(X_train, y_train, X_valid, y_valid)])
 print(history.history)
 #model.fit(X_train, y_train, epochs=50, validation_data=(X_valid, y_valid))
+'''
 
 '''
 weights = []
@@ -68,3 +70,18 @@ print(benchmark)
 print(cossims)
 print(clustering.labels_)
 '''
+
+weights = []
+for v in ['v22', 'v91', 'v72', 'v66', 'v89', 'v87', 'v90', 'v95', 'v71', 'v9', 'v27']:
+#for v in ['v43', 'v10', 'v27', 'v11', 'v34', 'v20', 'v41', 'v51', 'v37', 'v67', 'v66']:
+    weights_path = 'python/experiments/CIFAR10_rot2/OurMethodRSURandom25PercentWeightedCossim/weights/'
+    with open(weights_path + v + '_weights.pickle', 'rb') as file:
+        data = pickle.load(file)
+        weights.append(data)
+
+bw = metrics.flatten(weights[0])
+cossims = []
+for w in weights:
+    cossim = metrics.cossim(bw, metrics.flatten(w))
+    cossims.append(cossim)
+print(cossims)
