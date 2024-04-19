@@ -74,7 +74,7 @@ print(clustering.labels_)
 weights = []
 for v in ['v22', 'v91', 'v72', 'v66', 'v89', 'v87', 'v90', 'v95', 'v71', 'v9', 'v27']:
 #for v in ['v43', 'v10', 'v27', 'v11', 'v34', 'v20', 'v41', 'v51', 'v37', 'v67', 'v66']:
-    weights_path = 'python/experiments/CIFAR10_rot2/OurMethodRSURandom25PercentWeightedCossim/weights/'
+    weights_path = 'python/experiments/CIFAR10_rot2/OurMethodRSURandomExtremaWeightedCossim/weights/'
     with open(weights_path + v + '_weights.pickle', 'rb') as file:
         data = pickle.load(file)
         weights.append(data)

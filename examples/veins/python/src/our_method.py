@@ -60,13 +60,22 @@ def _weighted_aggregation(node_id, model, mw, X_valid, y_valid):
         })
 
     #result.sort(key=lambda r: r['f'], reverse=True)
-    #return result[:math.ceil(len(result) / 4)], mfeatures[0]
+    #values = result[:math.ceil(len(result) / 4)]
+    #return values, mfeatures[0]
 
     result.sort(key=lambda r: r['f'], reverse=False)
     diff = [result[i]['f'] - result[i - 1]['f'] for i in range(1, len(result))]
     rel_diff = [diff[i] / result[i]['f'] for i in range(len(diff))]
     arg = argrelextrema(np.array(rel_diff), np.greater)[0]
-    return result[arg[-1] + 1:], mfeatures[0]
+    values = result[arg[-1] + 1:] if len(arg) > 0 else result
+    #return values, mfeatures[0]
+
+    x = [values[i]['f'] for i in range(len(values))] + [1.0]
+    e_x = np.exp(x - np.max(x))
+    softmax = e_x / e_x.sum()
+    for i in range(len(values)):
+        values[i]['f'] = x[i]
+    return values, x[-1]
 
 def _local_clustering(node_id, model, mw, X_valid, y_valid):
     #loss, accuracy = model.evaluate(X_valid, y_valid, verbose=0)
