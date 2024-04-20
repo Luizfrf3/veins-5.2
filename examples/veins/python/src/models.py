@@ -33,16 +33,18 @@ def get_model():
     if constants.DATASET == constants.MNIST:
         model = keras.Sequential(
             [
-                keras.Input(shape=(28, 28, 1)),
-                layers.Conv2D(32, kernel_size=(3, 3), padding="same", activation="relu"),
+                keras.Input(shape=(32, 32, 3)),
+                layers.Conv2D(6, kernel_size=(5, 5), padding="same", name="conv0", activation="relu"),
                 layers.MaxPooling2D(pool_size=(2, 2)),
-                layers.Conv2D(64, kernel_size=(3, 3), padding="same", activation="relu"),
+                layers.Conv2D(16, kernel_size=(5, 5), padding="same", name="conv1", activation="relu"),
                 layers.MaxPooling2D(pool_size=(2, 2)),
                 layers.Dropout(0.25),
                 layers.Flatten(),
-                layers.Dense(128, activation="relu"),
+                layers.Dense(120, name="dense0", activation="relu"),
                 layers.Dropout(0.5),
-                layers.Dense(10, name="final_dense", activation="softmax")
+                layers.Dense(84, name="dense1", activation="relu"),
+                layers.Dropout(0.5),
+                layers.Dense(10, name="dense2", activation="softmax")
             ]
         )
     elif constants.DATASET == constants.CIFAR10:
@@ -104,7 +106,7 @@ def get_model():
 def get_outputs(model):
     outputs = None
 
-    if constants.DATASET == constants.CIFAR10:
+    if constants.DATASET == constants.CIFAR10 or constants.DATASET == constants.MNIST:
         outputs = [
             model.get_layer("conv0").output,
             model.get_layer("conv1").output,

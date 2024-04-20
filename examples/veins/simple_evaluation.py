@@ -2,7 +2,7 @@ import ast
 import matplotlib.pyplot as plt
 
 TIME_STEP = 5
-EXPERIMENT = 'CIFAR10_rot2'
+EXPERIMENT = 'MNIST_rot2'
 METHOD = 'GossipLearning'
 LOGS_PATH = 'python/experiments/' + EXPERIMENT + '/' + METHOD + '/logs/logs.txt'
 
@@ -31,8 +31,8 @@ for tl in train_logs:
             train_losses = []
             valid_losses = []
             for h in train_history.values():
-                train_accs.append(h['accuracy'][-1])
-                valid_accs.append(h['val_accuracy'][-1])
+                train_accs.append(h['train_balanced_accuracy'][-1])
+                valid_accs.append(h['valid_balanced_accuracy'][-1])
                 train_losses.append(h['loss'][-1])
                 valid_losses.append(h['val_loss'][-1])
             chart_train_accs.append(sum(train_accs) / len(train_accs))
@@ -48,8 +48,8 @@ valid_accs = []
 train_losses = []
 valid_losses = []
 for h in train_history.values():
-    train_accs.append(h['accuracy'][-1])
-    valid_accs.append(h['val_accuracy'][-1])
+    train_accs.append(h['train_balanced_accuracy'][-1])
+    valid_accs.append(h['valid_balanced_accuracy'][-1])
     train_losses.append(h['loss'][-1])
     valid_losses.append(h['val_loss'][-1])
 
