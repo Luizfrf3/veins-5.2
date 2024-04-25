@@ -24,6 +24,12 @@ def init(node_id, sim_time):
                     vehicle_data[node_id] = {}
                     vehicle_data[node_id]['train'] = (X_train, keras.utils.to_categorical(y_train, num_classes))
                     vehicle_data[node_id]['valid'] = (X_valid, keras.utils.to_categorical(y_valid, num_classes))
+
+            np.savez(
+                constants.DATA_GENERATED_FOLDER + file,
+                X_valid=vehicle_data[node_id]['valid'][0],
+                y_valid=vehicle_data[node_id]['valid'][1]
+            )
             logging.warning('Dataset preparation finished')
 
             node_models[node_id] = models.get_model()

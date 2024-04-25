@@ -49,8 +49,8 @@ WSCCServer::~WSCCServer()
 
 void WSCCServer::initialize()
 {
-    system("rm -rf weights logs");
-    system("mkdir weights logs");
+    system("rm -rf weights logs data");
+    system("mkdir weights logs data");
     py::initialize_interpreter();
 
     numberOfRSUs = getSimulation()->getModuleByPath("rsu[*]")->getVectorSize();

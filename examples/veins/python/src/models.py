@@ -5,6 +5,7 @@ from tensorflow.python import keras
 from tensorflow.python.keras import layers
 from tensorflow.python.ops import standard_ops
 from tensorflow.python.keras import optimizer_v2
+from sklearn.metrics import balanced_accuracy_score
 from python.src import constants
 
 class BalancedAccuracyCallback(keras.callbacks.Callback):
@@ -33,7 +34,7 @@ def get_model():
     if constants.DATASET == constants.MNIST:
         model = keras.Sequential(
             [
-                keras.Input(shape=(32, 32, 3)),
+                keras.Input(shape=(28, 28, 1)),
                 layers.Conv2D(6, kernel_size=(5, 5), padding="same", name="conv0", activation="relu"),
                 layers.MaxPooling2D(pool_size=(2, 2)),
                 layers.Conv2D(16, kernel_size=(5, 5), padding="same", name="conv1", activation="relu"),

@@ -44,8 +44,8 @@ void MyVeinsApp::initialize(int stage)
 
         vehicleId = mobility->getExternalId(); // Example flow0.2
         if (vehicleId.compare("flow0.0") == 0) {
-            system("rm -rf weights");
-            system("mkdir weights");
+            system("rm -rf weights logs data");
+            system("mkdir weights logs data");
             py::initialize_interpreter();
         }
     } else if (stage == 1) {
