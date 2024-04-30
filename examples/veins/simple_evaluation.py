@@ -1,9 +1,14 @@
+import os
 import ast
+import pickle
+import numpy as np
 import matplotlib.pyplot as plt
+from sklearn.metrics import balanced_accuracy_score
+from python.src import models
 
 TIME_STEP = 5
-EXPERIMENT = 'MNIST_rot4'
-METHOD = 'GossipLearning'
+EXPERIMENT = 'FMNIST_labels'
+METHOD = 'FedAvg'
 LOGS_PATH = 'python/experiments/' + EXPERIMENT + '/' + METHOD + '/logs/logs.txt'
 
 train_logs = []
@@ -75,3 +80,37 @@ plt.ylabel('Loss')
 plt.legend()
 plt.savefig('results/' + EXPERIMENT + '_' + METHOD + '_loss.png')
 plt.close()
+
+'''
+DATA_PATH = 'python/experiments/' + EXPERIMENT + '/' + METHOD + '/data/'
+X_valid = {}
+y_valid = {}
+vehicle_clusters = {}
+for file in os.listdir(DATA_PATH):
+    vehicle = file.split('_')[0]
+    cluster = file.split('_')[1]
+    vehicle_clusters[vehicle] = cluster
+    data = np.load(DATA_PATH + file)
+    if cluster not in X_valid.keys():
+        X_valid[cluster] = data['X_valid']
+        y_valid[cluster] = data['y_valid']
+    else:
+        X_valid[cluster] = np.concatenate((X_valid[cluster], data['X_valid']))
+        y_valid[cluster] = np.concatenate((y_valid[cluster], data['y_valid']))
+
+WEIGHTS_PATH = 'python/experiments/' + EXPERIMENT + '/' + METHOD + '/weights/'
+model = models.get_model()
+result = []
+for file in os.listdir(WEIGHTS_PATH):
+    with open(WEIGHTS_PATH + file, 'rb') as f:
+        vehicle = file.split('_')[0]
+        if vehicle != 'server':
+            cluster = vehicle_clusters[vehicle]
+            weights = pickle.load(f)
+            model.set_weights(weights)
+            y_pred = np.argmax(model.predict(X_valid[cluster]), axis=1)
+            y_true = np.argmax(y_valid[cluster], axis=1)
+            balanced_accuracy = balanced_accuracy_score(y_true, y_pred)
+            result.append(balanced_accuracy)
+print('Valid accuracy overall: ', sum(result) / len(result))
+'''

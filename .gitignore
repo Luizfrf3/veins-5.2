@@ -73,6 +73,7 @@ subprojects/veins_testsims/sim/**/valgrind.out
 subprojects/veins_testsims/opp_tests/**/work
 
 examples/veins/python/MNIST
+examples/veins/python/FMNIST
 examples/veins/python/CIFAR10
 examples/veins/python/GTSRB
 examples/veins/python/FEMNIST

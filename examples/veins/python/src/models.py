@@ -31,7 +31,7 @@ class BalancedAccuracyCallback(keras.callbacks.Callback):
 def get_model():
     model = None
 
-    if constants.DATASET == constants.MNIST:
+    if constants.DATASET in (constants.MNIST, constants.FMNIST):
         model = keras.Sequential(
             [
                 keras.Input(shape=(28, 28, 1)),
@@ -107,7 +107,7 @@ def get_model():
 def get_outputs(model):
     outputs = None
 
-    if constants.DATASET == constants.CIFAR10 or constants.DATASET == constants.MNIST:
+    if constants.DATASET in (constants.CIFAR10, constants.MNIST, constants.FMNIST):
         outputs = [
             model.get_layer("conv0").output,
             model.get_layer("conv1").output,
