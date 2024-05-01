@@ -97,14 +97,14 @@ void WSCCServer::handleMessage(cMessage *msg)
             for (int i = 0; i < numberOfRSUs; i++) {
                 veins::AppMessage* appMsg = new veins::AppMessage();
                 appMsg->setWeights(weights.c_str());
-                appMsg->setSenderId(SERVER.c_str());
+                appMsg->setSenderId("global");
                 appMsg->setParticipatingNodes("");
                 appMsg->setClusterNodes("");
                 send(appMsg, "gate$o", i);
             }
         } else {
             std::cout << "Sending models to " << numberOfClusters << " clusters, participating nodes " << participatingNodes << std::endl;
-            for (int i = 0; i < numberOfClusters; i++) {
+            for (int i = -1; i < numberOfClusters; i++) {
                 py::str weights_py = learning.attr("get_cluster_weights")(SERVER, i, simTime().dbl());
                 std::string weights = weights_py;
                 py::str cluster_nodes_py = learning.attr("get_cluster_nodes")(SERVER, i, simTime().dbl());
@@ -113,7 +113,11 @@ void WSCCServer::handleMessage(cMessage *msg)
                 for (int j = 0; j < numberOfRSUs; j++) {
                     veins::AppMessage* appMsg = new veins::AppMessage();
                     appMsg->setWeights(weights.c_str());
-                    appMsg->setSenderId(SERVER.c_str());
+                    if (i == -1) {
+                        appMsg->setSenderId("global");
+                    } else {
+                        appMsg->setSenderId(SERVER.c_str());
+                    }
                     appMsg->setParticipatingNodes(participatingNodes.c_str());
                     appMsg->setClusterNodes(clusterNodes.c_str());
                     send(appMsg, "gate$o", j);

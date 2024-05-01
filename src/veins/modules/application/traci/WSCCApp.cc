@@ -53,7 +53,7 @@ void WSCCApp::onWSM(BaseFrame1609_4* frame)
     if (currentState == WAITING && wsm->isRSU()) {
         std::set<std::string> participatingNodes = splitString(wsm->getParticipatingNodes(), ',');
         std::set<std::string> clusterNodes = splitString(wsm->getClusterNodes(), ',');
-        if (clusterNodes.count(vehicleId) > 0 || participatingNodes.count(vehicleId) == 0) {
+        if (clusterNodes.count(vehicleId) > 0 || (participatingNodes.count(vehicleId) == 0 && strcmp("global", wsm->getSenderId()) == 0)) {
             if (participatingNodes.count(vehicleId) == 0) {
                 std::cout << vehicleId << " did not participate in the server aggregation" << std::endl;
             }

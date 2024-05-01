@@ -59,6 +59,8 @@ def _cluster_aggregation(node_id, model):
 def _global_aggregation(node_id, model):
     weights = []
 
+    clusters_nodes[node_id][-1] = []
+
     model_weights = model.get_weights()
     for i in range(len(model_weights)):
         weights.append(np.zeros(model_weights[i].shape))
@@ -69,6 +71,7 @@ def _global_aggregation(node_id, model):
             weights[i] += rweights[i] * dataset_sizes[node_id][sender]
             size += dataset_sizes[node_id][sender]
         weights[i] = weights[i] / size
+    clusters_weights[node_id][-1] = weights
 
     return weights
 
