@@ -1,41 +1,16 @@
 import numpy as np
-import pandas as pd
-import cv2
+from tensorflow.keras import datasets
 from sklearn.model_selection import train_test_split
 np.random.seed(42)
 
-num_classes = 43
+num_classes = 10
 num_clients = 100
 alpha = 0.1
 
-def read_data(path):
-    df = pd.read_csv(path)
-    df = df.sample(frac=1).reset_index(drop=True)
+(x_train, y_train), (x_test, y_test) = datasets.fashion_mnist.load_data()
 
-    imgs = []
-    labels = []
-    for index, row in df.iterrows():
-        img = cv2.imread('GTSRB/raw/' + row['Path'])
-
-        min_side = min(img.shape[:-1])
-        centre = img.shape[0]//2, img.shape[1]//2
-        img = img[centre[0]-min_side//2:centre[0]+min_side//2,
-                centre[1]-min_side//2:centre[1]+min_side//2, :]
-
-        img = cv2.resize(img, (48, 48)) / 255.0
-        imgs.append(img)
-        labels.append(int(row['ClassId']))
-
-    imgs = np.array(imgs).astype("float32")
-    labels = np.array(labels)
-
-    p = np.random.permutation(imgs.shape[0])
-    imgs = imgs[p]
-    labels = labels[p]
-    return imgs, labels
-
-x_train, y_train = read_data('GTSRB/raw/Train.csv')
-x_test, y_test = read_data('GTSRB/raw/Test.csv')
+x_train = x_train.astype("float32") / 255
+x_test = x_test.astype("float32") / 255
 
 dataset_imgs = np.concatenate((x_train, x_test), axis=0)
 dataset_labels = np.concatenate((y_train, y_test), axis=0)
@@ -73,7 +48,7 @@ for i in range(len(y)):
     labels_train = np.array(y_train, dtype=np.float32)
     images_test = np.array(x_test, dtype=np.float32)
     labels_test = np.array(y_test, dtype=np.float32)
-    name = 'GTSRB/data/v' + str(i) + '_data.npz'
+    name = 'FMNIST/data/v' + str(i) + '_data.npz'
     np.savez(
         name, images_train=images_train, labels_train=labels_train,
         images_test=images_test, labels_test=labels_test, num_classes=num_classes
