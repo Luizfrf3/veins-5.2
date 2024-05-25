@@ -20,15 +20,24 @@ clean_time = [50]
 
 def _cluster_aggregation(node_id, model):
     nodes_data = list(received_weights[node_id].items())
+
     benchmark = random.randrange(len(nodes_data))
     bw = metrics.flatten(nodes_data[benchmark][1])
-
     cossims = []
     for sender, rweight in nodes_data:
         cossim = metrics.cossim(bw, metrics.flatten(rweight))
         cossims.append([cossim])
-
     clustering = AffinityPropagation(damping=0.7, max_iter=2000).fit(cossims)
+
+    #distances = []
+    #for sender1, rweight1 in nodes_data:
+    #    rw1 = metrics.flatten(rweight1)
+    #    distancerow = []
+    #    for sender2, rweight2 in nodes_data:
+    #        cossim = metrics.cossim(rw1, metrics.flatten(rweight2))
+    #        distancerow.append((1 - cossim) / 2)
+    #    distances.append(distancerow)
+    #clustering = AffinityPropagation(damping=0.7, max_iter=2000, affinity='precomputed').fit(distances)
 
     clusters_data = {}
     for i in range(len(clustering.labels_)):
