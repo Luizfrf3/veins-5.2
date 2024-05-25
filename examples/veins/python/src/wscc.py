@@ -39,6 +39,19 @@ def _cluster_aggregation(node_id, model):
     #    distances.append(distancerow)
     #clustering = AffinityPropagation(damping=0.7, max_iter=2000, affinity='precomputed').fit(distances)
 
+    #labels_ = []
+    #for sender, rweight in nodes_data:
+    #    sid = int(sender[1:])
+    #    if sid < 30:
+    #        labels_.append(0)
+    #    elif sid < 60:
+    #        labels_.append(1)
+    #    elif sid < 90:
+    #        labels_.append(2)
+    #    else:
+    #        labels_.append(4)
+    #clustering = type('',(object,),{'labels_':labels_})
+
     clusters_data = {}
     for i in range(len(clustering.labels_)):
         cluster = clustering.labels_[i]
