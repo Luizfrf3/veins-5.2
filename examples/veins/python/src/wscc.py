@@ -49,7 +49,7 @@ def _cluster_aggregation(node_id, model):
     #    elif sid < 90:
     #        labels_.append(2)
     #    else:
-    #        labels_.append(4)
+    #        labels_.append(3)
     #clustering = type('',(object,),{'labels_':labels_})
 
     clusters_data = {}

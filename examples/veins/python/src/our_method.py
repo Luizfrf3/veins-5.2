@@ -117,6 +117,10 @@ def store_weights(raw_weights, dataset_size, node_id, sender_id):
     if node_id not in received_weights.keys():
         received_weights[node_id] = {}
         dataset_sizes[node_id] = {}
+    #nid = int(node_id[1:])
+    #sid = int(sender_id[1:])
+    #if (nid < 30 and sid >= 30) or (nid < 60 and sid >= 60) or (nid < 90 and sid >= 90):
+    #    return
     received_weights[node_id][sender_id] = weights
     dataset_sizes[node_id][sender_id] = dataset_size
 
@@ -125,6 +129,10 @@ def store_weights_while_training(raw_weights, dataset_size, node_id, sender_id):
     if node_id not in received_weights_while_training.keys():
         received_weights_while_training[node_id] = {}
         dataset_sizes_while_training[node_id] = {}
+    #nid = int(node_id[1:])
+    #sid = int(sender_id[1:])
+    #if (nid < 30 and sid >= 30) or (nid < 60 and sid >= 60) or (nid < 90 and sid >= 90):
+    #    return
     received_weights_while_training[node_id][sender_id] = weights
     dataset_sizes_while_training[node_id][sender_id] = dataset_size
 
