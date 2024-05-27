@@ -166,7 +166,6 @@ def train(node_id, training_round, sim_time, vehicle_data, node_models):
                 mweights[i] = mweights[i] + (cw['w'][i] * dataset_sizes[node_id][cw['id']])
                 sizes += dataset_sizes[node_id][cw['id']]
             mweights[i] = mweights[i] / sizes
-        model.set_weights(mweights)
 
         #clustered_weights, mf = _weighted_aggregation(node_id, model, metrics.flatten(mweights), X_valid, y_valid)
         #cluster_nodes = [cw['id'] for cw in clustered_weights]
@@ -177,7 +176,6 @@ def train(node_id, training_round, sim_time, vehicle_data, node_models):
         #        mweights[i] = mweights[i] + (cw['w'][i] * dataset_sizes[node_id][cw['id']] * cw['f'])
         #        wagg += dataset_sizes[node_id][cw['id']] * cw['f']
         #    mweights[i] = mweights[i] / wagg
-        #model.set_weights(mweights)
 
         #for i in range(len(mweights)):
         #    size = len(X_train)
@@ -186,7 +184,14 @@ def train(node_id, training_round, sim_time, vehicle_data, node_models):
         #        mweights[i] += rweights[i] * dataset_sizes[node_id][sender]
         #        size += dataset_sizes[node_id][sender]
         #    mweights[i] = mweights[i] / size
-        #model.set_weights(mweights)
+
+        #mmodel.set_weights(mweights)
+        #_, maccuracy = model.evaluate(X_valid, y_valid, verbose=0)
+        #_, raccuracy = rmodel.evaluate(X_valid, y_valid, verbose=0)
+        #if raccuracy >= maccuracy or abs(maccuracy - raccuracy) <= constants.THRESHOLD:
+        #    model.set_weights(mweights)
+        #    accepted_model = True
+        model.set_weights(mweights)
 
     if constants.DATA_AUGMENTATION:
         datagen = ImageDataGenerator(zoom_range=0.25)
