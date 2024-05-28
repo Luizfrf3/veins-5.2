@@ -10,6 +10,8 @@ TIME_STEP = 5
 EXPERIMENT = 'FMNIST_wscc'
 METHOD = 'FedAvg'
 LOGS_PATH = 'python/experiments/' + EXPERIMENT + '/' + METHOD + '/logs/logs.txt'
+THRESHOLD = 0.85
+NUMBER_OF_VEHICLES = 100
 
 train_logs = []
 with open(LOGS_PATH, 'r') as logs_file:
@@ -18,7 +20,11 @@ with open(LOGS_PATH, 'r') as logs_file:
         if logs_data['event'] == 'train':
             train_logs.append(logs_data)
 
-train_history = {}
+found_threshold = False
+train_history = {'v' + str(i): {
+    'train_balanced_accuracy': [0.0],
+    'valid_balanced_accuracy': [0.0]
+} for i in range(NUMBER_OF_VEHICLES)}
 chart_train_accs = []
 chart_valid_accs = []
 chart_train_losses = []
@@ -38,13 +44,18 @@ for tl in train_logs:
             for h in train_history.values():
                 train_accs.append(h['train_balanced_accuracy'][-1])
                 valid_accs.append(h['valid_balanced_accuracy'][-1])
-                train_losses.append(h['loss'][-1])
-                valid_losses.append(h['val_loss'][-1])
+                if 'loss' in h:
+                    train_losses.append(h['loss'][-1])
+                    valid_losses.append(h['val_loss'][-1])
             chart_train_accs.append(sum(train_accs) / len(train_accs))
             chart_valid_accs.append(sum(valid_accs) / len(valid_accs))
-            chart_train_losses.append(sum(train_losses) / len(train_losses))
-            chart_valid_losses.append(sum(valid_losses) / len(valid_losses))
+            if len(train_losses) > 0:
+                chart_train_losses.append(sum(train_losses) / len(train_losses))
+                chart_valid_losses.append(sum(valid_losses) / len(valid_losses))
             chart_times.append(time)
+            if not found_threshold and chart_valid_accs[-1] >= THRESHOLD:
+                found_threshold = True
+                print('Threshold of ' + str(THRESHOLD) + ' found at time ' + str(time))
         time += TIME_STEP
     train_history[node_id] = history
 
@@ -73,8 +84,8 @@ plt.savefig('results/' + EXPERIMENT + '_' + METHOD + '_acc.png')
 plt.close()
 
 plt.figure()
-plt.plot(chart_times, chart_train_losses, label='train')
-plt.plot(chart_times, chart_valid_losses, label='validation')
+plt.plot(chart_times[1:], chart_train_losses, label='train')
+plt.plot(chart_times[1:], chart_valid_losses, label='validation')
 plt.xlabel('Time')
 plt.ylabel('Loss')
 plt.legend()

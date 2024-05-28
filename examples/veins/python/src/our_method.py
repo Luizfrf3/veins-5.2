@@ -185,7 +185,7 @@ def train(node_id, training_round, sim_time, vehicle_data, node_models):
         #        size += dataset_sizes[node_id][sender]
         #    mweights[i] = mweights[i] / size
 
-        #mmodel.set_weights(mweights)
+        #rmodel.set_weights(mweights)
         #_, maccuracy = model.evaluate(X_valid, y_valid, verbose=0)
         #_, raccuracy = rmodel.evaluate(X_valid, y_valid, verbose=0)
         #if raccuracy >= maccuracy or abs(maccuracy - raccuracy) <= constants.THRESHOLD:
