@@ -66,8 +66,9 @@ valid_losses = []
 for h in train_history.values():
     train_accs.append(h['train_balanced_accuracy'][-1])
     valid_accs.append(h['valid_balanced_accuracy'][-1])
-    train_losses.append(h['loss'][-1])
-    valid_losses.append(h['val_loss'][-1])
+    if 'loss' in h:
+        train_losses.append(h['loss'][-1])
+        valid_losses.append(h['val_loss'][-1])
 
 print('Train accuracy: ', sum(train_accs) / len(train_accs))
 print('Valid accuracy: ', sum(valid_accs) / len(valid_accs))

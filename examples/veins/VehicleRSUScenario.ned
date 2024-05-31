@@ -19,6 +19,7 @@ network VehicleRSUScenario extends Scenario
         };
 
     submodules:
+        //rsu[8]: RSU {
         //rsu[12]: RSU {
         rsu[22]: RSU {
             @display("p=150,140;i=veins/sign/yellowdiamond;is=vs;r=500");
@@ -41,6 +42,7 @@ network VehicleRSUScenario extends Scenario
         server.gate$o[6] --> myChannel --> rsu[6].in;
         rsu[7].out --> myChannel --> server.gate$i[7];
         server.gate$o[7] --> myChannel --> rsu[7].in;
+        // For 8 RSUs, remove the ones below
         rsu[8].out --> myChannel --> server.gate$i[8];
         server.gate$o[8] --> myChannel --> rsu[8].in;
         rsu[9].out --> myChannel --> server.gate$i[9];
@@ -49,7 +51,7 @@ network VehicleRSUScenario extends Scenario
         server.gate$o[10] --> myChannel --> rsu[10].in;
         rsu[11].out --> myChannel --> server.gate$i[11];
         server.gate$o[11] --> myChannel --> rsu[11].in;
-        // For less RSUs, remove the ones below
+        // For 12 RSUs, remove the ones below
         rsu[12].out --> myChannel --> server.gate$i[12];
         server.gate$o[12] --> myChannel --> rsu[12].in;
         rsu[13].out --> myChannel --> server.gate$i[13];
