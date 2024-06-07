@@ -9,7 +9,7 @@ from python.src import models
 TIME_STEP = 5
 EXPERIMENT = 'FMNIST_wscc'
 METHOD = 'FedAvg'
-LOGS_PATH = 'python/experiments/' + EXPERIMENT + '/' + METHOD + '/logs/logs.txt'
+LOGS_PATH = 'python/experiments/' + EXPERIMENT + '/8RSU/' + METHOD + '/logs/logs.txt'
 THRESHOLD = 0.85
 NUMBER_OF_VEHICLES = 100
 

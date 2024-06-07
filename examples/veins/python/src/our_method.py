@@ -100,7 +100,7 @@ def _local_clustering(node_id, model, mw, X_valid, y_valid):
         #ccas = [metrics.cca(activations[i], ractivations[i], min(activations[i].shape[1], ractivations[i].shape[1])) for i in range(len(ractivations))]
 
         rfeatures.append(ckas)
-        #rfeatures.append([sum(ckas) / len(ckas)])
+        #rfeatures.append([sum(ckas) / len(ckas) if np.isfinite(sum(ckas) / len(ckas)) else 0.0])
         #rfeatures.append([cossim])
         rweights.append(rweight)
         senders.append(sender)
