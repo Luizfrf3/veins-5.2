@@ -23,11 +23,17 @@ def _cluster_aggregation(node_id, model):
 
     benchmark = random.randrange(len(nodes_data))
     bw = metrics.flatten(nodes_data[benchmark][1])
+    sender_benchmark = nodes_data[benchmark][0]
     cossims = []
     for sender, rweight in nodes_data:
+        #if sender == sender_benchmark:
+        #    continue
         cossim = metrics.cossim(bw, metrics.flatten(rweight))
         cossims.append([cossim])
     clustering = AffinityPropagation(damping=0.7, max_iter=2000).fit(cossims)
+    labels = clustering.labels_
+    #benchmark_cluster = clustering.predict([[1.0]])[0]
+    #labels.insert(benchmark, benchmark_cluster)
 
     #distances = []
     #for sender1, rweight1 in nodes_data:
@@ -38,23 +44,23 @@ def _cluster_aggregation(node_id, model):
     #        distancerow.append((1 - cossim) / 2)
     #    distances.append(distancerow)
     #clustering = AffinityPropagation(damping=0.7, max_iter=2000, affinity='precomputed').fit(distances)
+    #labels = clustering.labels_
 
-    #labels_ = []
+    #labels = []
     #for sender, rweight in nodes_data:
     #    sid = int(sender[1:])
     #    if sid < 30:
-    #        labels_.append(0)
+    #        labels.append(0)
     #    elif sid < 60:
-    #        labels_.append(1)
+    #        labels.append(1)
     #    elif sid < 90:
-    #        labels_.append(2)
+    #        labels.append(2)
     #    else:
-    #        labels_.append(3)
-    #clustering = type('',(object,),{'labels_':labels_})
+    #        labels.append(3)
 
     clusters_data = {}
-    for i in range(len(clustering.labels_)):
-        cluster = clustering.labels_[i]
+    for i in range(len(labels)):
+        cluster = labels[i]
         if cluster not in clusters_nodes[node_id]:
             clusters_nodes[node_id][cluster] = []
         clusters_nodes[node_id][cluster].append(nodes_data[i][0])
@@ -76,7 +82,7 @@ def _cluster_aggregation(node_id, model):
             cweights[i] = cweights[i] / size
         clusters_weights[node_id][cluster] = cweights
 
-    return max(clustering.labels_) + 1
+    return max(labels) + 1, sender_benchmark
 
 def _global_aggregation(node_id, model):
     weights = []
@@ -109,6 +115,7 @@ def aggregation(aggregation_round, node_id, sim_time, node_models):
     model = node_models[node_id]
 
     number_of_clusters = 0
+    sender_benchmark = ''
     participating_nodes[node_id] = []
     clusters_nodes[node_id] = {}
     clusters_weights[node_id] = {}
@@ -119,11 +126,11 @@ def aggregation(aggregation_round, node_id, sim_time, node_models):
 
     if len(received_weights[node_id]) > 0:
         participating_nodes[node_id] = list(received_weights[node_id].keys())
-        number_of_clusters = _cluster_aggregation(node_id, model)
+        number_of_clusters, sender_benchmark = _cluster_aggregation(node_id, model)
         weights = _global_aggregation(node_id, model)
         model.set_weights(weights)
 
-    logs_data = {'event': 'aggregation', 'node_id': node_id, 'sim_time': sim_time, 'aggregation_round': aggregation_round, 'number_of_received_models': len(received_weights[node_id]), 'number_of_clusters': number_of_clusters, 'participating_nodes': participating_nodes, 'clusters_nodes': clusters_nodes}
+    logs_data = {'event': 'aggregation', 'node_id': node_id, 'sim_time': sim_time, 'aggregation_round': aggregation_round, 'number_of_received_models': len(received_weights[node_id]), 'number_of_clusters': number_of_clusters, 'sender_benchmark': sender_benchmark, 'participating_nodes': participating_nodes, 'clusters_nodes': clusters_nodes}
     logs.register_log(logs_data)
 
     models.save_weights(node_id, model.get_weights())
