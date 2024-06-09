@@ -31,9 +31,9 @@ def _cluster_aggregation(node_id, model):
         cossim = metrics.cossim(bw, metrics.flatten(rweight))
         cossims.append([cossim])
     clustering = AffinityPropagation(damping=0.7, max_iter=2000).fit(cossims)
-    labels = clustering.labels_
+    labels = list(clustering.labels_)
     #benchmark_cluster = clustering.predict([[1.0]])[0]
-    #labels.insert(benchmark, benchmark_cluster)
+    #labels = np.insert(labels, benchmark, benchmark_cluster)
 
     #distances = []
     #for sender1, rweight1 in nodes_data:

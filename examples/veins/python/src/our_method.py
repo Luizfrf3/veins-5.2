@@ -105,11 +105,13 @@ def _local_clustering(node_id, model, mw, X_valid, y_valid):
         rweights.append(rweight)
         senders.append(sender)
 
+    #rfeatures.append(mfeatures)
     rfeatures = np.array(rfeatures)
     clustering = AffinityPropagation(damping=0.7, max_iter=2000).fit(rfeatures)
 
     vehicle_cluster = clustering.predict([mfeatures])[0]
     indexes = [i for i in range(len(clustering.labels_)) if clustering.labels_[i] == vehicle_cluster]
+    #indexes = [i for i in range(len(clustering.labels_) - 1) if clustering.labels_[i] == clustering.labels_[-1]]
     return [{'w': rweights[i], 'id': senders[i]} for i in indexes]
 
 def store_weights(raw_weights, dataset_size, node_id, sender_id):
