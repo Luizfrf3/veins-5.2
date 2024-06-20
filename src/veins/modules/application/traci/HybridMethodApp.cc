@@ -17,7 +17,7 @@ void HybridMethodApp::initialize(int stage)
     DemoBaseApplLayer::initialize(stage);
     if (stage == 0) {
         // Start training the model with local data
-        currentState = WAITING;
+        currentState = TRAINING;
         trainingRound = 0;
         numberOfReceivedModels = 0;
         numberOfReceivedModelsWhileTraining = 0;
@@ -71,14 +71,16 @@ void HybridMethodApp::onWSM(BaseFrame1609_4* frame)
             py::module_ learning = py::module_::import("learning");
             learning.attr("receive_global_model")(wsm->getWeights(), vehicleId, wsm->getSenderId(), simTime().dbl());
 
+            if (currentState == TRAINING) {
+                cancelAndDelete(trainingMessage);
+            }
+            cancelAndDelete(gossipModelMessage);
+
             findHost()->getDisplayString().setTagArg("i", 1, "red");
             currentState = TRAINING;
             receivedModelFromServer = true;
             numberOfReceivedModels = 0;
             numberOfReceivedModelsWhileTraining = 0;
-
-            cancelAndDelete(gossipModelMessage);
-            cancelAndDelete(trainingMessage);
 
             trainingMessage = new cMessage("Training local model");
             scheduleAt(simTime() + TRAINING_TIME - 3 + uniform(0.0, 5.0), trainingMessage);

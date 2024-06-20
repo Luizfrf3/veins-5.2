@@ -13,7 +13,9 @@ from python.src import constants, models, logs, metrics
 random.seed(constants.SEED)
 
 received_weights = {}
+received_weights_while_training = {}
 dataset_sizes = {}
+dataset_sizes_while_training = {}
 received_model_from_server = {}
 
 participating_nodes = {}
