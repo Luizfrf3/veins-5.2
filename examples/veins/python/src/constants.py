@@ -19,7 +19,8 @@ OUR_METHOD = 'Our Method'
 FED_AVG = 'FedAvg'
 FED_PROX = 'FedProx'
 WSCC = 'WSCC'
-EXPERIMENT = OUR_METHOD
+HYBRID_METHOD = 'Hybrid Method'
+EXPERIMENT = HYBRID_METHOD
 
 DATA_PATH = 'python/' + DATASET + '/data/'
 WEIGHTS_FOLDER = 'weights/'

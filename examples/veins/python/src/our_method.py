@@ -79,10 +79,10 @@ def _weighted_aggregation(node_id, model, mw, X_valid, y_valid):
 
 def _local_clustering(node_id, model, mw, X_valid, y_valid):
     #loss, accuracy = model.evaluate(X_valid, y_valid, verbose=0)
-    inter_model = keras.Model(inputs=model.input, outputs=models.get_outputs(model))
-    activations = [_preprocess_activations(act) for act in inter_model(X_valid)]
-    mfeatures = [1.0 for _ in range(len(activations))]
-    #mfeatures = [1.0]
+    #inter_model = keras.Model(inputs=model.input, outputs=models.get_outputs(model))
+    #activations = [_preprocess_activations(act) for act in inter_model(X_valid)]
+    #mfeatures = [1.0 for _ in range(len(activations))]
+    mfeatures = [1.0]
     #mfeatures = [1.0, 1.0, 1.0, loss, accuracy]
     #mfeatures = [metrics.cca(act, act, act.shape[1]) for act in activations]
 
@@ -90,18 +90,18 @@ def _local_clustering(node_id, model, mw, X_valid, y_valid):
     rweights = []
     senders = []
     for sender, rweight in received_weights[node_id].items():
-        rmodel.set_weights(rweight)
+        #rmodel.set_weights(rweight)
 
         #loss, accuracy = rmodel.evaluate(X_valid, y_valid, verbose=0)
-        #cossim = metrics.cossim(mw, metrics.flatten(rweight))
-        rinter_model = keras.Model(inputs=rmodel.input, outputs=models.get_outputs(rmodel))
-        ractivations = [_preprocess_activations(ract) for ract in rinter_model(X_valid)]
-        ckas = [metrics.cka(activations[i], ractivations[i]) for i in range(len(ractivations))]
+        cossim = metrics.cossim(mw, metrics.flatten(rweight))
+        #rinter_model = keras.Model(inputs=rmodel.input, outputs=models.get_outputs(rmodel))
+        #ractivations = [_preprocess_activations(ract) for ract in rinter_model(X_valid)]
+        #ckas = [metrics.cka(activations[i], ractivations[i]) for i in range(len(ractivations))]
         #ccas = [metrics.cca(activations[i], ractivations[i], min(activations[i].shape[1], ractivations[i].shape[1])) for i in range(len(ractivations))]
 
-        rfeatures.append(ckas)
+        #rfeatures.append(ckas)
         #rfeatures.append([sum(ckas) / len(ckas) if np.isfinite(sum(ckas) / len(ckas)) else 0.0])
-        #rfeatures.append([cossim])
+        rfeatures.append([cossim])
         rweights.append(rweight)
         senders.append(sender)
 

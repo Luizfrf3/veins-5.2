@@ -3,7 +3,7 @@ import logging
 import numpy as np
 from sklearn.model_selection import StratifiedKFold
 from tensorflow import keras
-from python.src import constants, models, logs, gossip_learning, our_method, fed_avg_fed_prox, wscc
+from python.src import constants, models, logs, gossip_learning, our_method, fed_avg_fed_prox, wscc, hybrid_method
 
 vehicle_data = {}
 node_models = {}
@@ -54,6 +54,8 @@ def train(node_id, training_round, sim_time):
         fed_avg_fed_prox.train(node_id, training_round, sim_time, vehicle_data, node_models)
     elif constants.EXPERIMENT == constants.WSCC:
         wscc.train(node_id, training_round, sim_time, vehicle_data, node_models)
+    elif constants.EXPERIMENT == constants.HYBRID_METHOD:
+        hybrid_method.train(node_id, training_round, sim_time, vehicle_data, node_models)
 
 def get_weights(node_id, sim_time):
     logs_data = {'event': 'get_weights', 'node_id': node_id, 'sim_time': sim_time}
@@ -85,6 +87,8 @@ def store_weights(raw_weights, dataset_size, node_id, sender_id, sim_time):
         fed_avg_fed_prox.store_weights(raw_weights, dataset_size, node_id, sender_id)
     elif constants.EXPERIMENT == constants.WSCC:
         wscc.store_weights(raw_weights, dataset_size, node_id, sender_id)
+    elif constants.EXPERIMENT == constants.HYBRID_METHOD:
+        hybrid_method.store_weights(raw_weights, dataset_size, node_id, sender_id)
 
 def store_weights_while_training(raw_weights, dataset_size, node_id, sender_id, sim_time):
     logs_data = {'event': 'store_weights_while_training', 'dataset_size': dataset_size, 'node_id': node_id, 'sim_time': sim_time, 'sender_id': sender_id}
@@ -92,6 +96,8 @@ def store_weights_while_training(raw_weights, dataset_size, node_id, sender_id, 
 
     if constants.EXPERIMENT == constants.OUR_METHOD:
         our_method.store_weights_while_training(raw_weights, dataset_size, node_id, sender_id)
+    elif constants.EXPERIMENT == constants.HYBRID_METHOD:
+        hybrid_method.store_weights_while_training(raw_weights, dataset_size, node_id, sender_id)
 
 def receive_global_model(raw_weights, node_id, sender_id, sim_time):
     if constants.EXPERIMENT == constants.FED_AVG:
@@ -100,6 +106,8 @@ def receive_global_model(raw_weights, node_id, sender_id, sim_time):
         fed_avg_fed_prox.receive_global_model(raw_weights, node_id, sender_id, sim_time, node_models)
     elif constants.EXPERIMENT == constants.WSCC:
         wscc.receive_global_model(raw_weights, node_id, sender_id, sim_time, node_models, vehicle_data)
+    elif constants.EXPERIMENT == constants.HYBRID_METHOD:
+        hybrid_method.receive_global_model(raw_weights, node_id, sender_id, sim_time, node_models, vehicle_data)
 
 def aggregation(aggregation_round, node_id, sim_time):
     if constants.EXPERIMENT == constants.FED_AVG:
@@ -108,6 +116,8 @@ def aggregation(aggregation_round, node_id, sim_time):
         fed_avg_fed_prox.aggregation(aggregation_round, node_id, sim_time, node_models)
     elif constants.EXPERIMENT == constants.WSCC:
         return wscc.aggregation(aggregation_round, node_id, sim_time, node_models)
+    elif constants.EXPERIMENT == constants.HYBRID_METHOD:
+        return hybrid_method.aggregation(aggregation_round, node_id, sim_time, node_models)
 
 def get_participating_nodes(node_id, sim_time):
     logs_data = {'event': 'get_participating_nodes', 'node_id': node_id, 'sim_time': sim_time}
@@ -115,6 +125,8 @@ def get_participating_nodes(node_id, sim_time):
 
     if constants.EXPERIMENT == constants.WSCC:
         return wscc.get_participating_nodes(node_id, sim_time)
+    elif constants.EXPERIMENT == constants.HYBRID_METHOD:
+        return hybrid_method.get_participating_nodes(node_id, sim_time)
 
 def get_cluster_weights(node_id, cluster, sim_time):
     logs_data = {'event': 'get_cluster_weights', 'node_id': node_id, 'cluster': cluster, 'sim_time': sim_time}
@@ -122,6 +134,8 @@ def get_cluster_weights(node_id, cluster, sim_time):
 
     if constants.EXPERIMENT == constants.WSCC:
         return wscc.get_cluster_weights(node_id, cluster, sim_time)
+    elif constants.EXPERIMENT == constants.HYBRID_METHOD:
+        return hybrid_method.get_cluster_weights(node_id, cluster, sim_time)
 
 def get_cluster_nodes(node_id, cluster, sim_time):
     logs_data = {'event': 'get_cluster_nodes', 'node_id': node_id, 'cluster': cluster, 'sim_time': sim_time}
@@ -129,3 +143,5 @@ def get_cluster_nodes(node_id, cluster, sim_time):
 
     if constants.EXPERIMENT == constants.WSCC:
         return wscc.get_cluster_nodes(node_id, cluster, sim_time)
+    elif constants.EXPERIMENT == constants.HYBRID_METHOD:
+        return hybrid_method.get_cluster_nodes(node_id, cluster, sim_time)
