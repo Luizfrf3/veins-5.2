@@ -79,8 +79,12 @@ void HybridMethodApp::onWSM(BaseFrame1609_4* frame)
 
             cancelAndDelete(gossipModelMessage);
             cancelAndDelete(trainingMessage);
+
             trainingMessage = new cMessage("Training local model");
             scheduleAt(simTime() + TRAINING_TIME - 3 + uniform(0.0, 5.0), trainingMessage);
+
+            gossipModelMessage = new cMessage("Send model to peers", GOSSIP_MODEL);
+            scheduleAt(simTime() + GOSSIP_ROUND_TIME + uniform(1.0, 2.0), gossipModelMessage);
         } else {
             std::cerr << "onWSM - Received model ignored because the vehicle belongs to another cluster" << std::endl;
         }
@@ -107,12 +111,12 @@ void HybridMethodApp::handleSelfMsg(cMessage* msg)
 
     switch (msg->getKind()) {
     case LOCAL_TRAINING: {
-        std::cout << "Node " << vehicleId << " ending training, round " << trainingRound << ", received models " << numberOfReceivedModels << std::endl;
 
         if (receivedModelFromServer == true) {
-            gossipModelMessage = new cMessage("Send model to peers", GOSSIP_MODEL);
-            scheduleAt(simTime() + GOSSIP_ROUND_TIME, gossipModelMessage);
+            std::cout << "Node " << vehicleId << " ending training, round " << trainingRound << std::endl;
             receivedModelFromServer = false;
+        } else {
+            std::cout << "Node " << vehicleId << " ending training, round " << trainingRound << ", received models " << numberOfReceivedModels << std::endl;
         }
 
         py::module_ learning = py::module_::import("learning");

@@ -1,9 +1,14 @@
 import logging
+import copy
+import math
 import random
 import numpy as np
 from tensorflow.python import keras
 from keras.preprocessing.image import ImageDataGenerator
 from sklearn.cluster import AffinityPropagation
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+from scipy.signal import argrelextrema
 from python.src import constants, models, logs, metrics
 random.seed(constants.SEED)
 
@@ -18,6 +23,101 @@ clusters_weights = {}
 rmodel = models.get_model()
 
 clean_time = [50]
+
+def _preprocess_activations(act):
+    result = np.array(act)
+    if len(act.shape) > 2:
+        result = result.reshape((act.shape[0], act.shape[1] * act.shape[2] * act.shape[3]))
+
+    #scaler = StandardScaler()
+    #scaler.fit(result)
+    #result = scaler.transform(result)
+
+    #pca = PCA(n_components=0.99)
+    #pca.fit(result)
+    #result = pca.transform(result)
+
+    return result
+
+def _weighted_aggregation(node_id, model, mw, X_valid, y_valid):
+    #loss, accuracy = model.evaluate(X_valid, y_valid, verbose=0)
+    #inter_model = keras.Model(inputs=model.input, outputs=models.get_outputs(model))
+    #activations = [_preprocess_activations(act) for act in inter_model(X_valid)]
+    #mfeatures = [1.0 for _ in range(len(activations))]
+    mfeatures = [1.0]
+    #mfeatures = [1.0, 1.0, 1.0, loss, accuracy]
+    #mfeatures = [metrics.cca(act, act, act.shape[1]) for act in activations]
+
+    result = []
+    for sender, rweight in received_weights[node_id].items():
+        #loss, accuracy = rmodel.evaluate(X_valid, y_valid, verbose=0)
+        cossim = metrics.cossim(mw, metrics.flatten(rweight))
+        #rmodel.set_weights(rweight)
+        #rinter_model = keras.Model(inputs=rmodel.input, outputs=models.get_outputs(rmodel))
+        #ractivations = [_preprocess_activations(ract) for ract in rinter_model(X_valid)]
+        #ckas = [metrics.cka(activations[i], ractivations[i]) for i in range(len(ractivations))]
+        #ccas = [metrics.cca(activations[i], ractivations[i], min(activations[i].shape[1], ractivations[i].shape[1])) for i in range(len(ractivations))]
+
+        result.append({
+            'w': rweight,
+            'f': (cossim + 1.0) / 2,
+            'id': sender
+        })
+
+    #result.sort(key=lambda r: r['f'], reverse=True)
+    #values = result[:math.ceil(len(result) / 4)]
+    #return values, mfeatures[0]
+
+    result.sort(key=lambda r: r['f'], reverse=False)
+    diff = [result[i]['f'] - result[i - 1]['f'] for i in range(1, len(result))]
+    rel_diff = [diff[i] / result[i]['f'] for i in range(len(diff))]
+    arg = argrelextrema(np.array(rel_diff), np.greater)[0]
+    values = result[arg[-1] + 1:] if len(arg) > 0 else result
+    #return values, mfeatures[0]
+
+    x = [values[i]['f'] for i in range(len(values))] + [1.0]
+    e_x = np.exp(x - np.max(x))
+    softmax = e_x / e_x.sum()
+    for i in range(len(values)):
+        values[i]['f'] = softmax[i]
+    return values, softmax[-1]
+
+def _local_clustering(node_id, model, mw, X_valid, y_valid):
+    #loss, accuracy = model.evaluate(X_valid, y_valid, verbose=0)
+    #inter_model = keras.Model(inputs=model.input, outputs=models.get_outputs(model))
+    #activations = [_preprocess_activations(act) for act in inter_model(X_valid)]
+    #mfeatures = [1.0 for _ in range(len(activations))]
+    mfeatures = [1.0]
+    #mfeatures = [1.0, 1.0, 1.0, loss, accuracy]
+    #mfeatures = [metrics.cca(act, act, act.shape[1]) for act in activations]
+
+    rfeatures = []
+    rweights = []
+    senders = []
+    for sender, rweight in received_weights[node_id].items():
+        #rmodel.set_weights(rweight)
+
+        #loss, accuracy = rmodel.evaluate(X_valid, y_valid, verbose=0)
+        cossim = metrics.cossim(mw, metrics.flatten(rweight))
+        #rinter_model = keras.Model(inputs=rmodel.input, outputs=models.get_outputs(rmodel))
+        #ractivations = [_preprocess_activations(ract) for ract in rinter_model(X_valid)]
+        #ckas = [metrics.cka(activations[i], ractivations[i]) for i in range(len(ractivations))]
+        #ccas = [metrics.cca(activations[i], ractivations[i], min(activations[i].shape[1], ractivations[i].shape[1])) for i in range(len(ractivations))]
+
+        #rfeatures.append(ckas)
+        #rfeatures.append([sum(ckas) / len(ckas) if np.isfinite(sum(ckas) / len(ckas)) else 0.0])
+        rfeatures.append([cossim])
+        rweights.append(rweight)
+        senders.append(sender)
+
+    #rfeatures.append(mfeatures)
+    rfeatures = np.array(rfeatures)
+    clustering = AffinityPropagation(damping=0.7, max_iter=2000).fit(rfeatures)
+
+    vehicle_cluster = clustering.predict([mfeatures])[0]
+    indexes = [i for i in range(len(clustering.labels_)) if clustering.labels_[i] == vehicle_cluster]
+    #indexes = [i for i in range(len(clustering.labels_) - 1) if clustering.labels_[i] == clustering.labels_[-1]]
+    return [{'w': rweights[i], 'id': senders[i]} for i in indexes]
 
 def _cluster_aggregation(node_id, model):
     nodes_data = list(received_weights[node_id].items())
@@ -183,9 +283,17 @@ def receive_global_model(raw_weights, node_id, sender_id, sim_time, node_models,
     #_, raccuracy = rmodel.evaluate(X_valid, y_valid, verbose=0)
     #if raccuracy >= maccuracy or abs(maccuracy - raccuracy) <= constants.THRESHOLD:
     #    model.set_weights(rweights)
+    #    received_weights[node_id] = {}
+    #    dataset_sizes[node_id] = {}
+    #    received_weights_while_training[node_id] = {}
+    #    dataset_sizes_while_training[node_id] = {}
     #    received_model_from_server[node_id] = True
     #    accepted_model = True
     model.set_weights(rweights)
+    received_weights[node_id] = {}
+    dataset_sizes[node_id] = {}
+    received_weights_while_training[node_id] = {}
+    dataset_sizes_while_training[node_id] = {}
     received_model_from_server[node_id] = True
     maccuracy = 0
     raccuracy = 0
@@ -213,7 +321,7 @@ def train(node_id, training_round, sim_time, vehicle_data, node_models):
     participating_nodes = []
     cluster_nodes = []
 
-    if not received_model_from_server and len(received_weights[node_id]) > 0:
+    if not received_model_from_server[node_id] and len(received_weights[node_id]) > 0:
         participating_nodes = [node for node in received_weights[node_id].keys()]
 
         clustered_weights = _local_clustering(node_id, model, metrics.flatten(mweights), X_valid, y_valid)
