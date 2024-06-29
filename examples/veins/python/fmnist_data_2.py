@@ -19,10 +19,16 @@ X = [[] for _ in range(num_clients)]
 y = [[] for _ in range(num_clients)]
 dataidx_map = {}
 
+least_samples = 64
+
 min_size = 0
 K = num_classes
 N = len(dataset_labels)
-while min_size < num_classes:
+
+try_cnt = 1
+while min_size < least_samples:
+    if try_cnt > 1:
+        print(f'Client data size does not meet the minimum requirement {least_samples}. Try allocating again for the {try_cnt}-th time.')
     idx_batch = [[] for _ in range(num_clients)]
     for k in range(K):
         idx_k = np.where(dataset_labels == k)[0]
@@ -33,6 +39,7 @@ while min_size < num_classes:
         proportions = (np.cumsum(proportions) * len(idx_k)).astype(int)[:-1]
         idx_batch = [idx_j + idx.tolist() for idx_j, idx in zip(idx_batch, np.split(idx_k, proportions))]
         min_size = min([len(idx_j) for idx_j in idx_batch])
+    try_cnt += 1
 
 for j in range(num_clients):
     dataidx_map[j] = idx_batch[j]

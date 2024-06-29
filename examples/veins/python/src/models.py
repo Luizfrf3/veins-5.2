@@ -1,3 +1,4 @@
+import os
 import gc
 import pickle
 import tensorflow as tf
@@ -7,6 +8,8 @@ from tensorflow.python.ops import standard_ops
 from tensorflow.python.keras import optimizer_v2
 from sklearn.metrics import balanced_accuracy_score
 from python.src import constants
+
+os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
 class BalancedAccuracyCallback(keras.callbacks.Callback):
 
