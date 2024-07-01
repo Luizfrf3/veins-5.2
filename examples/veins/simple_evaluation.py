@@ -7,9 +7,10 @@ from sklearn.metrics import balanced_accuracy_score
 from python.src import models
 
 TIME_STEP = 5
-EXPERIMENT = 'FMNIST_wscc'
+EXPERIMENT = 'FMNIST_dir'
 METHOD = 'FedAvg'
-LOGS_PATH = 'python/experiments/' + EXPERIMENT + '/8RSU/' + METHOD + '/logs/logs.txt'
+ENVIRONMENT = ''#'8RSU/'
+LOGS_PATH = 'python/experiments/' + EXPERIMENT + '/' + ENVIRONMENT + METHOD + '/logs/logs.txt'
 THRESHOLD = 0.85
 NUMBER_OF_VEHICLES = 100
 
