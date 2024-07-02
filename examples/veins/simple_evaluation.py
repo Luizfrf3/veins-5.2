@@ -7,7 +7,7 @@ from sklearn.metrics import balanced_accuracy_score
 from python.src import models
 
 TIME_STEP = 5
-EXPERIMENT = 'FMNIST_dir'
+EXPERIMENT = 'CIFAR10_dir'
 METHOD = 'FedAvg'
 ENVIRONMENT = ''#'8RSU/'
 LOGS_PATH = 'python/experiments/' + EXPERIMENT + '/' + ENVIRONMENT + METHOD + '/logs/logs.txt'

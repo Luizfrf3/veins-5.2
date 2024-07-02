@@ -51,9 +51,9 @@ for client in range(num_clients):
 
 for i in range(len(y)):
     x_train, x_test, y_train, y_test = train_test_split(X[i], y[i], train_size=0.8, shuffle=True)
-    images_train = np.expand_dims(np.array(x_train, dtype=np.float32), -1)
+    images_train = np.array(x_train, dtype=np.float32)
     labels_train = np.array(y_train, dtype=np.float32)
-    images_test = np.expand_dims(np.array(x_test, dtype=np.float32), -1)
+    images_test = np.array(x_test, dtype=np.float32)
     labels_test = np.array(y_test, dtype=np.float32)
     name = 'CIFAR10/data/v' + str(i) + '_data.npz'
     np.savez(
