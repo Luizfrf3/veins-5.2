@@ -1,12 +1,12 @@
+import cv2
 import numpy as np
 import pandas as pd
-import cv2
 from sklearn.model_selection import train_test_split
 np.random.seed(42)
 
 num_classes = 43
 num_clients = 100
-alpha = 0.1
+alpha = 0.9
 
 def read_data(path):
     df = pd.read_csv(path)
@@ -44,10 +44,16 @@ X = [[] for _ in range(num_clients)]
 y = [[] for _ in range(num_clients)]
 dataidx_map = {}
 
+least_samples = 64
+
 min_size = 0
 K = num_classes
 N = len(dataset_labels)
+
+try_cnt = 1
 while min_size < num_classes:
+    if try_cnt > 1:
+        print(f'Client data size does not meet the minimum requirement {least_samples}. Try allocating again for the {try_cnt}-th time.')
     idx_batch = [[] for _ in range(num_clients)]
     for k in range(K):
         idx_k = np.where(dataset_labels == k)[0]
@@ -58,6 +64,7 @@ while min_size < num_classes:
         proportions = (np.cumsum(proportions) * len(idx_k)).astype(int)[:-1]
         idx_batch = [idx_j + idx.tolist() for idx_j, idx in zip(idx_batch, np.split(idx_k, proportions))]
         min_size = min([len(idx_j) for idx_j in idx_batch])
+    try_cnt += 1
 
 for j in range(num_clients):
     dataidx_map[j] = idx_batch[j]

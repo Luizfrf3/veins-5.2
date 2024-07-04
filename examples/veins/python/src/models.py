@@ -34,6 +34,9 @@ class BalancedAccuracyCallback(keras.callbacks.Callback):
 def get_model():
     model = None
 
+    # FLIS: MNIST, FMNIST, CIFAR10
+    # IFCA: FEMNIST
+    # MicronNet: GTSRB
     if constants.DATASET in (constants.MNIST, constants.FMNIST):
         model = keras.Sequential(
             [
@@ -72,31 +75,31 @@ def get_model():
         model = keras.Sequential(
             [
                 keras.Input(shape=(28, 28, 1)),
-                layers.Conv2D(32, kernel_size=(5, 5), padding="same", activation="relu"),
+                layers.Conv2D(32, kernel_size=(5, 5), padding="same", name="conv0", activation="relu"),
                 layers.MaxPooling2D(pool_size=(2, 2), strides=(2, 2)),
-                layers.Conv2D(64, kernel_size=(5, 5), padding="same", activation="relu"),
+                layers.Conv2D(64, kernel_size=(5, 5), padding="same", name="conv1", activation="relu"),
                 layers.MaxPooling2D(pool_size=(2, 2), strides=(2, 2)),
                 layers.Flatten(),
-                layers.Dense(2048, activation="relu"),
+                layers.Dense(2048, name="dense0", activation="relu"),
                 layers.Dropout(0.5),
-                layers.Dense(62, name="final_dense", activation="softmax")
+                layers.Dense(62, name="dense1", activation="softmax")
             ]
         )
     elif constants.DATASET == constants.GTSRB:
         model = keras.Sequential(
             [
                 keras.Input(shape=(48, 48, 3)),
-                layers.Conv2D(1, kernel_size=(1, 1), padding="same", activation="relu"),
-                layers.Conv2D(29, kernel_size=(5, 5), padding="same", activation="relu"),
+                layers.Conv2D(1, kernel_size=(1, 1), padding="same", name="conv0", activation="relu"),
+                layers.Conv2D(29, kernel_size=(5, 5), padding="same", name="conv1", activation="relu"),
                 layers.MaxPooling2D(pool_size=(3, 3), strides=(2, 2)),
-                layers.Conv2D(59, kernel_size=(3, 3), padding="same", activation="relu"),
+                layers.Conv2D(59, kernel_size=(3, 3), padding="same", name="conv2", activation="relu"),
                 layers.MaxPooling2D(pool_size=(3, 3), strides=(2, 2)),
-                layers.Conv2D(74, kernel_size=(3, 3), padding="same", activation="relu"),
+                layers.Conv2D(74, kernel_size=(3, 3), padding="same", name="conv3", activation="relu"),
                 layers.MaxPooling2D(pool_size=(3, 3), strides=(2, 2)),
                 layers.Flatten(),
-                layers.Dense(300, activation="relu"),
+                layers.Dense(300, name="dense0", activation="relu"),
                 layers.Dropout(0.5),
-                layers.Dense(43, name="final_dense", activation="softmax")
+                layers.Dense(43, name="dense1", activation="softmax")
             ]
         )
 
@@ -117,6 +120,22 @@ def get_outputs(model):
             model.get_layer("dense0").output,
             model.get_layer("dense1").output,
             model.get_layer("dense2").output
+        ]
+    elif constants.DATASET == constants.FEMNIST:
+        outputs = [
+            model.get_layer("conv0").output,
+            model.get_layer("conv1").output,
+            model.get_layer("dense0").output,
+            model.get_layer("dense1").output
+        ]
+    elif constants.DATASET == constants.GTSRB:
+        outputs = [
+            model.get_layer("conv0").output,
+            model.get_layer("conv1").output,
+            model.get_layer("conv2").output,
+            model.get_layer("conv3").output,
+            model.get_layer("dense0").output,
+            model.get_layer("dense1").output
         ]
 
     return outputs
