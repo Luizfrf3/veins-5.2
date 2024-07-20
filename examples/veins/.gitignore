@@ -20,6 +20,7 @@ venv/
 weights/
 logs/
 data/
+tmp/
 
 __pycache__/
 *.py[cod]

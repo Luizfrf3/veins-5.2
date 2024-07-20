@@ -49,8 +49,8 @@ CentralServer::~CentralServer()
 
 void CentralServer::initialize()
 {
-    system("rm -rf weights logs data");
-    system("mkdir weights logs data");
+    system("rm -rf weights logs data tmp");
+    system("mkdir weights logs data tmp");
     py::initialize_interpreter();
 
     numberOfRSUs = getSimulation()->getModuleByPath("rsu[*]")->getVectorSize();

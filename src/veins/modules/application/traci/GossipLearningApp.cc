@@ -22,8 +22,8 @@ void GossipLearningApp::initialize(int stage)
 
         vehicleId = mobility->getExternalId();
         if (vehicleId.compare("v0") == 0) {
-            system("rm -rf weights logs data");
-            system("mkdir weights logs data");
+            system("rm -rf weights logs data tmp");
+            system("mkdir weights logs data tmp");
             py::initialize_interpreter();
         }
     } else if (stage == 1) {

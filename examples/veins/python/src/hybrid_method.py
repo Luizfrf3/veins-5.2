@@ -225,7 +225,7 @@ def store_weights_while_training(raw_weights, dataset_size, node_id, sender_id):
     dataset_sizes_while_training[node_id][sender_id] = dataset_size
 
 def aggregation(aggregation_round, node_id, sim_time, node_models):
-    model = node_models[node_id]
+    model = models.handle_read_model(node_id, node_models)
 
     number_of_clusters = 0
     sender_benchmark = ''
@@ -248,7 +248,7 @@ def aggregation(aggregation_round, node_id, sim_time, node_models):
     logs.register_log(logs_data)
 
     models.save_weights(node_id, model.get_weights())
-    node_models[node_id] = model
+    models.handle_save_model(node_id, model, node_models)
 
     received_weights[node_id] = {}
     dataset_sizes[node_id] = {}
@@ -278,7 +278,7 @@ def receive_global_model(raw_weights, node_id, sender_id, sim_time, node_models,
         received_model_from_server[node_id] = False
 
     accepted_model = False
-    model = node_models[node_id]
+    model = models.handle_read_model(node_id, node_models)
     rweights = models.decode_weights(raw_weights)
     #rmodel.set_weights(rweights)
     #_, maccuracy = model.evaluate(X_valid, y_valid, verbose=0)
@@ -299,6 +299,7 @@ def receive_global_model(raw_weights, node_id, sender_id, sim_time, node_models,
     received_model_from_server[node_id] = True
     maccuracy = 0
     raccuracy = 0
+    models.handle_save_model(node_id, model, node_models)
 
     logs_data = {'event': 'receive_global_model', 'node_id': node_id, 'sim_time': sim_time, 'sender_id': sender_id, 'accepted_model': accepted_model, 'maccuracy': maccuracy, 'raccuracy': raccuracy}
     logs.register_log(logs_data)
@@ -308,7 +309,7 @@ def train(node_id, training_round, sim_time, vehicle_data, node_models):
     X_valid, y_valid = vehicle_data[node_id]['valid']
 
     accepted_model = False
-    model = node_models[node_id]
+    model = models.handle_read_model(node_id, node_models)
     mweights = model.get_weights()
 
     if node_id not in received_weights.keys():
@@ -364,6 +365,7 @@ def train(node_id, training_round, sim_time, vehicle_data, node_models):
 
     if constants.DATA_AUGMENTATION:
         datagen = ImageDataGenerator(zoom_range=0.2, horizontal_flip=True)
+        #datagen = ImageDataGenerator(zoom_range=0.2, rotation_range=45, width_shift_range=0.2, height_shift_range=0.2)
         datagen.fit(X_train)
         history = model.fit(datagen.flow(X_train, y_train, batch_size=constants.BATCH_SIZE), steps_per_epoch = constants.EPOCHS * X_train.shape[0] / 50, validation_data=(X_valid, y_valid), callbacks=[models.BalancedAccuracyCallback(X_train, y_train, X_valid, y_valid)], verbose=0)
     else:
@@ -374,7 +376,7 @@ def train(node_id, training_round, sim_time, vehicle_data, node_models):
     logs.register_log(logs_data)
 
     models.save_weights(node_id, model.get_weights())
-    node_models[node_id] = model
+    models.handle_save_model(node_id, model, node_models)
 
     received_weights[node_id] = copy.deepcopy(received_weights_while_training[node_id])
     dataset_sizes[node_id] = copy.deepcopy(dataset_sizes_while_training[node_id])

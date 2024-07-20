@@ -35,8 +35,7 @@ def get_model():
     model = None
 
     # FLIS: MNIST, FMNIST, CIFAR10
-    # IFCA: FEMNIST
-    # MicronNet: GTSRB
+    # MicronNet: FEMNIST, GTSRB
     if constants.DATASET in (constants.MNIST, constants.FMNIST):
         model = keras.Sequential(
             [
@@ -75,12 +74,16 @@ def get_model():
         model = keras.Sequential(
             [
                 keras.Input(shape=(28, 28, 1)),
-                layers.Conv2D(32, kernel_size=(5, 5), padding="same", name="conv0", activation="relu"),
-                layers.MaxPooling2D(pool_size=(2, 2), strides=(2, 2)),
-                layers.Conv2D(64, kernel_size=(5, 5), padding="same", name="conv1", activation="relu"),
-                layers.MaxPooling2D(pool_size=(2, 2), strides=(2, 2)),
+                layers.Conv2D(1, kernel_size=(1, 1), padding="same", name="conv0", activation="relu"),
+                layers.Conv2D(29, kernel_size=(5, 5), padding="same", name="conv1", activation="relu"),
+                layers.MaxPooling2D(pool_size=(3, 3), strides=(2, 2)),
+                layers.Conv2D(59, kernel_size=(3, 3), padding="same", name="conv2", activation="relu"),
+                layers.MaxPooling2D(pool_size=(3, 3), strides=(2, 2)),
+                layers.Conv2D(74, kernel_size=(3, 3), padding="same", name="conv3", activation="relu"),
+                layers.MaxPooling2D(pool_size=(3, 3), strides=(2, 2)),
                 layers.Flatten(),
-                layers.Dense(2048, name="dense0", activation="relu"),
+                layers.Dropout(0.5),
+                layers.Dense(300, name="dense0", activation="relu"),
                 layers.Dropout(0.5),
                 layers.Dense(62, name="dense1", activation="softmax")
             ]
@@ -97,6 +100,7 @@ def get_model():
                 layers.Conv2D(74, kernel_size=(3, 3), padding="same", name="conv3", activation="relu"),
                 layers.MaxPooling2D(pool_size=(3, 3), strides=(2, 2)),
                 layers.Flatten(),
+                layers.Dropout(0.5),
                 layers.Dense(300, name="dense0", activation="relu"),
                 layers.Dropout(0.5),
                 layers.Dense(43, name="dense1", activation="softmax")
@@ -104,9 +108,9 @@ def get_model():
         )
 
     if constants.EXPERIMENT == constants.FED_PROX:
-        model.compile(loss="categorical_crossentropy", optimizer=FedProxOptimizer(), metrics=["accuracy"])
+        model.compile(loss="categorical_crossentropy", optimizer=FedProxOptimizer(learning_rate=constants.LEARNING_RATE), metrics=["accuracy"])
     else:
-        model.compile(loss="categorical_crossentropy", optimizer="adam", metrics=["accuracy"])
+        model.compile(loss="categorical_crossentropy", optimizer=optimizer_v2.adam.Adam(learning_rate=constants.LEARNING_RATE), metrics=["accuracy"])
 
     return model
 
@@ -121,14 +125,7 @@ def get_outputs(model):
             model.get_layer("dense1").output,
             model.get_layer("dense2").output
         ]
-    elif constants.DATASET == constants.FEMNIST:
-        outputs = [
-            model.get_layer("conv0").output,
-            model.get_layer("conv1").output,
-            model.get_layer("dense0").output,
-            model.get_layer("dense1").output
-        ]
-    elif constants.DATASET == constants.GTSRB:
+    elif constants.DATASET in (constants.FEMNIST, constants.GTSRB):
         outputs = [
             model.get_layer("conv0").output,
             model.get_layer("conv1").output,
@@ -140,8 +137,8 @@ def get_outputs(model):
 
     return outputs
 
-def save_weights(car_id, weights):
-    weights_path = constants.WEIGHTS_FOLDER + car_id + constants.WEIGHTS_FILE_SUFFIX
+def save_weights(node_id, weights):
+    weights_path = constants.WEIGHTS_FOLDER + node_id + constants.WEIGHTS_FILE_SUFFIX
     with open(weights_path, 'wb') as weights_file:
         pickle.dump(weights, weights_file)
 
@@ -163,10 +160,26 @@ def clear_session():
     keras.backend.clear_session()
     gc.collect()
 
+def handle_save_model(node_id, model, node_models):
+    if constants.ENABLE_TMP_FOLDER:
+        tmp_path = constants.TMP_FOLDER + node_id + constants.TMP_FILE_SUFFIX
+        with open(tmp_path, 'wb') as tmp_file:
+            pickle.dump(model, tmp_file)
+    else:
+        node_models[node_id] = model
+
+def handle_read_model(node_id, node_models):
+    if constants.ENABLE_TMP_FOLDER:
+        tmp_path = constants.TMP_FOLDER + node_id + constants.TMP_FILE_SUFFIX
+        with open(tmp_path, 'rb') as tmp_file:
+            return pickle.load(tmp_file)
+    else:
+        return node_models[node_id]
+
 @tf.keras.utils.register_keras_serializable()
 class FedProxOptimizer(optimizer_v2.optimizer_v2.OptimizerV2):
 
-    def __init__(self, learning_rate=0.01, mu=0.01, name='FedProxOptimizer', **kwargs):
+    def __init__(self, learning_rate=0.001, mu=0.01, name='FedProxOptimizer', **kwargs):
         super().__init__(name=name, **kwargs)
 
         self._set_hyper('learning_rate', learning_rate)

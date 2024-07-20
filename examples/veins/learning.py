@@ -32,13 +32,13 @@ def init(node_id, sim_time):
             )
             logging.warning('Dataset preparation finished')
 
-            node_models[node_id] = models.get_model()
+            models.handle_save_model(node_id, models.get_model(), node_models)
 
             logs_data = {'event': 'init', 'node_id': node_id, 'sim_time': sim_time}
             logs.register_log(logs_data)
 
 def init_server(node_id, sim_time):
-    node_models[node_id] = models.get_model()
+    models.handle_save_model(node_id, models.get_model(), node_models)
 
     logs_data = {'event': 'init_server', 'node_id': node_id, 'sim_time': sim_time}
     logs.register_log(logs_data)
@@ -61,7 +61,7 @@ def get_weights(node_id, sim_time):
     logs_data = {'event': 'get_weights', 'node_id': node_id, 'sim_time': sim_time}
     logs.register_log(logs_data)
 
-    model = node_models[node_id]
+    model = models.handle_read_model(node_id, node_models)
     return models.encode_weights(model.get_weights())
 
 def get_dataset_size(node_id):

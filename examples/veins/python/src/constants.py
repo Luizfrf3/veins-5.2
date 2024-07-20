@@ -5,6 +5,7 @@ SPLIT = 0
 EPOCHS = 1
 BATCH_SIZE = 50
 DATA_AUGMENTATION = False
+LEARNING_RATE = 0.001
 keras.utils.set_random_seed(SEED)
 
 MNIST = 'MNIST'
@@ -27,5 +28,9 @@ WEIGHTS_FOLDER = 'weights/'
 WEIGHTS_FILE_SUFFIX = '_weights.pickle'
 LOGS_PATH = 'logs/logs.txt'
 DATA_GENERATED_FOLDER = 'data/'
+TMP_FOLDER = 'tmp/'
+TMP_FILE_SUFFIX = '.pickle'
 
 THRESHOLD = 0.1
+
+ENABLE_TMP_FOLDER = False
