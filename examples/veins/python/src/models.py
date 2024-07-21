@@ -157,7 +157,7 @@ def encode_weights(weights, node_id):
 
 def decode_weights(raw_weights, sender_id):
     if constants.ENABLE_TMP_FOLDER:
-        weights_path = constants.TMP_FOLDER + node_id + constants.TMP_FILE_SUFFIX
+        weights_path = constants.TMP_FOLDER + sender_id + constants.TMP_FILE_SUFFIX
         with open(weights_path, 'rb') as weights_file:
             return pickle.load(weights_file)
     else:

@@ -97,7 +97,7 @@ void HybridMethodServer::handleMessage(cMessage *msg)
             for (int i = 0; i < numberOfRSUs; i++) {
                 veins::AppMessage* appMsg = new veins::AppMessage();
                 appMsg->setWeights(weights.c_str());
-                appMsg->setSenderId("global");
+                appMsg->setSenderId(SERVER);
                 appMsg->setParticipatingNodes("");
                 appMsg->setClusterNodes("");
                 send(appMsg, "gate$o", i);
@@ -114,9 +114,9 @@ void HybridMethodServer::handleMessage(cMessage *msg)
                     veins::AppMessage* appMsg = new veins::AppMessage();
                     appMsg->setWeights(weights.c_str());
                     if (i == -1) {
-                        appMsg->setSenderId("global");
+                        appMsg->setSenderId(SERVER);
                     } else {
-                        appMsg->setSenderId(i);
+                        appMsg->setSenderId(std::to_string(i).c_str());
                     }
                     appMsg->setParticipatingNodes(participatingNodes.c_str());
                     appMsg->setClusterNodes(clusterNodes.c_str());

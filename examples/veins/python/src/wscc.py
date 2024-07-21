@@ -145,7 +145,7 @@ def get_participating_nodes(node_id, sim_time):
     return ','.join(participating_nodes[node_id])
 
 def get_cluster_weights(node_id, cluster, sim_time):
-    return models.encode_weights(clusters_weights[node_id][cluster], cluster)
+    return models.encode_weights(clusters_weights[node_id][cluster], 'server' if cluster == -1 else cluster)
 
 def get_cluster_nodes(node_id, cluster, sim_time):
     return ','.join(clusters_nodes[node_id][cluster])
