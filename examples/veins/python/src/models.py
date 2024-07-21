@@ -142,39 +142,34 @@ def save_weights(node_id, weights):
     with open(weights_path, 'wb') as weights_file:
         pickle.dump(weights, weights_file)
 
-def encode_weights(weights):
-    weights_bytes = pickle.dumps(weights)
-    raw_weights = ''
-    for byte in weights_bytes:
-        raw_weights += str(byte) + ','
-    return raw_weights[:-1]
+def encode_weights(weights, node_id):
+    if constants.ENABLE_TMP_FOLDER:
+        weights_path = constants.TMP_FOLDER + node_id + constants.TMP_FILE_SUFFIX
+        with open(weights_path, 'wb') as weights_file:
+            pickle.dump(weights, weights_file)
+        return ''
+    else:
+        weights_bytes = pickle.dumps(weights)
+        raw_weights = ''
+        for byte in weights_bytes:
+            raw_weights += str(byte) + ','
+        return raw_weights[:-1]
 
-def decode_weights(raw_weights):
-    byte_list = []
-    for byte_str in raw_weights.split(','):
-        byte_list.append(int(byte_str))
-    weights_bytes = bytes(byte_list)
-    return pickle.loads(weights_bytes)
+def decode_weights(raw_weights, sender_id):
+    if constants.ENABLE_TMP_FOLDER:
+        weights_path = constants.TMP_FOLDER + node_id + constants.TMP_FILE_SUFFIX
+        with open(weights_path, 'rb') as weights_file:
+            return pickle.load(weights_file)
+    else:
+        byte_list = []
+        for byte_str in raw_weights.split(','):
+            byte_list.append(int(byte_str))
+        weights_bytes = bytes(byte_list)
+        return pickle.loads(weights_bytes)
 
 def clear_session():
     keras.backend.clear_session()
     gc.collect()
-
-def handle_save_model(node_id, model, node_models):
-    if constants.ENABLE_TMP_FOLDER:
-        tmp_path = constants.TMP_FOLDER + node_id + constants.TMP_FILE_SUFFIX
-        with open(tmp_path, 'wb') as tmp_file:
-            pickle.dump(model, tmp_file)
-    else:
-        node_models[node_id] = model
-
-def handle_read_model(node_id, node_models):
-    if constants.ENABLE_TMP_FOLDER:
-        tmp_path = constants.TMP_FOLDER + node_id + constants.TMP_FILE_SUFFIX
-        with open(tmp_path, 'rb') as tmp_file:
-            return pickle.load(tmp_file)
-    else:
-        return node_models[node_id]
 
 @tf.keras.utils.register_keras_serializable()
 class FedProxOptimizer(optimizer_v2.optimizer_v2.OptimizerV2):

@@ -7,10 +7,10 @@ from python.src import constants, models, logs
 received_weights = {}
 dataset_sizes = {}
 
-clean_time = [50]
+clean_time = [constants.CLEAR_TIME]
 
 def store_weights(raw_weights, dataset_size, node_id, sender_id):
-    weights = models.decode_weights(raw_weights)
+    weights = models.decode_weights(raw_weights, sender_id)
     if node_id not in received_weights.keys():
         received_weights[node_id] = {}
         dataset_sizes[node_id] = {}
@@ -18,7 +18,7 @@ def store_weights(raw_weights, dataset_size, node_id, sender_id):
     dataset_sizes[node_id][sender_id] = dataset_size
 
 def aggregation(aggregation_round, node_id, sim_time, node_models):
-    model = models.handle_read_model(node_id, node_models)
+    model = node_models[node_id]
 
     if node_id not in received_weights.keys():
         received_weights[node_id] = {}
@@ -42,7 +42,7 @@ def aggregation(aggregation_round, node_id, sim_time, node_models):
     logs.register_log(logs_data)
 
     models.save_weights(node_id, model.get_weights())
-    models.handle_save_model(node_id, model, node_models)
+    node_models[node_id] = model
 
     received_weights[node_id] = {}
     dataset_sizes[node_id] = {}
@@ -51,16 +51,16 @@ def receive_global_model(raw_weights, node_id, sender_id, sim_time, node_models)
     logs_data = {'event': 'receive_global_model', 'node_id': node_id, 'sim_time': sim_time, 'sender_id': sender_id}
     logs.register_log(logs_data)
 
-    model = models.handle_read_model(node_id, node_models)
-    weights = models.decode_weights(raw_weights)
+    model = node_models[node_id]
+    weights = models.decode_weights(raw_weights, sender_id)
     model.set_weights(weights)
-    models.handle_save_model(node_id, model, node_models)
+    node_models[node_id] = model
 
 def train(node_id, training_round, sim_time, vehicle_data, node_models):
     X_train, y_train = vehicle_data[node_id]['train']
     X_valid, y_valid = vehicle_data[node_id]['valid']
 
-    model = models.handle_read_model(node_id, node_models)
+    model = node_models[node_id]
     if constants.DATA_AUGMENTATION:
         datagen = ImageDataGenerator(zoom_range=0.2, horizontal_flip=True)
         #datagen = ImageDataGenerator(zoom_range=0.2, rotation_range=45, width_shift_range=0.2, height_shift_range=0.2)
@@ -74,9 +74,9 @@ def train(node_id, training_round, sim_time, vehicle_data, node_models):
     logs.register_log(logs_data)
 
     models.save_weights(node_id, model.get_weights())
-    models.handle_save_model(node_id, model, node_models)
+    node_models[node_id] = model
 
     if sim_time >= clean_time[0]:
         logging.warning('Clearing Keras session')
         models.clear_session()
-        clean_time[0] = clean_time[0] + 50
+        clean_time[0] = clean_time[0] + constants.CLEAR_TIME

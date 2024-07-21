@@ -116,7 +116,7 @@ void HybridMethodServer::handleMessage(cMessage *msg)
                     if (i == -1) {
                         appMsg->setSenderId("global");
                     } else {
-                        appMsg->setSenderId(SERVER.c_str());
+                        appMsg->setSenderId(i);
                     }
                     appMsg->setParticipatingNodes(participatingNodes.c_str());
                     appMsg->setClusterNodes(clusterNodes.c_str());

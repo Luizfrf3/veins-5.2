@@ -3,13 +3,13 @@ from tensorflow.python import keras
 from keras.preprocessing.image import ImageDataGenerator
 from python.src import constants, models, logs
 
-clean_time = [50]
+clean_time = [constants.CLEAR_TIME]
 
 def train(node_id, training_round, sim_time, vehicle_data, node_models):
     X_train, y_train = vehicle_data[node_id]['train']
     X_valid, y_valid = vehicle_data[node_id]['valid']
 
-    model = models.handle_read_model(node_id, node_models)
+    model = node_models[node_id]
     if constants.DATA_AUGMENTATION:
         datagen = ImageDataGenerator(zoom_range=0.2, horizontal_flip=True)
         #datagen = ImageDataGenerator(zoom_range=0.2, rotation_range=45, width_shift_range=0.2, height_shift_range=0.2)
@@ -23,19 +23,19 @@ def train(node_id, training_round, sim_time, vehicle_data, node_models):
     logs.register_log(logs_data)
 
     models.save_weights(node_id, model.get_weights())
-    models.handle_save_model(node_id, model, node_models)
+    node_models[node_id] = model
 
     if sim_time >= clean_time[0]:
         logging.warning('Clearing Keras session')
         models.clear_session()
-        clean_time[0] = clean_time[0] + 50
+        clean_time[0] = clean_time[0] + constants.CLEAR_TIME
 
-def merge(raw_weights, dataset_size, node_id, vehicle_data, node_models):
+def merge(raw_weights, dataset_size, node_id, sender_id, vehicle_data, node_models):
     size = len(vehicle_data[node_id]['train'][0])
-    model = models.handle_read_model(node_id, node_models)
-    received_weights = models.decode_weights(raw_weights)
+    model = node_models[node_id]
+    received_weights = models.decode_weights(raw_weights, sender_id)
     weights = model.get_weights()
     for i in range(len(weights)):
         weights[i] = (weights[i] * size + received_weights[i] * dataset_size) / (size + dataset_size)
     model.set_weights(weights)
-    models.handle_save_model(node_id, model, node_models)
+    node_models[node_id] = model

@@ -32,13 +32,13 @@ def init(node_id, sim_time):
             )
             logging.warning('Dataset preparation finished')
 
-            models.handle_save_model(node_id, models.get_model(), node_models)
+            node_models[node_id] = models.get_model()
 
             logs_data = {'event': 'init', 'node_id': node_id, 'sim_time': sim_time}
             logs.register_log(logs_data)
 
 def init_server(node_id, sim_time):
-    models.handle_save_model(node_id, models.get_model(), node_models)
+    node_models[node_id] = models.get_model()
 
     logs_data = {'event': 'init_server', 'node_id': node_id, 'sim_time': sim_time}
     logs.register_log(logs_data)
@@ -61,8 +61,8 @@ def get_weights(node_id, sim_time):
     logs_data = {'event': 'get_weights', 'node_id': node_id, 'sim_time': sim_time}
     logs.register_log(logs_data)
 
-    model = models.handle_read_model(node_id, node_models)
-    return models.encode_weights(model.get_weights())
+    model = node_models[node_id]
+    return models.encode_weights(model.get_weights(), node_id)
 
 def get_dataset_size(node_id):
     return len(vehicle_data[node_id]['train'][0])
@@ -73,7 +73,7 @@ def merge(raw_weights, dataset_size, node_id, sender_id, sim_time):
     logs.register_log(logs_data)
 
     if constants.EXPERIMENT == constants.GOSSIP_LEARNING:
-        gossip_learning.merge(raw_weights, dataset_size, node_id, vehicle_data, node_models)
+        gossip_learning.merge(raw_weights, dataset_size, node_id, sender_id, vehicle_data, node_models)
 
 def store_weights(raw_weights, dataset_size, node_id, sender_id, sim_time):
     logs_data = {'event': 'store_weights', 'dataset_size': dataset_size, 'node_id': node_id, 'sim_time': sim_time, 'sender_id': sender_id}

@@ -15,7 +15,7 @@ received_weights_while_training = {}
 dataset_sizes = {}
 dataset_sizes_while_training = {}
 
-clean_time = [50]
+clean_time = [constants.CLEAR_TIME]
 
 rmodel = models.get_model()
 
@@ -115,7 +115,7 @@ def _local_clustering(node_id, model, mw, X_valid, y_valid):
     return [{'w': rweights[i], 'id': senders[i]} for i in indexes]
 
 def store_weights(raw_weights, dataset_size, node_id, sender_id):
-    weights = models.decode_weights(raw_weights)
+    weights = models.decode_weights(raw_weights, sender_id)
     if node_id not in received_weights.keys():
         received_weights[node_id] = {}
         dataset_sizes[node_id] = {}
@@ -127,7 +127,7 @@ def store_weights(raw_weights, dataset_size, node_id, sender_id):
     dataset_sizes[node_id][sender_id] = dataset_size
 
 def store_weights_while_training(raw_weights, dataset_size, node_id, sender_id):
-    weights = models.decode_weights(raw_weights)
+    weights = models.decode_weights(raw_weights, sender_id)
     if node_id not in received_weights_while_training.keys():
         received_weights_while_training[node_id] = {}
         dataset_sizes_while_training[node_id] = {}
@@ -143,7 +143,7 @@ def train(node_id, training_round, sim_time, vehicle_data, node_models):
     X_valid, y_valid = vehicle_data[node_id]['valid']
 
     accepted_model = False
-    model = models.handle_read_model(node_id, node_models)
+    model = node_models[node_id]
     mweights = model.get_weights()
 
     if node_id not in received_weights.keys():
@@ -208,7 +208,7 @@ def train(node_id, training_round, sim_time, vehicle_data, node_models):
     logs.register_log(logs_data)
 
     models.save_weights(node_id, model.get_weights())
-    models.handle_save_model(node_id, model, node_models)
+    node_models[node_id] = model
 
     received_weights[node_id] = copy.deepcopy(received_weights_while_training[node_id])
     dataset_sizes[node_id] = copy.deepcopy(dataset_sizes_while_training[node_id])
@@ -218,4 +218,4 @@ def train(node_id, training_round, sim_time, vehicle_data, node_models):
     if sim_time >= clean_time[0]:
         logging.warning('Clearing Keras session')
         models.clear_session()
-        clean_time[0] = clean_time[0] + 50
+        clean_time[0] = clean_time[0] + constants.CLEAR_TIME
