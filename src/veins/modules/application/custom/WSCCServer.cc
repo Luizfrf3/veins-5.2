@@ -97,7 +97,7 @@ void WSCCServer::handleMessage(cMessage *msg)
             for (int i = 0; i < numberOfRSUs; i++) {
                 veins::AppMessage* appMsg = new veins::AppMessage();
                 appMsg->setWeights(weights.c_str());
-                appMsg->setSenderId(SERVER);
+                appMsg->setSenderId(SERVER.c_str());
                 appMsg->setParticipatingNodes("");
                 appMsg->setClusterNodes("");
                 send(appMsg, "gate$o", i);
@@ -114,7 +114,7 @@ void WSCCServer::handleMessage(cMessage *msg)
                     veins::AppMessage* appMsg = new veins::AppMessage();
                     appMsg->setWeights(weights.c_str());
                     if (i == -1) {
-                        appMsg->setSenderId(SERVER);
+                        appMsg->setSenderId(SERVER.c_str());
                     } else {
                         appMsg->setSenderId(std::to_string(i).c_str());
                     }

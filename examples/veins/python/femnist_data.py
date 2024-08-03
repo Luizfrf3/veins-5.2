@@ -27,9 +27,15 @@ x_test = np.array_split(x_test, num_clients)
 y_test = np.array_split(y_test, num_clients)
 
 for i in range(len(x_train)):
-    images_train = np.array(x_train[i], dtype=np.float32)
+    itr = np.array(x_train[i], dtype=np.float32)
+    itr = itr.reshape((itr.shape[0], 28, 28))
+    itr = 1.0 - itr
+    images_train = np.expand_dims(itr, -1)
     labels_train = np.array(y_train[i], dtype=np.float32)
-    images_test = np.array(x_test[i], dtype=np.float32)
+    its = np.array(x_test[i], dtype=np.float32)
+    its = its.reshape((its.shape[0], 28, 28))
+    its = 1.0 - its
+    images_test = np.expand_dims(its, -1)
     labels_test = np.array(y_test[i], dtype=np.float32)
     name = 'FEMNIST/data/v' + str(i) + '_data.npz'
     np.savez(

@@ -74,7 +74,6 @@ def get_model():
         model = keras.Sequential(
             [
                 keras.Input(shape=(28, 28, 1)),
-                layers.Conv2D(1, kernel_size=(1, 1), padding="same", name="conv0", activation="relu"),
                 layers.Conv2D(29, kernel_size=(5, 5), padding="same", name="conv1", activation="relu"),
                 layers.MaxPooling2D(pool_size=(3, 3), strides=(2, 2)),
                 layers.Conv2D(59, kernel_size=(3, 3), padding="same", name="conv2", activation="relu"),
@@ -92,7 +91,6 @@ def get_model():
         model = keras.Sequential(
             [
                 keras.Input(shape=(48, 48, 3)),
-                layers.Conv2D(1, kernel_size=(1, 1), padding="same", name="conv0", activation="relu"),
                 layers.Conv2D(29, kernel_size=(5, 5), padding="same", name="conv1", activation="relu"),
                 layers.MaxPooling2D(pool_size=(3, 3), strides=(2, 2)),
                 layers.Conv2D(59, kernel_size=(3, 3), padding="same", name="conv2", activation="relu"),
@@ -144,7 +142,7 @@ def save_weights(node_id, weights):
 
 def encode_weights(weights, node_id):
     if constants.ENABLE_TMP_FOLDER:
-        weights_path = constants.TMP_FOLDER + node_id + constants.TMP_FILE_SUFFIX
+        weights_path = constants.TMP_FOLDER + str(node_id) + constants.TMP_FILE_SUFFIX
         with open(weights_path, 'wb') as weights_file:
             pickle.dump(weights, weights_file)
         return ''
@@ -157,7 +155,7 @@ def encode_weights(weights, node_id):
 
 def decode_weights(raw_weights, sender_id):
     if constants.ENABLE_TMP_FOLDER:
-        weights_path = constants.TMP_FOLDER + sender_id + constants.TMP_FILE_SUFFIX
+        weights_path = constants.TMP_FOLDER + str(sender_id) + constants.TMP_FILE_SUFFIX
         with open(weights_path, 'rb') as weights_file:
             return pickle.load(weights_file)
     else:
