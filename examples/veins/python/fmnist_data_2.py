@@ -19,7 +19,7 @@ X = [[] for _ in range(num_clients)]
 y = [[] for _ in range(num_clients)]
 dataidx_map = {}
 
-least_samples = 64
+least_samples = 8
 
 min_size = 0
 K = num_classes

@@ -239,6 +239,7 @@ def aggregation(aggregation_round, node_id, sim_time, node_models):
         received_model_from_server[node_id] = False
 
     if len(received_weights[node_id]) > 0:
+        # Remove the 2 lines below to use global aggregation only
         participating_nodes[node_id] = list(received_weights[node_id].keys())
         number_of_clusters, sender_benchmark = _cluster_aggregation(node_id, model)
         weights = _global_aggregation(node_id, model)
