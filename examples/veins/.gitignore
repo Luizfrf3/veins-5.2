@@ -21,6 +21,7 @@ weights/
 logs/
 data/
 tmp/
+dua-routes.json
 
 __pycache__/
 *.py[cod]
