@@ -156,15 +156,15 @@ def receive_global_model(raw_weights, node_id, sender_id, sim_time, node_models,
     accepted_model = False
     model = node_models[node_id]
     rweights = models.decode_weights(raw_weights, sender_id)
-    #rmodel.set_weights(rweights)
-    #_, maccuracy = model.evaluate(X_valid, y_valid, verbose=0)
-    #_, raccuracy = rmodel.evaluate(X_valid, y_valid, verbose=0)
-    #if raccuracy >= maccuracy or abs(maccuracy - raccuracy) <= constants.THRESHOLD:
-    #    model.set_weights(rweights)
-    #    accepted_model = True
-    model.set_weights(rweights)
-    maccuracy = 0
-    raccuracy = 0
+    rmodel.set_weights(rweights)
+    _, maccuracy = model.evaluate(X_valid, y_valid, verbose=0)
+    _, raccuracy = rmodel.evaluate(X_valid, y_valid, verbose=0)
+    if raccuracy >= maccuracy or abs(maccuracy - raccuracy) <= constants.THRESHOLD:
+        model.set_weights(rweights)
+        accepted_model = True
+    #model.set_weights(rweights)
+    #maccuracy = 0
+    #raccuracy = 0
     node_models[node_id] = model
 
     logs_data = {'event': 'receive_global_model', 'node_id': node_id, 'sim_time': sim_time, 'sender_id': sender_id, 'accepted_model': accepted_model, 'maccuracy': maccuracy, 'raccuracy': raccuracy}

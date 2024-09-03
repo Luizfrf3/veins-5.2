@@ -281,25 +281,25 @@ def receive_global_model(raw_weights, node_id, sender_id, sim_time, node_models,
     accepted_model = False
     model = node_models[node_id]
     rweights = models.decode_weights(raw_weights, sender_id)
-    #rmodel.set_weights(rweights)
-    #_, maccuracy = model.evaluate(X_valid, y_valid, verbose=0)
-    #_, raccuracy = rmodel.evaluate(X_valid, y_valid, verbose=0)
-    #if raccuracy >= maccuracy or abs(maccuracy - raccuracy) <= constants.THRESHOLD:
-    #    model.set_weights(rweights)
-    #    received_weights[node_id] = {}
-    #    dataset_sizes[node_id] = {}
-    #    received_weights_while_training[node_id] = {}
-    #    dataset_sizes_while_training[node_id] = {}
-    #    received_model_from_server[node_id] = True
-    #    accepted_model = True
-    model.set_weights(rweights)
-    received_weights[node_id] = {}
-    dataset_sizes[node_id] = {}
-    received_weights_while_training[node_id] = {}
-    dataset_sizes_while_training[node_id] = {}
-    received_model_from_server[node_id] = True
-    maccuracy = 0
-    raccuracy = 0
+    rmodel.set_weights(rweights)
+    _, maccuracy = model.evaluate(X_valid, y_valid, verbose=0)
+    _, raccuracy = rmodel.evaluate(X_valid, y_valid, verbose=0)
+    if raccuracy >= maccuracy or abs(maccuracy - raccuracy) <= constants.THRESHOLD:
+        model.set_weights(rweights)
+        received_weights[node_id] = {}
+        dataset_sizes[node_id] = {}
+        received_weights_while_training[node_id] = {}
+        dataset_sizes_while_training[node_id] = {}
+        received_model_from_server[node_id] = True
+        accepted_model = True
+    #model.set_weights(rweights)
+    #received_weights[node_id] = {}
+    #dataset_sizes[node_id] = {}
+    #received_weights_while_training[node_id] = {}
+    #dataset_sizes_while_training[node_id] = {}
+    #received_model_from_server[node_id] = True
+    #maccuracy = 0
+    #raccuracy = 0
     node_models[node_id] = model
 
     logs_data = {'event': 'receive_global_model', 'node_id': node_id, 'sim_time': sim_time, 'sender_id': sender_id, 'accepted_model': accepted_model, 'maccuracy': maccuracy, 'raccuracy': raccuracy}
@@ -356,13 +356,13 @@ def train(node_id, training_round, sim_time, vehicle_data, node_models):
         #        size += dataset_sizes[node_id][sender]
         #    mweights[i] = mweights[i] / size
 
-        #rmodel.set_weights(mweights)
-        #_, maccuracy = model.evaluate(X_valid, y_valid, verbose=0)
-        #_, raccuracy = rmodel.evaluate(X_valid, y_valid, verbose=0)
-        #if raccuracy >= maccuracy or abs(maccuracy - raccuracy) <= constants.THRESHOLD:
-        #    model.set_weights(mweights)
-        #    accepted_model = True
-        model.set_weights(mweights)
+        rmodel.set_weights(mweights)
+        _, maccuracy = model.evaluate(X_valid, y_valid, verbose=0)
+        _, raccuracy = rmodel.evaluate(X_valid, y_valid, verbose=0)
+        if raccuracy >= maccuracy or abs(maccuracy - raccuracy) <= constants.THRESHOLD:
+            model.set_weights(mweights)
+            accepted_model = True
+        #model.set_weights(mweights)
 
     if constants.DATA_AUGMENTATION:
         datagen = ImageDataGenerator(zoom_range=0.2, horizontal_flip=True)
