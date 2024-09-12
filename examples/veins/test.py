@@ -10,7 +10,6 @@ from tensorflow import keras
 from keras.preprocessing.image import ImageDataGenerator
 from python.src import constants, models, metrics
 
-'''
 class BalancedAccuracyCallback(keras.callbacks.Callback):
 
     def __init__(self, X_train, y_train, X_valid, y_valid):
@@ -31,7 +30,7 @@ class BalancedAccuracyCallback(keras.callbacks.Callback):
         valid_balanced_accuracy = balanced_accuracy_score(y_true, y_pred)
         logs["valid_balanced_accuracy"] = valid_balanced_accuracy
 
-data = np.load(constants.DATA_PATH + 'v0_0_0_data.npz')
+data = np.load(constants.DATA_PATH + 'v0_data.npz')
 X, y = data['images_train'], data['labels_train']
 num_classes = data['num_classes']
 
@@ -46,10 +45,13 @@ datagen.fit(X_train)
 
 model = models.get_model()
 model.summary()
-history = model.fit(datagen.flow(X_train, y_train, batch_size=50), steps_per_epoch = 3 * X_train.shape[0] / 50, epochs=50, validation_data=(X_valid, y_valid), callbacks=[BalancedAccuracyCallback(X_train, y_train, X_valid, y_valid)])
+history = model.fit(datagen.flow(X_train, y_train, batch_size=50), steps_per_epoch = 3 * X_train.shape[0] / 50, epochs=5, validation_data=(X_valid, y_valid), callbacks=[BalancedAccuracyCallback(X_train, y_train, X_valid, y_valid)])
 print(history.history)
+y_pred = tf.argmax(model.predict(X_valid), axis=1)
+y_true = tf.argmax(y_valid, axis=1)
+valid_balanced_accuracy = balanced_accuracy_score(y_true, y_pred)
+print(valid_balanced_accuracy)
 #model.fit(X_train, y_train, epochs=50, validation_data=(X_valid, y_valid))
-'''
 
 '''
 weights = []
@@ -71,6 +73,7 @@ print(cossims)
 print(clustering.labels_)
 '''
 
+'''
 weights = []
 for v in ['v22', 'v91', 'v72', 'v66', 'v89', 'v87', 'v90', 'v95', 'v71', 'v9', 'v27']:
 #for v in ['v43', 'v10', 'v27', 'v11', 'v34', 'v20', 'v41', 'v51', 'v37', 'v67', 'v66']:
@@ -85,3 +88,4 @@ for w in weights:
     cossim = metrics.cossim(bw, metrics.flatten(w))
     cossims.append(cossim)
 print(cossims)
+'''

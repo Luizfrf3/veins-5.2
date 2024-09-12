@@ -1,5 +1,7 @@
 import numpy as np
+import tensorflow as tf
 from sklearn.cross_decomposition import CCA
+from sklearn.metrics import balanced_accuracy_score
 
 def flatten(w):
     r = np.array([], dtype=np.float32)
@@ -28,3 +30,9 @@ def cca(features_x, features_y, n_components):
     cca_obj.fit(features_x, features_y)
     x_c, y_c = cca_obj.transform(features_x, features_y)
     return np.mean([np.corrcoef(x_c[:, i], y_c[:, i])[0, 1] for i in range(n_components)])
+
+def balanced_accuracy(model, rmodel, X_valid, y_valid):
+    y_true = tf.argmax(y_valid, axis=1)
+    maccuracy = balanced_accuracy_score(y_true, tf.argmax(model.predict(X_valid), axis=1))
+    raccuracy = balanced_accuracy_score(y_true, tf.argmax(rmodel.predict(X_valid), axis=1))
+    return maccuracy, raccuracy

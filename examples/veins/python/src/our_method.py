@@ -143,6 +143,8 @@ def train(node_id, training_round, sim_time, vehicle_data, node_models):
     X_valid, y_valid = vehicle_data[node_id]['valid']
 
     accepted_model = False
+    maccuracy = 0.0
+    raccuracy = 0.0
     model = node_models[node_id]
     mweights = model.get_weights()
 
@@ -187,13 +189,12 @@ def train(node_id, training_round, sim_time, vehicle_data, node_models):
         #        size += dataset_sizes[node_id][sender]
         #    mweights[i] = mweights[i] / size
 
-        #rmodel.set_weights(mweights)
-        #_, maccuracy = model.evaluate(X_valid, y_valid, verbose=0)
-        #_, raccuracy = rmodel.evaluate(X_valid, y_valid, verbose=0)
-        #if raccuracy >= maccuracy or abs(maccuracy - raccuracy) <= constants.THRESHOLD:
-        #    model.set_weights(mweights)
-        #    accepted_model = True
-        model.set_weights(mweights)
+        rmodel.set_weights(mweights)
+        maccuracy, raccuracy = metrics.balanced_accuracy(model, rmodel, X_valid, y_valid)
+        if raccuracy >= maccuracy or abs(maccuracy - raccuracy) <= constants.THRESHOLD:
+            model.set_weights(mweights)
+            accepted_model = True
+        #model.set_weights(mweights)
 
     if constants.DATA_AUGMENTATION:
         datagen = ImageDataGenerator(zoom_range=0.2, horizontal_flip=True)
@@ -204,7 +205,7 @@ def train(node_id, training_round, sim_time, vehicle_data, node_models):
         history = model.fit(X_train, y_train, epochs=constants.EPOCHS, batch_size=constants.BATCH_SIZE, validation_data=(X_valid, y_valid), callbacks=[models.BalancedAccuracyCallback(X_train, y_train, X_valid, y_valid)], verbose=0)
 
     logging.warning('Node {}, Training Round {}, History {}'.format(node_id, training_round, history.history))
-    logs_data = {'event': 'train', 'node_id': node_id, 'sim_time': sim_time, 'accepted_model': accepted_model, 'training_round': training_round, 'number_of_received_models': len(received_weights[node_id]), 'history': history.history, 'participating_nodes': participating_nodes, 'cluster_nodes': cluster_nodes}
+    logs_data = {'event': 'train', 'node_id': node_id, 'sim_time': sim_time, 'accepted_model': accepted_model, 'maccuracy': maccuracy, 'raccuracy': raccuracy, 'training_round': training_round, 'number_of_received_models': len(received_weights[node_id]), 'history': history.history, 'participating_nodes': participating_nodes, 'cluster_nodes': cluster_nodes}
     logs.register_log(logs_data)
 
     models.save_weights(node_id, model.get_weights())

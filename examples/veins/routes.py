@@ -60,7 +60,8 @@ random.seed(123)
 random.shuffle(data)
 root = ET.Element('routes')
 for i in range(100):
-    vehicle = ET.SubElement(root, 'vehicle', id=('v' + str(i)), depart=(str(i * 2) + '.0'), departPost='random', departSpeed='max')
+    vehicle = ET.SubElement(root, 'vehicle', id=('v' + str(i)), depart=(str(i * 6) + '.0'), departPost='random', departSpeed='max')
+    #vehicle = ET.SubElement(root, 'vehicle', id=('v' + str(int((i * 4) % 100 + (i / 25)))), depart=(str(i * 6) + '.0'), departPost='random', departSpeed='max')
     ET.SubElement(vehicle, 'route', edges=data[i]['route'])
 xmlstr = minidom.parseString(ET.tostring(root)).toprettyxml(indent='    ')
 with open('routes-generated.xml', 'w') as f:
