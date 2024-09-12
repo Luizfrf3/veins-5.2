@@ -282,7 +282,6 @@ def receive_global_model(raw_weights, node_id, sender_id, sim_time, node_models,
     model = node_models[node_id]
     rweights = models.decode_weights(raw_weights, sender_id)
     rmodel.set_weights(rweights)
-    y_true = tf.argmax(y_valid, axis=1)
     maccuracy, raccuracy = metrics.balanced_accuracy(model, rmodel, X_valid, y_valid)
     if raccuracy >= maccuracy or abs(maccuracy - raccuracy) <= constants.THRESHOLD:
         model.set_weights(rweights)
