@@ -34,10 +34,10 @@ def _preprocess_activations(act):
 
     return result
 
-def _weighted_aggregation(node_id, model, mw, X_valid, y_valid):
-    #loss, accuracy = model.evaluate(X_valid, y_valid, verbose=0)
+def _weighted_aggregation(node_id, model, mw, X_accept, y_accept):
+    #loss, accuracy = model.evaluate(X_accept, y_accept, verbose=0)
     #inter_model = keras.Model(inputs=model.input, outputs=models.get_outputs(model))
-    #activations = [_preprocess_activations(act) for act in inter_model(X_valid)]
+    #activations = [_preprocess_activations(act) for act in inter_model(X_accept)]
     #mfeatures = [1.0 for _ in range(len(activations))]
     mfeatures = [1.0]
     #mfeatures = [1.0, 1.0, 1.0, loss, accuracy]
@@ -45,11 +45,11 @@ def _weighted_aggregation(node_id, model, mw, X_valid, y_valid):
 
     result = []
     for sender, rweight in received_weights[node_id].items():
-        #loss, accuracy = rmodel.evaluate(X_valid, y_valid, verbose=0)
+        #loss, accuracy = rmodel.evaluate(X_accept, y_accept, verbose=0)
         cossim = metrics.cossim(mw, metrics.flatten(rweight))
         #rmodel.set_weights(rweight)
         #rinter_model = keras.Model(inputs=rmodel.input, outputs=models.get_outputs(rmodel))
-        #ractivations = [_preprocess_activations(ract) for ract in rinter_model(X_valid)]
+        #ractivations = [_preprocess_activations(ract) for ract in rinter_model(X_accept)]
         #ckas = [metrics.cka(activations[i], ractivations[i]) for i in range(len(ractivations))]
         #ccas = [metrics.cca(activations[i], ractivations[i], min(activations[i].shape[1], ractivations[i].shape[1])) for i in range(len(ractivations))]
 
@@ -77,10 +77,10 @@ def _weighted_aggregation(node_id, model, mw, X_valid, y_valid):
         values[i]['f'] = softmax[i]
     return values, softmax[-1]
 
-def _local_clustering(node_id, model, mw, X_valid, y_valid):
-    #loss, accuracy = model.evaluate(X_valid, y_valid, verbose=0)
+def _local_clustering(node_id, model, mw, X_accept, y_accept):
+    #loss, accuracy = model.evaluate(X_accept, y_accept, verbose=0)
     #inter_model = keras.Model(inputs=model.input, outputs=models.get_outputs(model))
-    #activations = [_preprocess_activations(act) for act in inter_model(X_valid)]
+    #activations = [_preprocess_activations(act) for act in inter_model(X_accept)]
     #mfeatures = [1.0 for _ in range(len(activations))]
     mfeatures = [1.0]
     #mfeatures = [1.0, 1.0, 1.0, loss, accuracy]
@@ -92,10 +92,10 @@ def _local_clustering(node_id, model, mw, X_valid, y_valid):
     for sender, rweight in received_weights[node_id].items():
         #rmodel.set_weights(rweight)
 
-        #loss, accuracy = rmodel.evaluate(X_valid, y_valid, verbose=0)
+        #loss, accuracy = rmodel.evaluate(X_accept, y_accept, verbose=0)
         cossim = metrics.cossim(mw, metrics.flatten(rweight))
         #rinter_model = keras.Model(inputs=rmodel.input, outputs=models.get_outputs(rmodel))
-        #ractivations = [_preprocess_activations(ract) for ract in rinter_model(X_valid)]
+        #ractivations = [_preprocess_activations(ract) for ract in rinter_model(X_accept)]
         #ckas = [metrics.cka(activations[i], ractivations[i]) for i in range(len(ractivations))]
         #ccas = [metrics.cca(activations[i], ractivations[i], min(activations[i].shape[1], ractivations[i].shape[1])) for i in range(len(ractivations))]
 
@@ -140,6 +140,7 @@ def store_weights_while_training(raw_weights, dataset_size, node_id, sender_id):
 
 def train(node_id, training_round, sim_time, vehicle_data, node_models):
     X_train, y_train = vehicle_data[node_id]['train']
+    X_accept, y_accept = vehicle_data[node_id]['accept']
     X_valid, y_valid = vehicle_data[node_id]['valid']
 
     accepted_model = False
@@ -161,7 +162,7 @@ def train(node_id, training_round, sim_time, vehicle_data, node_models):
     if len(received_weights[node_id]) > 0:
         participating_nodes = [node for node in received_weights[node_id].keys()]
 
-        clustered_weights = _local_clustering(node_id, model, metrics.flatten(mweights), X_valid, y_valid)
+        clustered_weights = _local_clustering(node_id, model, metrics.flatten(mweights), X_accept, y_accept)
         cluster_nodes = [cw['id'] for cw in clustered_weights]
         for i in range(len(mweights)):
             sizes = len(X_train)
@@ -171,7 +172,7 @@ def train(node_id, training_round, sim_time, vehicle_data, node_models):
                 sizes += dataset_sizes[node_id][cw['id']]
             mweights[i] = mweights[i] / sizes
 
-        #clustered_weights, mf = _weighted_aggregation(node_id, model, metrics.flatten(mweights), X_valid, y_valid)
+        #clustered_weights, mf = _weighted_aggregation(node_id, model, metrics.flatten(mweights), X_accept, y_accept)
         #cluster_nodes = [cw['id'] for cw in clustered_weights]
         #for i in range(len(mweights)):
         #    wagg = len(X_train) * mf
@@ -190,7 +191,7 @@ def train(node_id, training_round, sim_time, vehicle_data, node_models):
         #    mweights[i] = mweights[i] / size
 
         rmodel.set_weights(mweights)
-        maccuracy, raccuracy = metrics.balanced_accuracy(model, rmodel, X_valid, y_valid)
+        maccuracy, raccuracy = metrics.balanced_accuracy(model, rmodel, X_accept, y_accept)
         if raccuracy >= maccuracy or abs(maccuracy - raccuracy) <= constants.THRESHOLD:
             model.set_weights(mweights)
             accepted_model = True

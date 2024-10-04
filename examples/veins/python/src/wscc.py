@@ -151,13 +151,13 @@ def get_cluster_nodes(node_id, cluster, sim_time):
     return ','.join(clusters_nodes[node_id][cluster])
 
 def receive_global_model(raw_weights, node_id, sender_id, sim_time, node_models, vehicle_data):
-    X_valid, y_valid = vehicle_data[node_id]['valid']
+    X_accept, y_accept = vehicle_data[node_id]['accept']
 
     accepted_model = False
     model = node_models[node_id]
     rweights = models.decode_weights(raw_weights, sender_id)
     rmodel.set_weights(rweights)
-    maccuracy, raccuracy = metrics.balanced_accuracy(model, rmodel, X_valid, y_valid)
+    maccuracy, raccuracy = metrics.balanced_accuracy(model, rmodel, X_accept, y_accept)
     if raccuracy >= maccuracy or abs(maccuracy - raccuracy) <= constants.THRESHOLD:
         model.set_weights(rweights)
         accepted_model = True

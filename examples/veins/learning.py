@@ -16,14 +16,20 @@ def init(node_id, sim_time):
             X, y = data['images_train'], data['labels_train']
             num_classes = data['num_classes']
 
-            skf = StratifiedKFold(n_splits=5)
-            for i, (train_index, valid_index) in enumerate(skf.split(X, y)):
+            skf_valid = StratifiedKFold(n_splits=6)
+            for i, (ta_index, valid_index) in enumerate(skf_valid.split(X, y)):
                 if constants.SPLIT == i:
-                    X_train, y_train = X[train_index], y[train_index]
+                    X_ta, y_ta = X[ta_index], y[ta_index]
                     X_valid, y_valid = X[valid_index], y[valid_index]
-                    vehicle_data[node_id] = {}
-                    vehicle_data[node_id]['train'] = (X_train, keras.utils.to_categorical(y_train, num_classes))
-                    vehicle_data[node_id]['valid'] = (X_valid, keras.utils.to_categorical(y_valid, num_classes))
+                    skf_accept = StratifiedKFold(n_splits=5)
+                    for j, (train_index, accept_index) in enumerate(skf_accept.split(X_ta, y_ta)):
+                        if constants.SPLIT == j:
+                            X_train, y_train = X[train_index], y[train_index]
+                            X_accept, y_accept = X[accept_index], y[accept_index]
+                            vehicle_data[node_id] = {}
+                            vehicle_data[node_id]['train'] = (X_train, keras.utils.to_categorical(y_train, num_classes))
+                            vehicle_data[node_id]['accept'] = (X_accept, keras.utils.to_categorical(y_accept, num_classes))
+                            vehicle_data[node_id]['valid'] = (X_valid, keras.utils.to_categorical(y_valid, num_classes))
 
             np.savez(
                 constants.DATA_GENERATED_FOLDER + file,
