@@ -105,7 +105,7 @@ def get_model():
             ]
         )
 
-    if constants.EXPERIMENT == constants.FED_PROX:
+    if constants.EXPERIMENT == constants.FED_PROX or constants.EXPERIMENT == constants.FED_PC:
         model.compile(loss="categorical_crossentropy", optimizer=FedProxOptimizer(learning_rate=constants.LEARNING_RATE), metrics=["accuracy"])
     else:
         model.compile(loss="categorical_crossentropy", optimizer=optimizer_v2.adam.Adam(learning_rate=constants.LEARNING_RATE), metrics=["accuracy"])

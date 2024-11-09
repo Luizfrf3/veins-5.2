@@ -21,6 +21,7 @@ FED_AVG = 'FedAvg'
 FED_PROX = 'FedProx'
 WSCC = 'WSCC'
 HYBRID_METHOD = 'Hybrid Method'
+FED_PC = 'FedPC'
 EXPERIMENT = HYBRID_METHOD
 
 DATA_PATH = 'python/' + DATASET + '/data/'

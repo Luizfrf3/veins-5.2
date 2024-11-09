@@ -34,8 +34,11 @@ def merge(raw_weights, dataset_size, node_id, sender_id, vehicle_data, node_mode
     size = len(vehicle_data[node_id]['train'][0])
     model = node_models[node_id]
     received_weights = models.decode_weights(raw_weights, sender_id)
-    weights = model.get_weights()
-    for i in range(len(weights)):
-        weights[i] = (weights[i] * size + received_weights[i] * dataset_size) / (size + dataset_size)
+    if constants.EXPERIMENT == constants.FED_PC:
+        weights = received_weights
+    else:
+        weights = model.get_weights()
+        for i in range(len(weights)):
+            weights[i] = (weights[i] * size + received_weights[i] * dataset_size) / (size + dataset_size)
     model.set_weights(weights)
     node_models[node_id] = model

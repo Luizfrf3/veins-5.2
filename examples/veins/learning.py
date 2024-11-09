@@ -50,7 +50,7 @@ def init_server(node_id, sim_time):
     logs.register_log(logs_data)
 
 def train(node_id, training_round, sim_time):
-    if constants.EXPERIMENT == constants.GOSSIP_LEARNING:
+    if constants.EXPERIMENT == constants.GOSSIP_LEARNING or constants.EXPERIMENT == constants.FED_PC:
         gossip_learning.train(node_id, training_round, sim_time, vehicle_data, node_models)
     elif constants.EXPERIMENT == constants.OUR_METHOD:
         our_method.train(node_id, training_round, sim_time, vehicle_data, node_models)
@@ -78,7 +78,7 @@ def merge(raw_weights, dataset_size, node_id, sender_id, sim_time):
     logs_data = {'event': 'merge', 'dataset_size': dataset_size, 'node_id': node_id, 'sim_time': sim_time, 'sender_id': sender_id}
     logs.register_log(logs_data)
 
-    if constants.EXPERIMENT == constants.GOSSIP_LEARNING:
+    if constants.EXPERIMENT == constants.GOSSIP_LEARNING or constants.EXPERIMENT == constants.FED_PC:
         gossip_learning.merge(raw_weights, dataset_size, node_id, sender_id, vehicle_data, node_models)
 
 def store_weights(raw_weights, dataset_size, node_id, sender_id, sim_time):
