@@ -17,6 +17,7 @@ received_weights_while_training = {}
 dataset_sizes = {}
 dataset_sizes_while_training = {}
 received_model_from_server = {}
+received_models_from_server = {}
 
 participating_nodes = {}
 clusters_nodes = {}
@@ -212,6 +213,7 @@ def store_weights(raw_weights, dataset_size, node_id, sender_id):
         received_weights[node_id] = {}
         dataset_sizes[node_id] = {}
         received_model_from_server[node_id] = False
+        received_models_from_server[node_id] = []
     received_weights[node_id][sender_id] = weights
     dataset_sizes[node_id][sender_id] = dataset_size
 
@@ -221,6 +223,7 @@ def store_weights_while_training(raw_weights, dataset_size, node_id, sender_id):
         received_weights_while_training[node_id] = {}
         dataset_sizes_while_training[node_id] = {}
         received_model_from_server[node_id] = False
+        received_models_from_server[node_id] = []
     received_weights_while_training[node_id][sender_id] = weights
     dataset_sizes_while_training[node_id][sender_id] = dataset_size
 
@@ -267,47 +270,27 @@ def get_cluster_nodes(node_id, cluster, sim_time):
     return ','.join(clusters_nodes[node_id][cluster])
 
 def receive_global_model(raw_weights, node_id, sender_id, sim_time, node_models, vehicle_data):
-    X_accept, y_accept = vehicle_data[node_id]['accept']
-
     if node_id not in received_weights.keys():
         received_weights[node_id] = {}
         dataset_sizes[node_id] = {}
-        received_model_from_server[node_id] = False
     if node_id not in received_weights_while_training.keys():
         received_weights_while_training[node_id] = {}
         dataset_sizes_while_training[node_id] = {}
+    if node_id not in received_model_from_server.keys():
         received_model_from_server[node_id] = False
+    if node_id not in received_models_from_server.keys():
+        received_models_from_server[node_id] = []
 
-    accepted_model = False
-    model = node_models[node_id]
     rweights = models.decode_weights(raw_weights, sender_id)
-    rmodel.set_weights(rweights)
-    maccuracy, raccuracy = metrics.balanced_accuracy(model, rmodel, X_accept, y_accept)
-    if raccuracy >= maccuracy or abs(maccuracy - raccuracy) <= constants.THRESHOLD:
-        model.set_weights(rweights)
-        received_weights[node_id] = {}
-        dataset_sizes[node_id] = {}
-        received_weights_while_training[node_id] = {}
-        dataset_sizes_while_training[node_id] = {}
-        received_model_from_server[node_id] = True
-        accepted_model = True
-    #model.set_weights(rweights)
-    #received_weights[node_id] = {}
-    #dataset_sizes[node_id] = {}
-    #received_weights_while_training[node_id] = {}
-    #dataset_sizes_while_training[node_id] = {}
-    #received_model_from_server[node_id] = True
-    #maccuracy = 0
-    #raccuracy = 0
-    node_models[node_id] = model
+    received_models_from_server[node_id].append(rweights)
 
-    logs_data = {'event': 'receive_global_model', 'node_id': node_id, 'sim_time': sim_time, 'sender_id': sender_id, 'accepted_model': accepted_model, 'maccuracy': maccuracy, 'raccuracy': raccuracy}
+    logs_data = {'event': 'receive_global_model', 'node_id': node_id, 'sim_time': sim_time, 'sender_id': sender_id}
     logs.register_log(logs_data)
 
 def train(node_id, training_round, sim_time, vehicle_data, node_models):
     X_train, y_train = vehicle_data[node_id]['train']
-    X_accept, y_accept = vehicle_data[node_id]['accept']
     X_valid, y_valid = vehicle_data[node_id]['valid']
+    X_accept, y_accept = vehicle_data[node_id]['accept']
 
     accepted_model = False
     maccuracy = 0.0
@@ -318,11 +301,13 @@ def train(node_id, training_round, sim_time, vehicle_data, node_models):
     if node_id not in received_weights.keys():
         received_weights[node_id] = {}
         dataset_sizes[node_id] = {}
-        received_model_from_server[node_id] = False
     if node_id not in received_weights_while_training.keys():
         received_weights_while_training[node_id] = {}
         dataset_sizes_while_training[node_id] = {}
+    if node_id not in received_model_from_server.keys():
         received_model_from_server[node_id] = False
+    if node_id not in received_models_from_server.keys():
+        received_models_from_server[node_id] = []
 
     participating_nodes = []
     cluster_nodes = []
@@ -364,6 +349,21 @@ def train(node_id, training_round, sim_time, vehicle_data, node_models):
             model.set_weights(mweights)
             accepted_model = True
         #model.set_weights(mweights)
+    elif received_model_from_server[node_id]:
+        maccuracy = balanced_accuracy_score(tf.argmax(y_accept, axis=1), tf.argmax(model.predict(X_accept), axis=1))
+        rweights = None
+        for rw in received_models_from_server[node_id]:
+            rmodel.set_weights(rw)
+            raccuracy_aux = balanced_accuracy_score(tf.argmax(y_accept, axis=1), tf.argmax(rmodel.predict(X_accept), axis=1))
+            if raccuracy_aux > raccuracy:
+                raccuracy = raccuracy_aux
+                rweights = rw
+        if raccuracy >= maccuracy or abs(maccuracy - raccuracy) <= constants.THRESHOLD:
+            model.set_weights(rweights)
+            accepted_model = True
+        #model.set_weights(rweights)
+        #maccuracy = 0
+        #raccuracy = 0
 
     if constants.DATA_AUGMENTATION:
         datagen = ImageDataGenerator(zoom_range=0.2, horizontal_flip=True)
@@ -385,6 +385,7 @@ def train(node_id, training_round, sim_time, vehicle_data, node_models):
     received_weights_while_training[node_id] = {}
     dataset_sizes_while_training[node_id] = {}
     received_model_from_server[node_id] = False
+    received_models_from_server[node_id] = []
 
     if sim_time >= clean_time[0]:
         logging.warning('Clearing Keras session')

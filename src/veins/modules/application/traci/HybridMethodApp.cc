@@ -62,31 +62,33 @@ void HybridMethodApp::onWSM(BaseFrame1609_4* frame)
     if (wsm->isRSU()) {
         std::set<std::string> participatingNodes = splitString(wsm->getParticipatingNodes(), ',');
         std::set<std::string> clusterNodes = splitString(wsm->getClusterNodes(), ',');
-        if (clusterNodes.count(vehicleId) > 0 || (participatingNodes.count(vehicleId) == 0 && strcmp("server", wsm->getSenderId()) == 0)) {
-            if (participatingNodes.count(vehicleId) == 0) {
-                std::cout << vehicleId << " did not participate in the server aggregation" << std::endl;
-            }
-            std::cout << vehicleId << " started training" << std::endl;
-
+        if (clusterNodes.count(vehicleId) > 0 || participatingNodes.count(vehicleId) == 0) {
             py::module_ learning = py::module_::import("learning");
             learning.attr("receive_global_model")(wsm->getWeights(), vehicleId, wsm->getSenderId(), simTime().dbl());
 
-            if (currentState == TRAINING) {
-                cancelAndDelete(trainingMessage);
+            if (!receivedModelFromServer) {
+                if (participatingNodes.count(vehicleId) == 0) {
+                    std::cout << vehicleId << " did not participate in the server aggregation" << std::endl;
+                }
+                std::cout << vehicleId << " started training" << std::endl;
+
+                if (currentState == TRAINING) {
+                    cancelAndDelete(trainingMessage);
+                }
+                cancelAndDelete(gossipModelMessage);
+
+                findHost()->getDisplayString().setTagArg("i", 1, "red");
+                currentState = TRAINING;
+                receivedModelFromServer = true;
+                numberOfReceivedModels = 0;
+                numberOfReceivedModelsWhileTraining = 0;
+
+                trainingMessage = new cMessage("Training local model");
+                scheduleAt(simTime() + TRAINING_TIME - 3 + uniform(0.0, 5.0), trainingMessage);
+
+                gossipModelMessage = new cMessage("Send model to peers", GOSSIP_MODEL);
+                scheduleAt(simTime() + GOSSIP_ROUND_TIME + uniform(1.0, 2.0), gossipModelMessage);
             }
-            cancelAndDelete(gossipModelMessage);
-
-            findHost()->getDisplayString().setTagArg("i", 1, "red");
-            currentState = TRAINING;
-            receivedModelFromServer = true;
-            numberOfReceivedModels = 0;
-            numberOfReceivedModelsWhileTraining = 0;
-
-            trainingMessage = new cMessage("Training local model");
-            scheduleAt(simTime() + TRAINING_TIME - 3 + uniform(0.0, 5.0), trainingMessage);
-
-            gossipModelMessage = new cMessage("Send model to peers", GOSSIP_MODEL);
-            scheduleAt(simTime() + GOSSIP_ROUND_TIME + uniform(1.0, 2.0), gossipModelMessage);
         } else {
             std::cerr << "onWSM - Received model ignored because the vehicle belongs to another cluster" << std::endl;
         }

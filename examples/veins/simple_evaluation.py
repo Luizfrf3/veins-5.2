@@ -7,8 +7,8 @@ from sklearn.metrics import balanced_accuracy_score
 from python.src import models
 
 TIME_STEP = 5
-EXPERIMENT = 'GTSRB_dir'
-METHOD = 'FedAvg'
+EXPERIMENT = 'FMNIST_wscc'
+METHOD = 'HybridMethodCossim'
 ENVIRONMENT = ''#'8RSU/'
 LOGS_PATH = 'python/experiments/' + EXPERIMENT + '/' + ENVIRONMENT + METHOD + '/logs/logs.txt'
 THRESHOLD = 0.85

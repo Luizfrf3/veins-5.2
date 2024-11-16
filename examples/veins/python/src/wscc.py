@@ -4,11 +4,13 @@ import numpy as np
 from tensorflow.python import keras
 from keras.preprocessing.image import ImageDataGenerator
 from sklearn.cluster import AffinityPropagation
+from sklearn.metrics import balanced_accuracy_score
 from python.src import constants, models, logs, metrics
 random.seed(constants.SEED)
 
 received_weights = {}
 dataset_sizes = {}
+received_models_from_server = {}
 
 participating_nodes = {}
 clusters_nodes = {}
@@ -151,29 +153,38 @@ def get_cluster_nodes(node_id, cluster, sim_time):
     return ','.join(clusters_nodes[node_id][cluster])
 
 def receive_global_model(raw_weights, node_id, sender_id, sim_time, node_models, vehicle_data):
+    if node_id not in received_models_from_server.keys():
+        received_models_from_server[node_id] = []
+
+    rweights = models.decode_weights(raw_weights, sender_id)
+    received_models_from_server[node_id].append(rweights)
+
+    logs_data = {'event': 'receive_global_model', 'node_id': node_id, 'sim_time': sim_time, 'sender_id': sender_id}
+    logs.register_log(logs_data)
+
+def train(node_id, training_round, sim_time, vehicle_data, node_models):
+    X_train, y_train = vehicle_data[node_id]['train']
+    X_valid, y_valid = vehicle_data[node_id]['valid']
     X_accept, y_accept = vehicle_data[node_id]['accept']
 
     accepted_model = False
     model = node_models[node_id]
-    rweights = models.decode_weights(raw_weights, sender_id)
-    rmodel.set_weights(rweights)
-    maccuracy, raccuracy = metrics.balanced_accuracy(model, rmodel, X_accept, y_accept)
+    maccuracy = balanced_accuracy_score(tf.argmax(y_accept, axis=1), tf.argmax(model.predict(X_accept), axis=1))
+    raccuracy = 0.0
+    rweights = None
+    for rw in received_models_from_server[node_id]:
+        rmodel.set_weights(rw)
+        raccuracy_aux = balanced_accuracy_score(tf.argmax(y_accept, axis=1), tf.argmax(rmodel.predict(X_accept), axis=1))
+        if raccuracy_aux > raccuracy:
+            raccuracy = raccuracy_aux
+            rweights = rw
     if raccuracy >= maccuracy or abs(maccuracy - raccuracy) <= constants.THRESHOLD:
         model.set_weights(rweights)
         accepted_model = True
     #model.set_weights(rweights)
     #maccuracy = 0
     #raccuracy = 0
-    node_models[node_id] = model
 
-    logs_data = {'event': 'receive_global_model', 'node_id': node_id, 'sim_time': sim_time, 'sender_id': sender_id, 'accepted_model': accepted_model, 'maccuracy': maccuracy, 'raccuracy': raccuracy}
-    logs.register_log(logs_data)
-
-def train(node_id, training_round, sim_time, vehicle_data, node_models):
-    X_train, y_train = vehicle_data[node_id]['train']
-    X_valid, y_valid = vehicle_data[node_id]['valid']
-
-    model = node_models[node_id]
     if constants.DATA_AUGMENTATION:
         datagen = ImageDataGenerator(zoom_range=0.2, horizontal_flip=True)
         #datagen = ImageDataGenerator(zoom_range=0.2, rotation_range=15, width_shift_range=0.2, height_shift_range=0.2)
@@ -183,11 +194,13 @@ def train(node_id, training_round, sim_time, vehicle_data, node_models):
         history = model.fit(X_train, y_train, epochs=constants.EPOCHS, batch_size=constants.BATCH_SIZE, validation_data=(X_valid, y_valid), callbacks=[models.BalancedAccuracyCallback(X_train, y_train, X_valid, y_valid)], verbose=0)
 
     logging.warning('Node {}, Training Round {}, History {}'.format(node_id, training_round, history.history))
-    logs_data = {'event': 'train', 'node_id': node_id, 'sim_time': sim_time, 'training_round': training_round, 'history': history.history}
+    logs_data = {'event': 'train', 'node_id': node_id, 'sim_time': sim_time, 'accepted_model': accepted_model, 'maccuracy': maccuracy, 'raccuracy': raccuracy, 'training_round': training_round, 'history': history.history}
     logs.register_log(logs_data)
 
     models.save_weights(node_id, model.get_weights())
     node_models[node_id] = model
+
+    received_models_from_server[node_id] = []
 
     if sim_time >= clean_time[0]:
         logging.warning('Clearing Keras session')

@@ -8,8 +8,8 @@ from sklearn.metrics import balanced_accuracy_score
 from python.src import models
 
 TIME_STEP = 5
-EXPERIMENT = 'GTSRB_dir'
-METHOD = 'FedAvg'
+EXPERIMENT = 'FMNIST_wscc'
+METHOD = 'HybridMethodCossim'
 ENVIRONMENT = ''#'8RSU/'
 REPLACE = 'REPLACE'
 LOGS_PATH = 'python/experiments/' + EXPERIMENT + '/' + ENVIRONMENT + METHOD + '/' + REPLACE + '/logs/logs.txt'
@@ -95,6 +95,11 @@ for exp in range(NUMBER_OF_EXPERIMENTS):
     final_train_loss.append(sum(train_losses) / len(train_losses))
     final_valid_loss.append(sum(valid_losses) / len(valid_losses))
 
+print('Train accuracy: ', final_train_acc)
+print('Valid accuracy: ', final_valid_acc)
+print('Train loss: ', final_train_loss)
+print('Valid loss: ', final_valid_loss)
+
 print('Train accuracy: ', sum(final_train_acc) / len(final_train_acc))
 print('Valid accuracy: ', sum(final_valid_acc) / len(final_valid_acc))
 print('Train loss: ', sum(final_train_loss) / len(final_train_loss))
@@ -163,5 +168,9 @@ for exp in range(NUMBER_OF_EXPERIMENTS):
                 result_united.append(balanced_accuracy)
     results_separated.append(sum(result_separated) / len(result_separated))
     results_united.append(sum(result_united) / len(result_united))
+
+print('Test accuracy separated: ', results_separated)
+print('Test accuracy united: ', results_united)
+
 print('Test accuracy separated: ', sum(results_separated) / len(results_separated))
 print('Test accuracy united: ', sum(results_united) / len(results_united))
