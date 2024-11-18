@@ -3,6 +3,7 @@ import copy
 import math
 import random
 import numpy as np
+import tensorflow as tf
 from tensorflow.python import keras
 from keras.preprocessing.image import ImageDataGenerator
 from sklearn.cluster import AffinityPropagation
@@ -352,12 +353,12 @@ def train(node_id, training_round, sim_time, vehicle_data, node_models):
     elif received_model_from_server[node_id]:
         maccuracy = balanced_accuracy_score(tf.argmax(y_accept, axis=1), tf.argmax(model.predict(X_accept), axis=1))
         rweights = None
-        for rw in received_models_from_server[node_id]:
-            rmodel.set_weights(rw)
+        for rws in received_models_from_server[node_id]:
+            rmodel.set_weights(rws)
             raccuracy_aux = balanced_accuracy_score(tf.argmax(y_accept, axis=1), tf.argmax(rmodel.predict(X_accept), axis=1))
-            if raccuracy_aux > raccuracy:
+            if raccuracy_aux >= raccuracy:
                 raccuracy = raccuracy_aux
-                rweights = rw
+                rweights = rws
         if raccuracy >= maccuracy or abs(maccuracy - raccuracy) <= constants.THRESHOLD:
             model.set_weights(rweights)
             accepted_model = True
@@ -366,8 +367,8 @@ def train(node_id, training_round, sim_time, vehicle_data, node_models):
         #raccuracy = 0
 
     if constants.DATA_AUGMENTATION:
-        datagen = ImageDataGenerator(zoom_range=0.2, horizontal_flip=True)
-        #datagen = ImageDataGenerator(zoom_range=0.2, rotation_range=15, width_shift_range=0.2, height_shift_range=0.2)
+        #datagen = ImageDataGenerator(zoom_range=0.2, horizontal_flip=True)
+        datagen = ImageDataGenerator(zoom_range=0.2, rotation_range=15, width_shift_range=0.2, height_shift_range=0.2)
         datagen.fit(X_train)
         history = model.fit(datagen.flow(X_train, y_train, batch_size=constants.BATCH_SIZE), steps_per_epoch = constants.EPOCHS * X_train.shape[0] / 50, validation_data=(X_valid, y_valid), callbacks=[models.BalancedAccuracyCallback(X_train, y_train, X_valid, y_valid)], verbose=0)
     else:

@@ -4,7 +4,7 @@ SEED = 12
 SPLIT = 0
 EPOCHS = 1
 BATCH_SIZE = 50
-DATA_AUGMENTATION = False
+DATA_AUGMENTATION = True
 LEARNING_RATE = 0.001
 keras.utils.set_random_seed(SEED)
 
