@@ -38,7 +38,9 @@ def init(node_id, sim_time):
             )
             logging.warning('Dataset preparation finished')
 
-            node_models[node_id] = models.get_model()
+            model = models.get_model()
+            models.save_weights(node_id, model.get_weights())
+            node_models[node_id] = model
 
             logs_data = {'event': 'init', 'node_id': node_id, 'sim_time': sim_time}
             logs.register_log(logs_data)

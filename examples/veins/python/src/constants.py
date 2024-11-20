@@ -6,6 +6,7 @@ EPOCHS = 1
 BATCH_SIZE = 50
 DATA_AUGMENTATION = True
 LEARNING_RATE = 0.001
+MU = 0.001
 keras.utils.set_random_seed(SEED)
 
 MNIST = 'MNIST'
