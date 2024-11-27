@@ -9,8 +9,8 @@ from python.src import models
 
 TIME_STEP = 5
 EXPERIMENT = 'FMNIST_wscc'
-METHOD = 'HybridMethodCossim'
-ENVIRONMENT = ''#'8RSU/'
+METHOD = 'HVCFLThreshold'
+ENVIRONMENT = 'final/8RSU/'
 REPLACE = 'REPLACE'
 LOGS_PATH = 'python/experiments/' + EXPERIMENT + '/' + ENVIRONMENT + METHOD + '/' + REPLACE + '/logs/logs.txt'
 DATA_PATH = 'python/' + EXPERIMENT.split('_')[0] + '/data/'
@@ -104,6 +104,17 @@ print('Train accuracy: ', sum(final_train_acc) / len(final_train_acc))
 print('Valid accuracy: ', sum(final_valid_acc) / len(final_valid_acc))
 print('Train loss: ', sum(final_train_loss) / len(final_train_loss))
 print('Valid loss: ', sum(final_valid_loss) / len(final_valid_loss))
+
+size = 1000000
+for data in final_train_accs:
+    if len(data) < size:
+        size = len(data)
+chart_times = chart_times[:size]
+for i in range(len(final_train_accs)):
+    final_train_accs[i] = final_train_accs[i][:size]
+    final_valid_accs[i] = final_valid_accs[i][:size]
+    final_train_losses[i] = final_train_losses[i][:size-1]
+    final_valid_losses[i] = final_valid_losses[i][:size-1]
 
 plt.figure()
 plt.plot(chart_times, np.average(np.array(final_train_accs), axis=0), label='train')
