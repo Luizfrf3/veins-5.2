@@ -7,6 +7,7 @@ import tensorflow as tf
 from tensorflow.python import keras
 from keras.preprocessing.image import ImageDataGenerator
 from sklearn.cluster import AffinityPropagation
+from sklearn.metrics import balanced_accuracy_score
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 from scipy.signal import argrelextrema
@@ -284,6 +285,7 @@ def receive_global_model(raw_weights, node_id, sender_id, sim_time, node_models,
 
     rweights = models.decode_weights(raw_weights, sender_id)
     received_models_from_server[node_id].append(rweights)
+    received_model_from_server[node_id] = True
 
     logs_data = {'event': 'receive_global_model', 'node_id': node_id, 'sim_time': sim_time, 'sender_id': sender_id}
     logs.register_log(logs_data)
