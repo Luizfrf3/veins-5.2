@@ -198,8 +198,7 @@ def train(node_id, training_round, sim_time, vehicle_data, node_models):
         #model.set_weights(mweights)
 
     if constants.DATA_AUGMENTATION:
-        #datagen = ImageDataGenerator(zoom_range=0.2, horizontal_flip=True)
-        datagen = ImageDataGenerator(zoom_range=0.2, rotation_range=15, width_shift_range=0.2, height_shift_range=0.2)
+        datagen = ImageDataGenerator(zoom_range=0.1, rotation_range=15, width_shift_range=0.1, height_shift_range=0.1)
         datagen.fit(X_train)
         history = model.fit(datagen.flow(X_train, y_train, batch_size=constants.BATCH_SIZE), steps_per_epoch = constants.EPOCHS * X_train.shape[0] / 50, validation_data=(X_valid, y_valid), callbacks=[models.BalancedAccuracyCallback(X_train, y_train, X_valid, y_valid)], verbose=0)
     else:

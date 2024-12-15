@@ -5,7 +5,7 @@ import tensorflow as tf
 from tensorflow.python import keras
 from tensorflow.python.keras import layers
 from tensorflow.python.ops import standard_ops
-from tensorflow.python.keras import optimizer_v2
+from tensorflow.python.keras import optimizer_v1, optimizer_v2
 from sklearn.metrics import balanced_accuracy_score
 from python.src import constants
 
@@ -109,6 +109,7 @@ def get_model():
         model.compile(loss="categorical_crossentropy", optimizer=FedProxOptimizer(learning_rate=constants.LEARNING_RATE, mu=constants.MU), metrics=["accuracy"])
     else:
         model.compile(loss="categorical_crossentropy", optimizer=optimizer_v2.adam.Adam(learning_rate=constants.LEARNING_RATE), metrics=["accuracy"])
+        #model.compile(loss="categorical_crossentropy", optimizer=optimizer_v1.SGD(lr=constants.LEARNING_RATE), metrics=["accuracy"])
 
     return model
 
@@ -172,7 +173,7 @@ def clear_session():
 @tf.keras.utils.register_keras_serializable()
 class FedProxOptimizer(optimizer_v2.optimizer_v2.OptimizerV2):
 
-    def __init__(self, learning_rate=0.01, mu=0.01, name='FedProxOptimizer', **kwargs):
+    def __init__(self, learning_rate=0.01, mu=0.001, name='FedProxOptimizer', **kwargs):
         super().__init__(name=name, **kwargs)
 
         self._set_hyper('learning_rate', learning_rate)
