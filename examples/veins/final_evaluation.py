@@ -8,8 +8,8 @@ from sklearn.metrics import balanced_accuracy_score
 from python.src import models
 
 TIME_STEP = 5
-EXPERIMENT = 'FMNIST_rot4'
-METHOD = 'GossipLearning'
+EXPERIMENT = 'FMNIST_wscc'
+METHOD = 'HVCFLThreshold'
 ENVIRONMENT = 'final/8RSU/'
 REPLACE = 'REPLACE'
 LOGS_PATH = 'python/experiments/' + EXPERIMENT + '/' + ENVIRONMENT + METHOD + '/' + REPLACE + '/logs/logs.txt'
@@ -17,7 +17,7 @@ DATA_PATH = 'python/' + EXPERIMENT.split('_')[0] + '/data/'
 WEIGHTS_PATH = 'python/experiments/' + EXPERIMENT + '/' + ENVIRONMENT + METHOD + '/' + REPLACE + '/weights/'
 THRESHOLD = 0.85
 NUMBER_OF_VEHICLES = 100
-NUMBER_OF_EXPERIMENTS = 1
+NUMBER_OF_EXPERIMENTS = 3
 
 final_train_accs = []
 final_valid_accs = []
