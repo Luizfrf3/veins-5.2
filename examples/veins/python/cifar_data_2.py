@@ -5,7 +5,7 @@ np.random.seed(42)
 
 num_classes = 10
 num_clients = 100
-alpha = 0.3
+alpha = 0.1
 
 (x_train, y_train), (x_test, y_test) = datasets.cifar10.load_data()
 
