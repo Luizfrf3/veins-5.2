@@ -52,6 +52,7 @@ def _weighted_aggregation(node_id, model, mw, X_accept, y_accept):
     mfeatures = [1.0]
     #mfeatures = [1.0, 1.0, 1.0, loss, accuracy]
     #mfeatures = [metrics.cca(act, act, act.shape[1]) for act in activations]
+    #mfeatures = [balanced_accuracy_score(tf.argmax(y_accept, axis=1), tf.argmax(model.predict(X_accept), axis=1))]
 
     result = []
     for sender, rweight in received_weights[node_id].items():
@@ -62,6 +63,7 @@ def _weighted_aggregation(node_id, model, mw, X_accept, y_accept):
         #ractivations = [_preprocess_activations(ract) for ract in rinter_model(X_accept)]
         #ckas = [metrics.cka(activations[i], ractivations[i]) for i in range(len(ractivations))]
         #ccas = [metrics.cca(activations[i], ractivations[i], min(activations[i].shape[1], ractivations[i].shape[1])) for i in range(len(ractivations))]
+        #raccuracy = balanced_accuracy_score(tf.argmax(y_accept, axis=1), tf.argmax(rmodel.predict(X_accept), axis=1))
 
         result.append({
             'w': rweight,
@@ -95,6 +97,7 @@ def _local_clustering(node_id, model, mw, X_accept, y_accept):
     mfeatures = [1.0]
     #mfeatures = [1.0, 1.0, 1.0, loss, accuracy]
     #mfeatures = [metrics.cca(act, act, act.shape[1]) for act in activations]
+    #mfeatures = [balanced_accuracy_score(tf.argmax(y_accept, axis=1), tf.argmax(model.predict(X_accept), axis=1))]
 
     rfeatures = []
     rweights = []
@@ -108,9 +111,11 @@ def _local_clustering(node_id, model, mw, X_accept, y_accept):
         #ractivations = [_preprocess_activations(ract) for ract in rinter_model(X_accept)]
         #ckas = [metrics.cka(activations[i], ractivations[i]) for i in range(len(ractivations))]
         #ccas = [metrics.cca(activations[i], ractivations[i], min(activations[i].shape[1], ractivations[i].shape[1])) for i in range(len(ractivations))]
+        #raccuracy = balanced_accuracy_score(tf.argmax(y_accept, axis=1), tf.argmax(rmodel.predict(X_accept), axis=1))
 
         #rfeatures.append(ckas)
         #rfeatures.append([sum(ckas) / len(ckas) if np.isfinite(sum(ckas) / len(ckas)) else 0.0])
+        #rfeatures.append([raccuracy])
         rfeatures.append([cossim])
         rweights.append(rweight)
         senders.append(sender)
