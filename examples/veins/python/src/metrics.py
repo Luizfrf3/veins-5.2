@@ -16,6 +16,7 @@ def cossim(a, b):
     return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
 
 def centering(K):
+    K = torch.tensor([K], device=device) if len(K.shape) == 0 else K
     n = K.shape[0]
     unit = torch.ones([n, n], device=device)
     I = torch.eye(n, device=device)
