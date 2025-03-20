@@ -101,7 +101,7 @@ def _local_clustering(node_id, model, mw, X_accept, y_accept):
 
         #rfeatures.append(ckas)
         #rfeatures.append([sum(ckas) / len(ckas) if np.isfinite(sum(ckas) / len(ckas)) else 0.0])
-        rfeatures.append([cossim])
+        rfeatures.append([cossim if np.isfinite(cossim) else 0.0])
         rweights.append(rweight)
         senders.append(sender)
 
